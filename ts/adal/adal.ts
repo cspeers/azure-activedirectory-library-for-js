@@ -1,4 +1,7 @@
 
+/**
+ * @description Base Contract for OAuth Request Parameters
+ */
 export interface IRequestParameters {
     error: string;
     errorDescription: string;
@@ -8,6 +11,9 @@ export interface IRequestParameters {
     [key: string]: any;
 }
 
+/**
+ * @description Concrete implementation of OAuth Request Parameters
+ */
 export class RequestParameters implements IRequestParameters {
     error: string;
     errorDescription: string;
@@ -82,10 +88,18 @@ export class RequestInfo implements IRequestInfo {
     requestType: string;
 }
 
+/**
+ * @description Base contract representing a dictionary of
+ *  resource URI and Callbacks
+ */
 export interface ICallbackMap<T> {
     [expectedState: string]: T;
 }
 
+/**
+ * @description Concrete implementation of a dictionary of
+ *  resource URI and Callbacks
+ */
 export class CallbackMap<T> implements ICallbackMap<T> {
     [index: string]: T;
 }
@@ -114,6 +128,9 @@ export interface IUser {
     profile: IUserProfile;
 }
 
+/**
+ * @description Concrete implementation of a User
+ */
 export class User implements IUser {
     userName: string;
     profile: IUserProfile;
@@ -243,6 +260,9 @@ export interface IEndpointCollection {
     [key: string]: string;
 }
 
+/**
+* @description  Concrete implementation of Resource Uri to Endpoint Mapping
+*/
 export class EndpointCollection implements IEndpointCollection{
     [key: string]: string;
 }
@@ -341,10 +361,16 @@ export class RequestTypes {
     UNKNOWN: string = "UNKNOWN";
 }
 
+/**
+ * @description Enumeration for Error Messages
+ */
 export class ErrorMessages {
     NO_TOKEN: string = "User is not authorized";
 }
 
+/**
+ * @description Enumeration for Log Severity Levels
+ */
 export class LoggingLevels {
     ERROR = 0;
     WARN = 1;
@@ -352,6 +378,9 @@ export class LoggingLevels {
     VERBOSE = 3;
 }
 
+/**
+ * @description Constants for token storage field names
+ */
 export class StorageConstants {
     TOKEN_KEYS: string = "adal.token.keys";
     ACCESS_TOKEN_KEY: string = "adal.access.token.key";
@@ -373,6 +402,9 @@ export class StorageConstants {
     LOGIN_ERROR: string = "adal.login.error";
 }
 
+/**
+ * @description General Constants
+ */
 export class Constants {
     ACCESS_TOKEN: string = "access_token";
     EXPIRES_IN: string = "expires_in";
@@ -429,6 +461,9 @@ export interface IConfig {
     [key: string]: any;
 }
 
+/**
+ * @desc Abstract Base class for Configuration Options
+ */
 export abstract class ConfigBase implements IConfig {
     displayCall: IDisplayCall;
     tenant: string;
@@ -452,6 +487,9 @@ export abstract class ConfigBase implements IConfig {
     }
 }
 
+/**
+ * @desc Concrete implementation of Configuration Options
+ */
 export class Config extends ConfigBase {
     [key:string]:any;
 }
@@ -467,6 +505,9 @@ export interface IOAuthIFrame extends HTMLIFrameElement {
 
 }
 
+/**
+ * @description Contract for an Azure Active Directory Authentication Context
+ */
 export interface IAuthenticationContext {
 
     REQUEST_TYPE: RequestTypes;
@@ -502,6 +543,9 @@ export interface IAuthenticationContext {
     getCachedToken(resource: string): string;
 }
 
+/**
+ * @description Abstract base class for an Azure Active Directory Authentication Context
+ */
 export abstract class AuthenticationContextBase implements IAuthenticationContext {
 
     REQUEST_TYPE = new RequestTypes();
@@ -967,6 +1011,9 @@ export abstract class AuthenticationContextBase implements IAuthenticationContex
     abstract getUser(callback: IRequestCallback): IUser;
 }
 
+/**
+ * @description Concrete implementation of Azure Active Directory Authentication Context
+ */
 export class AuthenticationContext extends AuthenticationContextBase {
 
     private _cloneConfig(obj: any): Config {
@@ -1354,6 +1401,11 @@ export class AuthenticationContext extends AuthenticationContextBase {
     }
 }
 
+/**
+ * @description module dependency injection for commonjs
+ * 
+ * @param config {Config} The Authentication Context configuration to be used
+ */
 export function inject(config: Config): IAuthenticationContext {
     return new AuthenticationContext(config);
 }
