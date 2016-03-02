@@ -7,13 +7,26 @@ module.exports = function (grunt) {
         typescript: {
             base: {
             src: ['ts/**/*.ts'],
-            dest: 'lib',
+            dest: 'build',
             options: {
                     module: 'commonjs', 
                     target: 'es5',
                     sourceMap: true,
                     declaration: true
                 }
+            }
+        },
+        copy: {
+            main: {
+                    files: [
+                    {
+                        src: ["build/**/*.js"],
+                        dest: "lib/",
+                        filter:'isFile',
+                        flatten:true,
+                        expand:true
+                    }
+                ]
             }
         },
         jsdoc: {
@@ -46,7 +59,7 @@ module.exports = function (grunt) {
                   { src: 'lib/adal-angular.js', dest: 'build/adal-angular.min.js' },
                 ],
             }
-        },
+        }
     });
 
     // Load the plugin that provides the "uglify" task.
@@ -55,11 +68,12 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-typescript');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-jasmine-node');
+    grunt.loadNpmTasks('grunt-contrib-copy')
     // uglify task is producing invalid js file
 
     // jasmine node directly js api 
-    grunt.registerTask('default', ['typescript', 'jasmine_node']);
-    grunt.registerTask('doc', ['jsdoc']);
+    grunt.registerTask('default', ['typescript','copy','jasmine_node']);
+    grunt.registerTask('doc', ['typescript','jsdoc']);
     grunt.registerTask('minify', ['uglify']);
     
 };
