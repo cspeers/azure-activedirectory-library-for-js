@@ -1,0 +1,15 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "removeComments": false,
+    "preserveConstEnums": true,
+    "declaration":true,
+    "sourceMap": true,
+    "noEmitOnError": true,
+    "diagnostics": true,
+    "listFiles": true,
+    "outDir": "lib"
+  }
+}
