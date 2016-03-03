@@ -125,7 +125,7 @@ export interface IUserProfile {
 */
 export interface IUser {
     userName: string;
-    profile: IUserProfile;
+    profile?: IUserProfile;
 }
 
 /**
@@ -287,8 +287,8 @@ export interface IStringMap {
 export class Guid {
 
     static newGuid(): string {
-        const guidHolder = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx";
-        const hex = "0123456789abcdef";
+        var guidHolder = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx";
+        var hex = "0123456789abcdef";
         var r = 0;
         var guidResponse = "";
         for (var i = 0; i < 36; i++) {
@@ -462,9 +462,9 @@ export interface IConfig {
 }
 
 /**
- * @desc Abstract Base class for Configuration Options
+ * @desc Concrete implementation of Configuration Options
  */
-export abstract class ConfigBase implements IConfig {
+export class Config implements IConfig {
     displayCall: IDisplayCall;
     tenant: string;
     clientId: string;
@@ -481,28 +481,45 @@ export abstract class ConfigBase implements IConfig {
     postLogoutRedirectUri: string;
     extraQueryParameter: string;
     slice: string;
+
+    [key: string]: any;
+
     constructor() {
         this.correlationId = Guid.newGuid();
         this.endpoints=new EndpointCollection();
     }
 }
 
-/**
- * @desc Concrete implementation of Configuration Options
- */
-export class Config extends ConfigBase {
-    [key:string]:any;
+export interface IOAuthData{
+     isAuthenticated: boolean;
+     userName: string;
+     loginError: string;
+     profile: IUserProfile; 
 }
 
-export interface IOAuthWindow extends Window {
+ /**
+ * OAuthData implements IOAuthData
+ */
+export class OAuthData implements IOAuthData {
+    isAuthenticated: boolean;
+    userName: string;
+    loginError: string;
+    profile: IUserProfile;
+}
+
+export interface IOAuthHTMLElement{
     callBackMappedToRenewStates: ICallbackMap<IRequestCallback>;
     callBacksMappedToRenewStates: ICallbackMap<Array<IRequestCallback>>;
     oauth2Callback: any;
     AuthenticationContext: IAuthenticationContext;
 }
 
-export interface IOAuthIFrame extends HTMLIFrameElement {
+export interface IOAuthWindow extends Window,IOAuthHTMLElement {
 
+}
+
+export interface IOAuthIFrame extends HTMLIFrameElement,IOAuthHTMLElement{
+    parent:IOAuthWindow;
 }
 
 /**
@@ -541,12 +558,14 @@ export interface IAuthenticationContext {
     isCallback(hash: string): boolean;
     registerCallback(expectedState: string, resource: string, callback: IRequestCallback): void;
     getCachedToken(resource: string): string;
+    getItem(key: string): any;
+    saveItem(key: string, obj: any): boolean;
 }
 
 /**
- * @description Abstract base class for an Azure Active Directory Authentication Context
+ * @description Concrete implementation of Azure Active Directory Authentication Context
  */
-export abstract class AuthenticationContextBase implements IAuthenticationContext {
+export class AuthenticationContext implements IAuthenticationContext{
 
     REQUEST_TYPE = new RequestTypes();
     CONSTANTS = new Constants();
@@ -558,24 +577,14 @@ export abstract class AuthenticationContextBase implements IAuthenticationContex
     callback: IRequestCallback;
     idTokenNonce: string;
 
-    protected _singletonInstance: IAuthenticationContext;
-    protected _user: IUser;
-    protected _loginInProgress: boolean = false;
-    protected _libVersion(): string { return this.CONSTANTS.LIBRARY_VERSION; }
-    protected _idTokenNonce: string;
-    protected _renewStates: Array<string> = [];
-    protected _activeRenewals: RenewalList;
-    protected _renewActive = false;
-
-
-    abstract login(): void;
-    abstract logOut(): void;
-    abstract getCachedUser(): IUser;
-    abstract getRequestInfo(hash: string): IRequestInfo;
-    abstract handleWindowCallback(): void;
-    abstract saveTokenFromHash(requestInfo: IRequestInfo): void;
-    abstract registerCallback(expectedState: string, resource: string, callback: IRequestCallback): void;
-    abstract acquireToken(resource: string, callback: IRequestCallback): void;
+    private _singletonInstance: IAuthenticationContext;
+    private _user: IUser;
+    private _loginInProgress: boolean = false;
+    private _libVersion(): string { return this.CONSTANTS.LIBRARY_VERSION; }
+    private _idTokenNonce: string;
+    private _renewStates: Array<string> = [];
+    private _activeRenewals: RenewalList;
+    private _renewActive = false;
 
     getResourceForEndpoint(endpoint: string): string {
         if (this.config && this.config.endpoints) {
@@ -706,7 +715,7 @@ export abstract class AuthenticationContextBase implements IAuthenticationContex
         }
     }
 
-    protected _getHostFromUri(uri: string): string {
+    private _getHostFromUri(uri: string): string {
         // remove http:// or https:// from uri
         var extractedUri = String(uri).replace(/^(https?:)\/\//, '');
 
@@ -714,13 +723,13 @@ export abstract class AuthenticationContextBase implements IAuthenticationContex
         return extractedUri;
     }
 
-    protected _logstatus(msg: string) {
+    private _logstatus(msg: string) {
         if (console) {
             console.log(msg);
         }
     }
 
-    protected _getHash(hash: string): string {
+    private _getHash(hash: string): string {
         if (hash.indexOf("#/") > -1) {
             hash = hash.substring(hash.indexOf("#/") + 2);
         } else if (hash.indexOf("#") > -1) {
@@ -730,31 +739,31 @@ export abstract class AuthenticationContextBase implements IAuthenticationContex
         return hash;
     }
 
-    protected _expiresIn(expires: string): number {
+    private _expiresIn(expires: string): number {
         return DateTime.now() + parseInt(expires, 10);
     }
 
-    protected _addClientId(): string {
+    private _addClientId(): string {
         // x-client-SKU
         // x-client-Ver
         return "&x-client-SKU=Js&x-client-Ver=" + this._libVersion();
     };
 
-    protected _supportsLocalStorage(): boolean {
+    private _supportsLocalStorage(): boolean {
         return BrowserHelpers.supportsLocalStorage();
     }
 
-    protected _urlContainsQueryStringParameter(name: string, url: string): boolean {
+    private _urlContainsQueryStringParameter(name: string, url: string): boolean {
         // regex to detect pattern of a ? or & followed by the name parameter and an equals character
         var regex = new RegExp("[\\?&]" + name + "=");
         return regex.test(url);
     }
 
-    protected _supportsSessionStorage(): boolean {
+    private _supportsSessionStorage(): boolean {
         return BrowserHelpers.supportsSessionStorage();
     }
 
-    protected _getItem(key: string): any {
+    private _getItem(key: string): any {
 
         if (this.config && this.config.cacheLocation && this.config.cacheLocation === "localStorage") {
 
@@ -775,7 +784,15 @@ export abstract class AuthenticationContextBase implements IAuthenticationContex
         return sessionStorage.getItem(key);
     }
 
-    protected _saveItem(key: string, obj: any): boolean {
+    getItem(key: string): any {
+        return this._getItem(key);
+    }
+
+    saveItem(key: string, obj: any):boolean {
+        return this._saveItem(key, obj);
+    }
+
+    private _saveItem(key: string, obj: any): boolean {
 
         if (this.config && this.config.cacheLocation && this.config.cacheLocation === "localStorage") {
 
@@ -799,7 +816,7 @@ export abstract class AuthenticationContextBase implements IAuthenticationContex
         return true;
     };
 
-    protected _getResourceFromState(state: string): string {
+    private _getResourceFromState(state: string): string {
         if (state) {
             var splitIndex = state.indexOf("|");
             if (splitIndex > -1 && splitIndex + 1 < state.length) {
@@ -809,24 +826,24 @@ export abstract class AuthenticationContextBase implements IAuthenticationContex
         return "";
     }
 
-    protected _isEmpty(str: string): boolean {
+    private _isEmpty(str: string): boolean {
         return (typeof str === "undefined" || !str || 0 === str.length);
     }
 
-    protected _hasResource(key: string): boolean {
+    private _hasResource(key: string): boolean {
         var keys = this._getItem(this.CONSTANTS.STORAGE.TOKEN_KEYS) as string;
         return keys && !this._isEmpty(keys) && (keys.indexOf(key + this.CONSTANTS.RESOURCE_DELIMETER) > -1);
     }
 
-    protected _guid(): string {
+    private _guid(): string {
         return Guid.newGuid();
     }
 
-    protected _now(): number {
+    private _now(): number {
         return DateTime.now();
     }
 
-    protected _addAdalFrame(iframeId: string): HTMLIFrameElement {
+    private _addAdalFrame(iframeId: string): HTMLIFrameElement {
         if (typeof iframeId === "undefined") {
             return null;
         }
@@ -852,7 +869,7 @@ export abstract class AuthenticationContextBase implements IAuthenticationContex
         return adalFrame;
     }
 
-    protected _loadFrame(urlNavigate: string, frameName: string): void {
+    private _loadFrame(urlNavigate: string, frameName: string): void {
         var self = this;
         self.info("LoadFrame:" + frameName);
         var frameCheck = frameName;
@@ -870,7 +887,7 @@ export abstract class AuthenticationContextBase implements IAuthenticationContex
     * @description Redirect the Browser to Azure AD Authorization endpoint
     * @param {string}   urlNavigate The authorization request url
     */
-    protected promptUser(urlNavigate: string): void {
+    private promptUser(urlNavigate: string): void {
         if (urlNavigate) {
             this.info("Navigate to:" + urlNavigate);
             window.location.replace(urlNavigate);
@@ -879,7 +896,7 @@ export abstract class AuthenticationContextBase implements IAuthenticationContex
         }
     }
 
-    protected _getDomainHint(): string {
+    private _getDomainHint(): string {
         if (this._user && this._user.userName && this._user.userName.indexOf('@') > -1) {
             var parts = this._user.userName.split('@');
             // local part can include @ in quotes. Sending last part handles that.
@@ -897,7 +914,7 @@ export abstract class AuthenticationContextBase implements IAuthenticationContex
     * @param {string}   resource  ResourceUri identifying the target resource
     * @param {IRequestCallback} callback The Request Callback
     */
-    protected _renewToken(resource: string, callback: IRequestCallback): void {
+    private _renewToken(resource: string, callback: IRequestCallback): void {
         // use iframe to try refresh token
         // use given resource to create new authz url
         this._logstatus('renewToken is called for resource:' + resource);
@@ -920,7 +937,7 @@ export abstract class AuthenticationContextBase implements IAuthenticationContex
         urlNavigate += '&domain_hint=' + encodeURIComponent(this._getDomainHint());
         urlNavigate += '&nonce=' + encodeURIComponent(this._idTokenNonce);
         this.callback = callback;
-        this.registerCallback(expectedState,resource,callback);
+        this.registerCallback(expectedState, resource, callback);
         this.idTokenNonce = null;
         this._logstatus('Navigate to:' + urlNavigate);
         this._saveItem(this.CONSTANTS.STORAGE.LOGIN_REQUEST, '');
@@ -928,14 +945,14 @@ export abstract class AuthenticationContextBase implements IAuthenticationContex
         this._loadFrame(urlNavigate, 'adalRenewFrame');
     }
 
-    protected _renewIdToken(callback: IRequestCallback) {
+    private _renewIdToken(callback: IRequestCallback) {
         // use iframe to try refresh token
         this.info('renewIdToken is called');
         if (!this._hasResource(this.config.clientId)) {
             var keys = this._getItem(this.CONSTANTS.STORAGE.TOKEN_KEYS) || '';
             this._saveItem(this.CONSTANTS.STORAGE.TOKEN_KEYS, keys + this.config.clientId + this.CONSTANTS.RESOURCE_DELIMETER);
         }
-        
+
         var frameHandle = this._addAdalFrame('adalIdTokenFrame');
         var expectedState = this._guid() + '|' + this.config.clientId;
         this._idTokenNonce = this._guid();
@@ -945,7 +962,7 @@ export abstract class AuthenticationContextBase implements IAuthenticationContex
         this._renewStates.push(expectedState);
         this._saveItem(this.CONSTANTS.STORAGE.STATE_RENEW, expectedState);
         this._saveItem(this.CONSTANTS.STORAGE.FAILED_RENEW, '');
-        
+
         this.verbose('Renew Idtoken Expected state: ' + expectedState);
         var urlNavigate = this._getNavigateUrl('id_token', null) + '&prompt=none&login_hint=' + encodeURIComponent(this._user.userName);
 
@@ -963,7 +980,7 @@ export abstract class AuthenticationContextBase implements IAuthenticationContex
         this._loadFrame(urlNavigate, 'adalIdTokenFrame');
     }
 
-    protected _getNavigateUrl(responseType: string, resource: string) {
+    private _getNavigateUrl(responseType: string, resource: string) {
         var tenant = "common";
         if (this.config.tenant) {
             tenant = this.config.tenant;
@@ -978,11 +995,11 @@ export abstract class AuthenticationContextBase implements IAuthenticationContex
         return urlNavigate;
     }
 
-    protected _deserialize(query: string): IRequestParameters {
+    private _deserialize(query: string): IRequestParameters {
         return RequestParameters.deserialize(query);
     }
 
-    protected _serialize(responseType: string, obj: IConfig, resource: string): string {
+    private _serialize(responseType: string, obj: IConfig, resource: string): string {
         return RequestParameters.serialize(responseType, obj, resource);
     }
 
@@ -1007,14 +1024,6 @@ export abstract class AuthenticationContextBase implements IAuthenticationContex
     }
 
     [key: string]: any;
-
-    abstract getUser(callback: IRequestCallback): IUser;
-}
-
-/**
- * @description Concrete implementation of Azure Active Directory Authentication Context
- */
-export class AuthenticationContext extends AuthenticationContextBase {
 
     private _cloneConfig(obj: any): Config {
         if (null === obj || "object" !== typeof obj) {
@@ -1075,9 +1084,6 @@ export class AuthenticationContext extends AuthenticationContextBase {
 
     private _decode(base64IdToken: string): string { return Token.decode(base64IdToken); }
 
-    constructor(cfg: IConfig) {
-        super(this._cloneConfig(cfg));
-    }
 
     getUser(callback: IRequestCallback): IUser {
         // IDToken is first call
