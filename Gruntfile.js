@@ -20,7 +20,7 @@ module.exports = function (grunt) {
             main: {
                     files: [
                     {
-                        src: ["build/*.js"],
+                        src: ["build/*.js*","build/*.d.ts"],
                         dest: "lib/",
                         filter:'isFile',
                         flatten:true,
