@@ -20,7 +20,7 @@ module.exports = function (grunt) {
             main: {
                     files: [
                     {
-                        src: ["build/**/*.js"],
+                        src: ["build/*.js"],
                         dest: "lib/",
                         filter:'isFile',
                         flatten:true,
@@ -43,7 +43,13 @@ module.exports = function (grunt) {
                 match: '.',
                 matchall: false,
                 extensions: 'js',
-                specNameMatcher: 'spec'
+                specNameMatcher: 'spec',
+                jUnit: {
+                    report: true,
+                    savePath: "./build/reports/jasmine/",
+                    useDotNotation: true,
+                    consolidate: true
+                }
             },
             all: ['tests/unit/spec/']
         },
@@ -73,7 +79,7 @@ module.exports = function (grunt) {
 
     // jasmine node directly js api 
     grunt.registerTask('default', ['typescript','copy','jasmine_node']);
-    grunt.registerTask('doc', ['typescript','jsdoc']);
+    grunt.registerTask('doc', ['typescript','copy','jsdoc']);
     grunt.registerTask('minify', ['uglify']);
     
 };

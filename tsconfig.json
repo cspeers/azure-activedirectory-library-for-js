@@ -11,5 +11,8 @@
     "diagnostics": true,
     "listFiles": true,
     "outDir": "lib"
-  }
+  },
+  "exclude": [
+      "lib","build","node_modules"
+  ]
 }
