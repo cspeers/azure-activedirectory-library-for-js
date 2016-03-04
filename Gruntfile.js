@@ -3,31 +3,35 @@ module.exports = function (grunt) {
     // Project configuration.
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
-        clean: ['build/'],        
+        clean: ['build/'],
         typescript: {
             base: {
-            src: ['ts/**/*.ts'],
-            dest: 'build',
-            options: {
-                    module: 'commonjs', 
+                src: ['src/*.ts'],
+                dest: 'lib',
+                options: {
+                    module: 'commonjs',
                     target: 'es5',
-                    sourceMap: true,
                     declaration: true
                 }
             }
         },
         copy: {
             main: {
-                    files: [
+                files: [
                     {
-                        src: ["build/*.js*","build/*.d.ts"],
+                        src: ["build/**/*.js*", "build/**/*.d.ts"],
                         dest: "lib/",
-                        filter:'isFile',
-                        flatten:true,
-                        expand:true
+                        flatten: true,
+                        expand: true
                     }
                 ]
             }
+        },
+        typescript_export: {
+            your_target: {
+                src: ['build/*.d.ts'],
+                dest: 'build/index.d.ts'
+            },
         },
         jsdoc: {
             dist: {
@@ -61,8 +65,8 @@ module.exports = function (grunt) {
                 // Because these src-dest file mappings are manually specified, every
                 // time a new file is added or removed, the Gruntfile has to be updated.
                 files: [
-                  { src: 'lib/adal.js', dest: 'build/adal.min.js' },
-                  { src: 'lib/adal-angular.js', dest: 'build/adal-angular.min.js' },
+                    { src: 'lib/adal.js', dest: 'build/adal.min.js' },
+                    { src: 'lib/adal-angular.js', dest: 'build/adal-angular.min.js' },
                 ],
             }
         }
@@ -74,12 +78,13 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-typescript');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-jasmine-node');
-    grunt.loadNpmTasks('grunt-contrib-copy')
+    grunt.loadNpmTasks('grunt-contrib-copy');
+    grunt.loadNpmTasks('grunt-typescript-export');
     // uglify task is producing invalid js file
 
     // jasmine node directly js api 
-    grunt.registerTask('default', ['typescript','copy','jasmine_node']);
-    grunt.registerTask('doc', ['typescript','copy','jsdoc']);
+    grunt.registerTask('default', ['typescript', 'copy' ,'jasmine_node']);
+    grunt.registerTask('doc', ['typescript', 'copy', 'jsdoc']);
     grunt.registerTask('minify', ['uglify']);
-    
+
 };

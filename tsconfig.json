@@ -1,18 +1,14 @@
 {
-  "compileOnSave": true,
   "compilerOptions": {
     "module": "commonjs",
     "noImplicitAny": true,
     "removeComments": false,
     "preserveConstEnums": true,
-    "declaration":true,
-    "sourceMap": true,
+    "declaration": true,
     "noEmitOnError": true,
     "diagnostics": true,
     "listFiles": true,
-    "outDir": "lib"
+    "outDir": "build"
   },
-  "exclude": [
-      "node_modules","lib","build"
-  ]
+  "files": ["src/adal.ts"]
 }

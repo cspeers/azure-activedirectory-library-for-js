@@ -20,14 +20,15 @@
 /* global it */
 /* global describe */
 
-var lib='../../../lib/adal.js';
-console.log("testing export module " + lib)
+var lib='../../../lib/adalts/adalts.js';
+console.log("testing direct module " + lib)
+
 
 var atobHelper = require('atob');
 var confighash = { hash: '#' };
 var AdalModule = require(lib);
 
-describe('Adal', function () {
+describe('AdalTS', function () {
     var adal;
     var window = {
         location: {

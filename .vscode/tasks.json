@@ -5,29 +5,30 @@
 // ${fileDirname}: the current opened file's dirname
 // ${fileExtname}: the current opened file's extension
 // ${cwd}: the current working directory of the spawned process
-
 // A task runner that calls the Typescript compiler (tsc) and
 // Compiles a HelloWorld.ts program
 {
-	"version": "0.1.0",
-
-	// The command is tsc. Assumes that tsc has been installed using npm install -g typescript
-	"command": "tsc",
-
-	// The command is a shell script
-	"isShellCommand": true,
-
-	// Show the output window only if unrecognized errors occur.
-	"showOutput": "silent",
-
-	// args is the HelloWorld program to compile.
-	"args": [],
-
-	// use the standard tsc problem matcher to find compile problems
-	// in the output.
-	"problemMatcher": "$tsc"
+    "version": "0.1.0",
+    "command": "grunt",
+    "isShellCommand": true,
+    "tasks": [
+        {
+            "taskName": "default",
+            "args": [],
+            "isBuildCommand": true
+        },
+        {
+            "taskName": "doc",
+            "args": [],
+            "isBuildCommand": true
+        },
+        {
+            "taskName": "dist",
+            "args": [],
+            "isBuildCommand": true
+        }
+    ]
 }
-
 // A task runner that calls the Typescript compiler (tsc) and
 // compiles based on a tsconfig.json file that is present in
 // the root of the folder open in VSCode
@@ -52,7 +53,6 @@
 	"problemMatcher": "$tsc"
 }
 */
-
 // A task runner configuration for gulp. Gulp provides a less task
 // which compiles less to css.
 /*
@@ -73,7 +73,6 @@
 	]
 }
 */
-
 // Uncomment the following section to use jake to build a workspace
 // cloned from https://github.com/Microsoft/TypeScript.git
 /*
@@ -100,7 +99,6 @@
 	]
 }
 */
-
 // Uncomment the section below to use msbuild and generate problems
 // for csc, cpp, tsc and vb. The configuration assumes that msbuild
 // is available on the path and a solution file exists in the
@@ -127,7 +125,6 @@
 	]
 }
 */
-
 // Uncomment the following section to use msbuild which compiles Typescript
 // and less files.
 /*
@@ -187,4 +184,4 @@
 		}
 	}
 }
-*/
+*/ 

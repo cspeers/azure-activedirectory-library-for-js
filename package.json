@@ -1,9 +1,9 @@
 {
-  "name": "adal-angular",
+  "name": "adal",
   "author": {
-    "name": "Microsoft Open Technologies Inc",
-    "email": "msopentech@microsoft.com",
-    "url": "https://github.com/AzureAD/azure-activedirectory-library-for-js"
+    "name": "Chris Speers",
+    "email": "chris.speers@outlook.com",
+    "url": "https://github.com/cspeers/azure-activedirectory-library-for-js"
   },
   "licenses": [
     {
@@ -16,7 +16,7 @@
     "url": ""
   },
   "version": "1.0.8",
-  "description": "Windows Azure Active Directory Client Library for js (TypeScript)",
+  "description": "Windows Azure Active Directory Client Library for js (TypeScript)\\n via (Microsoft Open Technologies Inc)\nForked from: https://github.com/cspeers/azure-activedirectory-library-for-js",
   "keywords": [
     "implicit",
     "js",
@@ -25,6 +25,7 @@
     "oauth"
   ],
   "main": "./lib/adal.js",
+  "typings":"./lib/index.d.ts",
   "engines": {
     "node": ">=0.8.0"
   },
@@ -48,6 +49,7 @@
     "grunt-junit": "^0.1.6",
     "grunt-karma": "^0.9.x",
     "grunt-typescript": "",
+    "grunt-typescript-export": "^0.1.0",
     "jasmine-node": "~1.14.5",
     "jasmine-reporters": "~1.0.0",
     "jshint": "*",

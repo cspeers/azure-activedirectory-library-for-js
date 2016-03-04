@@ -263,7 +263,7 @@ export interface IEndpointCollection {
 /**
 * @description  Concrete implementation of Resource Uri to Endpoint Mapping
 */
-export class EndpointCollection implements IEndpointCollection{
+export class EndpointCollection implements IEndpointCollection {
     [key: string]: string;
 }
         
@@ -486,20 +486,20 @@ export class Config implements IConfig {
 
     constructor() {
         this.correlationId = Guid.newGuid();
-        this.endpoints=new EndpointCollection();
+        this.endpoints = new EndpointCollection();
     }
 }
 
-export interface IOAuthData{
-     isAuthenticated: boolean;
-     userName: string;
-     loginError: string;
-     profile: IUserProfile; 
+export interface IOAuthData {
+    isAuthenticated: boolean;
+    userName: string;
+    loginError: string;
+    profile: IUserProfile;
 }
 
- /**
- * OAuthData implements IOAuthData
- */
+/**
+* OAuthData implements IOAuthData
+*/
 export class OAuthData implements IOAuthData {
     isAuthenticated: boolean;
     userName: string;
@@ -507,19 +507,19 @@ export class OAuthData implements IOAuthData {
     profile: IUserProfile;
 }
 
-export interface IOAuthHTMLElement{
+export interface IOAuthHTMLElement {
     callBackMappedToRenewStates: ICallbackMap<IRequestCallback>;
     callBacksMappedToRenewStates: ICallbackMap<Array<IRequestCallback>>;
     oauth2Callback: any;
     AuthenticationContext: IAuthenticationContext;
 }
 
-export interface IOAuthWindow extends Window,IOAuthHTMLElement {
+export interface IOAuthWindow extends Window, IOAuthHTMLElement {
 
 }
 
-export interface IOAuthIFrame extends HTMLIFrameElement,IOAuthHTMLElement{
-    parent:IOAuthWindow;
+export interface IOAuthIFrame extends HTMLIFrameElement, IOAuthHTMLElement {
+    parent: IOAuthWindow;
 }
 
 /**
@@ -535,6 +535,7 @@ export interface IAuthenticationContext {
     frameCallInProgress: boolean;
     callback: IRequestCallback;
     idTokenNonce: string;
+    renewActive: boolean;
 
     login(): void;
     loginInProgress(): boolean;
@@ -544,7 +545,7 @@ export interface IAuthenticationContext {
     clearCache(): void;
     clearCacheForResource(resource: string): void;
     getCachedUser(): IUser;
-    getUser(callback:IRequestCallback):IUser;
+    getUser(callback: IRequestCallback): IUser;
     getLoginError(): string;
     getRequestInfo(hash: string): IRequestInfo;
     getResourceForEndpoint(endpoint: string): string;
@@ -565,7 +566,7 @@ export interface IAuthenticationContext {
 /**
  * @description Concrete implementation of Azure Active Directory Authentication Context
  */
-export class AuthenticationContext implements IAuthenticationContext{
+export class AuthenticationContext implements IAuthenticationContext {
 
     REQUEST_TYPE = new RequestTypes();
     CONSTANTS = new Constants();
@@ -584,7 +585,7 @@ export class AuthenticationContext implements IAuthenticationContext{
     private _idTokenNonce: string;
     private _renewStates: Array<string> = [];
     private _activeRenewals: RenewalList;
-    private _renewActive = false;
+    renewActive = false;
 
     getResourceForEndpoint(endpoint: string): string {
         if (this.config && this.config.endpoints) {
@@ -788,7 +789,7 @@ export class AuthenticationContext implements IAuthenticationContext{
         return this._getItem(key);
     }
 
-    saveItem(key: string, obj: any):boolean {
+    saveItem(key: string, obj: any): boolean {
         return this._saveItem(key, obj);
     }
 
@@ -1113,46 +1114,46 @@ export class AuthenticationContext implements IAuthenticationContext{
 
     acquireToken(resource: string, callback: IRequestCallback): void {
         if (this._isEmpty(resource)) {
-                this.warn('resource is required');
-                callback('resource is required', null);
-                return;
-            }
+            this.warn('resource is required');
+            callback('resource is required', null);
+            return;
+        }
+
+        var token = this.getCachedToken(resource);
+        if (token) {
+            this.info('Token is already in cache for resource:' + resource);
+            callback(null, token);
+            return;
+        }
+
+        if (this._getItem(this.CONSTANTS.STORAGE.FAILED_RENEW)) {
+            this.info('renewToken is failed for resource ' + resource + ':' + this._getItem(this.CONSTANTS.STORAGE.FAILED_RENEW));
+            callback(this._getItem(this.CONSTANTS.STORAGE.FAILED_RENEW), null);
+            return;
+        }
+
+        if (!this._user) {
+            this.warn('User login is required');
+            callback('User login is required', null);
+            return;
+        }
             
-            var token = this.getCachedToken(resource);
-            if (token) {
-                this.info('Token is already in cache for resource:' + resource);
-                callback(null, token);
-                return;
+        // refresh attept with iframe
+        //Already renewing for this resource, callback when we get the token.
+        if (this._activeRenewals[resource]) {
+            //Active renewals contains the state for each renewal.
+            this.registerCallback(this._activeRenewals[resource], resource, callback);
+        }
+        else {
+            if (resource === this.config.clientId) {
+                // App uses idtoken to send to api endpoints
+                // Default resource is tracked as clientid to store this token
+                this.verbose('renewing idtoken');
+                this._renewIdToken(callback);
+            } else {
+                this._renewToken(resource, callback);
             }
-            
-            if (this._getItem(this.CONSTANTS.STORAGE.FAILED_RENEW)) {
-                this.info('renewToken is failed for resource ' + resource + ':' + this._getItem(this.CONSTANTS.STORAGE.FAILED_RENEW));
-                callback(this._getItem(this.CONSTANTS.STORAGE.FAILED_RENEW), null);
-                return;
-            }
-            
-            if (!this._user) {
-                this.warn('User login is required');
-                callback('User login is required', null);
-                return;
-            }
-            
-            // refresh attept with iframe
-            //Already renewing for this resource, callback when we get the token.
-            if (this._activeRenewals[resource]) {
-                //Active renewals contains the state for each renewal.
-                this.registerCallback(this._activeRenewals[resource], resource, callback);
-            }
-            else {
-                if (resource === this.config.clientId) {
-                    // App uses idtoken to send to api endpoints
-                    // Default resource is tracked as clientid to store this token
-                    this.verbose('renewing idtoken');
-                    this._renewIdToken(callback);
-                } else {
-                    this._renewToken(resource, callback);
-                }
-            }
+        }
     }
 
     registerCallback(expectedState: string, resource: string, callback: IRequestCallback): void {
