@@ -6,7 +6,7 @@ module.exports = function (grunt) {
         clean: ['build/'],
         typescript: {
             base: {
-                src: ['src/*.ts'],
+                src: ['src/**/*.ts'],
                 dest: 'lib',
                 options: {
                     module: 'commonjs',

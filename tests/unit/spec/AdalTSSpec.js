@@ -20,7 +20,7 @@
 /* global it */
 /* global describe */
 
-var lib='../../../lib/adalts/adalts.js';
+var lib='../../../lib/adal/adal.js';
 console.log("testing direct module " + lib)
 
 

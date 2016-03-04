@@ -8,7 +8,7 @@
     "noEmitOnError": true,
     "diagnostics": true,
     "listFiles": true,
-    "outDir": "build"
+    "outDir": "lib"
   },
-  "files": ["src/adal.ts"]
+  "files": ["src/adal/adal.ts","src/adal-angular/adal-angular.ts"]
 }
