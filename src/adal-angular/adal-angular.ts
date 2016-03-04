@@ -1,6 +1,6 @@
 /// <reference path="../../typings/angularjs/angular.d.ts" />
 
-import adal=require("../adal/adal/adal");
+import adal=require("../adal/adal");
 
 module AdalModule {
     
