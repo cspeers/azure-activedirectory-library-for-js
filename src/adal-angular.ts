@@ -1,60 +1,60 @@
-/// <reference path="../../typings/angularjs/angular.d.ts" />
+/// <reference path="../typings/angularjs/angular.d.ts" />
 "use strict";
 
-import adal = require("../adal/adal");
+import * as adal from "./adal";
 
 /**
-* @description module dependency injection for commonjs
-* 
-* @param config {Config} The Authentication Context configuration to be used
-*/
-export function inject(config: adal.IConfig): adal.IAuthenticationContext {
+ * @description module dependency injection for commonjs
+ *
+ * @param config {Config} The Authentication Context configuration to be used
+ */
+export function inject(config:adal.IConfig):adal.IAuthenticationContext {
     return new adal.AuthenticationContext(config);
 }
 
 class AdalAuthenticationService implements angular.IServiceProvider {
 
-    $get: any;
+    $get:any;
 
-    updateDataFromCache: (resource: string) => void;
+    updateDataFromCache:(resource:string) => void;
 
-    init: (configOptions: adal.IConfig, httpProvider: angular.IHttpProvider) => void;
+    init:(configOptions:adal.IConfig, httpProvider:angular.IHttpProvider) => void;
 
-    acquireToken: (resource: string) => angular.IPromise<any>;
+    acquireToken:(resource:string) => angular.IPromise<any>;
 
-    login: () => void;
+    login:() => void;
 
-    loginInProgress: () => boolean;
+    loginInProgress:() => boolean;
 
-    logOut: () => void;
+    logOut:() => void;
 
-    getCachedToken: (resource: string) => string;
+    getCachedToken:(resource:string) => string;
 
-    getUser: () => angular.IPromise<adal.IUser>;
+    getUser:() => angular.IPromise<adal.IUser>;
 
-    getResourceForEndpoint: (endpoint: string) => string;
+    getResourceForEndpoint:(endpoint:string) => string;
 
-    clearCache: () => void;
+    clearCache:() => void;
 
-    clearCacheForResource: (resource: string) => void;
+    clearCacheForResource:(resource:string) => void;
 
-    info: (message: string) => void;
+    info:(message:string) => void;
 
-    verbose: (message: string) => void;
+    verbose:(message:string) => void;
 
-    config: adal.IConfig;
-    userInfo: adal.IOAuthData;
-    
+    config:adal.IConfig;
+    userInfo:adal.IOAuthData;
+
     constructor() {
 
-        var _adal: adal.AuthenticationContext = null;
-        var _oauthData: adal.OAuthData = { isAuthenticated: false, userName: "", loginError: "", profile: null };
+        var _adal:adal.AuthenticationContext = null;
+        var _oauthData:adal.OAuthData = {isAuthenticated: false, userName: "", loginError: "", profile: null};
 
-        var updateDataFromCache = (resource: string) => {
+        var updateDataFromCache = (resource:string) => {
             // only cache lookup here to not interrupt with events
             var token = _adal.getCachedToken(resource);
             _oauthData.isAuthenticated = token !== null && token.length > 0;
-            var user = _adal.getCachedUser() || { userName: "", profile: null };
+            var user = _adal.getCachedUser() || {userName: "", profile: null};
             _oauthData.userName = user.userName;
             _oauthData.profile = user.profile;
             _oauthData.loginError = _adal.getLoginError();
@@ -87,11 +87,11 @@ class AdalAuthenticationService implements angular.IServiceProvider {
 
         /**
          * @desc Special function that exposes methods in Angular controller
-        *  $rootScope, $window, $q, $location, $timeout are injected by Angular
+         *  $rootScope, $window, $q, $location, $timeout are injected by Angular
          */
         this.$get = [
             "$rootScope", "$window", "$q", "$location", "$timeout",
-            ($rootScope: angular.IRootScopeService, $window: angular.IWindowService, $q: angular.IQService, $location: angular.ILocationService, $timeout: angular.ITimeoutService) => {
+            ($rootScope:angular.IRootScopeService, $window:angular.IWindowService, $q:angular.IQService, $location:angular.ILocationService, $timeout:angular.ITimeoutService) => {
 
                 var locationChangeHandler = () => {
                     var hash = $window.location.hash;
@@ -198,11 +198,11 @@ class AdalAuthenticationService implements angular.IServiceProvider {
                     }
                 };
 
-                function isADLoginRequired(route: any, global: any) {
+                function isADLoginRequired(route:any, global:any) {
                     return global.requireADLogin ? route.requireADLogin !== false : !!route.requireADLogin;
                 }
 
-                var routeChangeHandler = (e: any, nextRoute: any) => {
+                var routeChangeHandler = (e:any, nextRoute:any) => {
                     if (nextRoute && nextRoute.$$route && isADLoginRequired(nextRoute.$$route, _adal.config)) {
                         if (!_oauthData.isAuthenticated) {
                             _adal.info("Route change event for:" + ($location as any).$$url);
@@ -211,7 +211,7 @@ class AdalAuthenticationService implements angular.IServiceProvider {
                     }
                 };
 
-                var stateChangeHandler = (e: any, toState: any, toParams: any, fromState: any, fromParams: any) => {
+                var stateChangeHandler = (e:any, toState:any, toParams:any, fromState:any, fromParams:any) => {
                     if (toState && isADLoginRequired(toState, _adal.config)) {
                         if (!_oauthData.isAuthenticated) {
                             // $location.$$url is set as the page we are coming from
@@ -244,15 +244,15 @@ class AdalAuthenticationService implements angular.IServiceProvider {
 
 class AdalHttpInterceptor implements angular.IHttpInterceptor {
 
-    request: (config: angular.IRequestConfig) => angular.IRequestConfig | angular.IPromise<angular.IRequestConfig>;
-    response: (rejection: any) => void;
+    request:(config:angular.IRequestConfig) => angular.IRequestConfig | angular.IPromise<angular.IRequestConfig>;
+    response:(rejection:any) => void;
 
-    constructor(authService: AdalAuthenticationService, $q: angular.IQService, $rootScope: angular.IRootScopeService) {
-        this.request = (config: angular.IRequestConfig): angular.IPromise<angular.IRequestConfig> | angular.IRequestConfig => {
+    constructor(authService:AdalAuthenticationService, $q:angular.IQService, $rootScope:angular.IRootScopeService) {
+        this.request = (config:angular.IRequestConfig):angular.IPromise<angular.IRequestConfig> | angular.IRequestConfig => {
             return config;
         };
 
-        this.response = (rejection: any) => {
+        this.response = (rejection:any) => {
             if (rejection && rejection.status === 401) {
                 var resource = authService.getResourceForEndpoint(rejection.config.url);
                 authService.clearCacheForResource(resource);
@@ -267,21 +267,17 @@ interface IAdalRootScope extends angular.IRootScopeService {
     userInfo: adal.IOAuthData
 }
 
-(function(){
-    if (angular) {
-        var AdalModule = angular.module("AdalAngular", []).run(($rootScope: IAdalRootScope): void => {
-            $rootScope.userInfo = { isAuthenticated: false, userName: '', loginError: '', profile: null };
-        });
-        AdalModule.provider("adalAuthenticationService", () => {
-            return new AdalAuthenticationService();
-        });
-        AdalModule.factory('ProtectedResourceInterceptor', [
-            'adalAuthenticationService', '$q', '$rootScope',
-            (authService: AdalAuthenticationService, $q: angular.IQService, $rootScope: IAdalRootScope) => {
-                return new AdalHttpInterceptor(authService, $q, $rootScope);
-            }
-        ]);
-    } else {
-        console.log("AngularJS is not here???");
-    }
-})();
+if (angular) {
+    var AdalModule = angular.module("AdalAngular", []);
+    AdalModule.provider("adalAuthenticationService", () => {
+        return new AdalAuthenticationService();
+    });
+    AdalModule.factory('ProtectedResourceInterceptor', [
+        'adalAuthenticationService', '$q', '$rootScope',
+        (authService:AdalAuthenticationService, $q:angular.IQService, $rootScope:IAdalRootScope) => {
+            return new AdalHttpInterceptor(authService, $q, $rootScope);
+        }
+    ]);
+} else {
+    console.log("AngularJS is not here???");
+}

@@ -10,5 +10,5 @@
     "listFiles": true,
     "outDir": "build"
   },
-  "files": ["src/adal/adal.ts","src/adal-angular/adal-angular.ts"]
+  "files": ["src/adal.ts","src/adal-angular.ts"]
 }

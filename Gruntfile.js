@@ -7,7 +7,7 @@ module.exports = function (grunt) {
         typescript: {
             base: {
                 src: ['src/**/*.ts'],
-                dest: 'lib',
+                dest: 'build',
                 options: {
                     module: 'commonjs',
                     target: 'es5',
@@ -26,7 +26,7 @@ module.exports = function (grunt) {
                     {
                         src: ["build/**/*.js*", "build/**/*.d.ts"],
                         dest: "lib/",
-                        flatten: false,
+                        flatten: true,
                         expand: true
                     }
                 ]
