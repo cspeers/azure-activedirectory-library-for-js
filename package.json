@@ -25,7 +25,7 @@
     "oauth"
   ],
   "main": "./lib/adal.js",
-  "typings":"./lib/index.d.ts",
+  "typings": "./lib/index.d.ts",
   "engines": {
     "node": ">=0.8.0"
   },
@@ -47,15 +47,16 @@
     "grunt-jasmine-node": "~0.2.1",
     "grunt-jsdoc": "~0.5.7",
     "grunt-junit": "^0.1.6",
-    "grunt-karma": "^0.9.x",
+    "grunt-karma": "^0.9.0",
     "grunt-typescript": "",
-    "grunt-typescript-export": "^0.1.0",
     "jasmine-node": "~1.14.5",
     "jasmine-reporters": "~1.0.0",
     "jshint": "*",
     "karma": "~0.12.24",
     "karma-chrome-launcher": "~0.1.5",
-    "karma-jasmine": "~0.1.5",
+    "karma-ie-launcher": "~0.1.5",
+    "karma-firefox-launcher":"~0.1.5",
+    "karma-jasmine": "^0.3.7",
     "taffydb": "^2.7.2"
   },
   "directories": {

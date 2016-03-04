@@ -6,7 +6,7 @@
 			"type": "node",
 			"program": "${workspaceRoot}/node_modules/jasmine-node/lib/jasmine-node/cli.js",
 			"stopOnEntry": false,
-			"args": ["tests/unit/spec/AdalSpec.js"],
+			"args": ["tests/angularModuleSpec.js"],
 			"cwd": "${workspaceRoot}",
 			"runtimeExecutable": null,
 			"runtimeArgs": [

@@ -20,12 +20,17 @@
         {
             "taskName": "doc",
             "args": [],
-            "isBuildCommand": true
+            "isBuildCommand": false
         },
         {
             "taskName": "dist",
             "args": [],
-            "isBuildCommand": true
+            "isBuildCommand": false
+        },
+        {
+            "taskName": "manual",
+            "args": [],
+            "isBuildCommand": false
         }
     ]
 }

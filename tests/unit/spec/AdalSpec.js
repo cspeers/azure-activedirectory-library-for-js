@@ -20,7 +20,7 @@
 /* global it */
 /* global describe */
 
-var lib='../../../lib/adal.js';
+var lib='../../../lib/adal/adal.js';
 console.log("testing export module " + lib)
 
 var atobHelper = require('atob');

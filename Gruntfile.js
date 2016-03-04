@@ -3,16 +3,21 @@ module.exports = function (grunt) {
     // Project configuration.
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
-        clean: ['build/'],
+        clean: ['build/','/lib'],
         typescript: {
             base: {
                 src: ['src/**/*.ts'],
-                dest: 'build',
+                dest: 'lib',
                 options: {
                     module: 'commonjs',
                     target: 'es5',
                     declaration: true
                 }
+            }
+        },
+        karma: {
+            unit: {
+                configFile: 'karma.conf.js'
             }
         },
         copy: {
@@ -21,17 +26,11 @@ module.exports = function (grunt) {
                     {
                         src: ["build/**/*.js*", "build/**/*.d.ts"],
                         dest: "lib/",
-                        flatten: true,
+                        flatten: false,
                         expand: true
                     }
                 ]
             }
-        },
-        typescript_export: {
-            your_target: {
-                src: ['build/*.d.ts'],
-                dest: 'build/index.d.ts'
-            },
         },
         jsdoc: {
             dist: {
@@ -79,12 +78,13 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-jasmine-node');
     grunt.loadNpmTasks('grunt-contrib-copy');
-    grunt.loadNpmTasks('grunt-typescript-export');
+    grunt.loadNpmTasks('grunt-karma');
     // uglify task is producing invalid js file
 
     // jasmine node directly js api 
-    grunt.registerTask('default', ['typescript', 'copy' ,'jasmine_node']);
-    grunt.registerTask('doc', ['typescript', 'copy', 'jsdoc']);
+    grunt.registerTask('default', ['typescript', 'copy', 'jasmine_node']);
+    grunt.registerTask('manual', ['typescript', 'copy', 'karma']);
+    grunt.registerTask('doc', ['clean','typescript', 'copy', 'jsdoc']);
     grunt.registerTask('minify', ['uglify']);
 
 };
