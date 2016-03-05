@@ -18,8 +18,13 @@
             "isBuildCommand": true
         },
         {
+            "taskName": "angular",
+            "args": ["angular"],
+            "isBuildCommand": false
+        },        
+        {
             "taskName": "doc",
-            "args": [],
+            "args": ["doc"],
             "isBuildCommand": false
         },
         {
@@ -28,8 +33,8 @@
             "isBuildCommand": false
         },
         {
-            "taskName": "manual",
-            "args": [],
+            "taskName": "clean",
+            "args": ["clean"],
             "isBuildCommand": false
         }
     ]

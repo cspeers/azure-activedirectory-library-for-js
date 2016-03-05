@@ -3,9 +3,16 @@ module.exports = function (grunt) {
     // Project configuration.
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
-        clean: ['build/','/lib'],
+        clean: {
+            build: ['build'],
+            lib: ['lib/**/*.js', 'lib/**/*.d.ts', 'lib/**/*.*map'],
+            src: ['src/**/*.js', 'src/**/*.d.ts', 'src/**/*.*map']
+        },
         ts: {
-            default:{tsconfig:true}
+            default: {
+                src: ["src/**/*.ts"],
+                tsconfig: true
+            }
         },
         karma: {
             unit: {
@@ -53,7 +60,7 @@ module.exports = function (grunt) {
 
     // Load the plugin that provides the "uglify" task.
     grunt.loadNpmTasks('grunt-jsdoc');
-    // grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-ts');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-jasmine-node');
@@ -62,9 +69,9 @@ module.exports = function (grunt) {
     // uglify task is producing invalid js file
 
     // jasmine node directly js api 
-    grunt.registerTask('default', ['ts','jasmine_node']);
-    grunt.registerTask('angular', ['ts', 'karma']);
-    grunt.registerTask('doc', ['clean','ts', 'jsdoc']);
+    grunt.registerTask('default', ['clean', 'ts', 'jasmine_node']);
+    grunt.registerTask('angular', ['clean', 'ts', 'karma']);
+    grunt.registerTask('doc', ['clean', 'ts', 'jsdoc']);
     grunt.registerTask('minify', ['uglify']);
 
 };

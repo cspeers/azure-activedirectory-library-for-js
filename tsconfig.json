@@ -7,9 +7,10 @@
     "declaration": true,
     "noEmitOnError": true,
     "diagnostics": true,
-    "listFiles": true
+    "listFiles": true,
+    "outDir": "lib"
   },
   "exclude": [
-      "node_modules","bower_components","typings"
+      "node_modules","bower_components","lib"
   ]
 }
