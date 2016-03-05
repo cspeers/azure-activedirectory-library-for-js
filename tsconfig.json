@@ -7,8 +7,9 @@
     "declaration": true,
     "noEmitOnError": true,
     "diagnostics": true,
-    "listFiles": true,
-    "outDir": "build"
+    "listFiles": true
   },
-  "files": ["src/adal.ts","src/adal-angular.ts"]
+  "exclude": [
+      "node_modules","bower_components","typings"
+  ]
 }

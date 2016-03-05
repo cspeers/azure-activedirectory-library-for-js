@@ -1,4 +1,8 @@
 /// <reference path="../typings/angularjs/angular.d.ts" />
+///<reference path="adal.ts"/>
+
+
+
 "use strict";
 
 import * as adal from "./adal";
@@ -12,7 +16,7 @@ export function inject(config:adal.IConfig):adal.IAuthenticationContext {
     return new adal.AuthenticationContext(config);
 }
 
-class AdalAuthenticationService implements angular.IServiceProvider {
+export class AdalAuthenticationService implements angular.IServiceProvider {
 
     $get:any;
 
@@ -144,7 +148,7 @@ class AdalAuthenticationService implements angular.IServiceProvider {
                                             var paramsJSON = _adal.getItem(_adal.CONSTANTS.STORAGE.START_PAGE_PARAMS);
 
                                             if (paramsJSON) {
-                                                // If params were stored redirect to the page and then 
+                                                // If params were stored redirect to the page and then
                                                 // initialize the params
                                                 var loginStartPageParams = JSON.parse(paramsJSON);
                                                 $location.url(loginStartPage).search(loginStartPageParams);
@@ -242,7 +246,7 @@ class AdalAuthenticationService implements angular.IServiceProvider {
     }
 }
 
-class AdalHttpInterceptor implements angular.IHttpInterceptor {
+export class AdalHttpInterceptor implements angular.IHttpInterceptor {
 
     request:(config:angular.IRequestConfig) => angular.IRequestConfig | angular.IPromise<angular.IRequestConfig>;
     response:(rejection:any) => void;
@@ -263,21 +267,6 @@ class AdalHttpInterceptor implements angular.IHttpInterceptor {
     }
 }
 
-interface IAdalRootScope extends angular.IRootScopeService {
+export interface IAdalRootScope extends angular.IRootScopeService {
     userInfo: adal.IOAuthData
-}
-
-if (angular) {
-    var AdalModule = angular.module("AdalAngular", []);
-    AdalModule.provider("adalAuthenticationService", () => {
-        return new AdalAuthenticationService();
-    });
-    AdalModule.factory('ProtectedResourceInterceptor', [
-        'adalAuthenticationService', '$q', '$rootScope',
-        (authService:AdalAuthenticationService, $q:angular.IQService, $rootScope:IAdalRootScope) => {
-            return new AdalHttpInterceptor(authService, $q, $rootScope);
-        }
-    ]);
-} else {
-    console.log("AngularJS is not here???");
 }

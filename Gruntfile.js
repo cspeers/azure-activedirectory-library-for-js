@@ -6,8 +6,7 @@ module.exports = function (grunt) {
         clean: ['build/','/lib'],
         typescript: {
             base: {
-                src: ['src/**/*.ts'],
-                dest: 'build',
+                src: ['lib/**/*.ts'],
                 options: {
                     module: 'commonjs',
                     target: 'es5',
@@ -18,18 +17,6 @@ module.exports = function (grunt) {
         karma: {
             unit: {
                 configFile: 'karma.conf.js'
-            }
-        },
-        copy: {
-            main: {
-                files: [
-                    {
-                        src: ["build/**/*.js*", "build/**/*.d.ts"],
-                        dest: "lib/",
-                        flatten: true,
-                        expand: true
-                    }
-                ]
             }
         },
         jsdoc: {
@@ -82,9 +69,9 @@ module.exports = function (grunt) {
     // uglify task is producing invalid js file
 
     // jasmine node directly js api 
-    grunt.registerTask('default', ['typescript', 'copy', 'jasmine_node']);
-    grunt.registerTask('manual', ['typescript', 'copy', 'karma']);
-    grunt.registerTask('doc', ['clean','typescript', 'copy', 'jsdoc']);
+    grunt.registerTask('default', ['typescript','jasmine_node']);
+    grunt.registerTask('angular', ['typescript', 'karma']);
+    grunt.registerTask('doc', ['clean','typescript', 'jsdoc']);
     grunt.registerTask('minify', ['uglify']);
 
 };

@@ -25,7 +25,6 @@
     "oauth"
   ],
   "main": "./lib/adal.js",
-  "typings": "./lib/index.d.ts",
   "engines": {
     "node": ">=0.8.0"
   },
