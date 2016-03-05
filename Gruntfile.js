@@ -6,7 +6,7 @@ module.exports = function (grunt) {
         clean: {
             build: ['build'],
             lib: ['lib/**/*.js', 'lib/**/*.d.ts', 'lib/**/*.*map'],
-            src: ['src/**/*.js', 'src/**/*.d.ts', 'src/**/*.*map']
+            src: ['src/**/*.js', 'src/**/*.*map']
         },
         ts: {
             default: {
@@ -51,8 +51,8 @@ module.exports = function (grunt) {
                 // Because these src-dest file mappings are manually specified, every
                 // time a new file is added or removed, the Gruntfile has to be updated.
                 files: [
-                    { src: 'lib/adal.js', dest: 'build/adal.min.js' },
-                    { src: 'lib/adal-angular.js', dest: 'build/adal-angular.min.js' }
+                    { src: 'lib/AdalTS.js', dest: 'build/AdalTS.min.js' },
+                    { src: 'lib/AdalTS-angular.js', dest: 'build/AdalTS-angular.min.js' }
                 ]
             }
         }

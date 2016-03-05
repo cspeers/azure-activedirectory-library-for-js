@@ -20,7 +20,7 @@
 /* global it */
 /* global describe */
 
-var lib='../../../lib/adal.js';
+var lib='../../../lib/Adal.js';
 console.log("testing export module " + lib)
 
 var atobHelper = require('atob');
@@ -102,7 +102,7 @@ describe('Adal', function () {
         window.localStorage = storageFake;
         window.sessionStorage = storageFake;
 
-        // Init adal 
+        // Init AdalTS
         global.window = window;
         global.localStorage = storageFake;
         global.sessionStorage = storageFake;
@@ -293,7 +293,7 @@ describe('Adal', function () {
         });
         
         //Simulate callback from the frame.
-        //adal.callback(null, '33333333-3333-4333-b333-333333333333');
+        //AdalTS.callback(null, '33333333-3333-4333-b333-333333333333');
         window.callBackMappedToRenewStates[adal.config.state](null, '33333333-3333-4333-b333-333333333333');
         //Both callbacks should have been provided with the token.
         expect(token).toBe('33333333-3333-4333-b333-333333333333', 'First callback should be called');
