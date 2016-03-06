@@ -2,13 +2,24 @@
 "use strict";
 console.log("adal-ts:loading beginning...");
 
+console.log("adal-ts:setting up context factory...");
+
+let $Adal:adal.ContextFactory<adal.IAuthenticationContext>={
+  Create:(cfg:adal.IConfig)=>{
+      return new AuthenticationContext(cfg);
+  }  
+};
+
+
+console.log("adal-ts:exporting classes and methods");
+
 /**
  * @description module dependency injection for commonjs
  *
  * @param config {Config} The Authentication Context configuration to be used
  */
 export function inject(config:adal.IConfig):adal.IAuthenticationContext {
-    return new AuthenticationContext(config);
+    return $Adal.Create<adal.IAuthenticationContext>(config);
 }
 
 /**
@@ -1241,11 +1252,4 @@ export class AuthenticationContext implements adal.IAuthenticationContext {
     [key: string]: any;
 
 }
-
-export class ContextFactory{
-    static Factory(config:Config):AuthenticationContext{return new AuthenticationContext(config);}    
-}
-
-let $adal=ContextFactory.Factory;
-
-console.log("adal-ts:loading complete! - " + $adal);
+console.log("adal-ts:loading complete! - " + $Adal);

@@ -20,7 +20,7 @@
 
 console.log("Starting the ng Tests...");
 
-console.log("Adal:" + $adal);
+console.log("Adal:" + $Adal);
 // Test app
 var app = angular.module('TestApplication', ['ngResource', 'ngRoute', 'AdalAngular']);
 

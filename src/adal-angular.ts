@@ -3,8 +3,7 @@
 
 "use strict";
 
-declare var $adal:adal.IContextFactory;
-console.log("adal-angular:loading beginning...");
+console.log("adal-angular:loading beginning..." + $Adal);
 
 export class AdalAuthenticationService implements angular.IServiceProvider {
 
@@ -39,7 +38,7 @@ export class AdalAuthenticationService implements angular.IServiceProvider {
     config:adal.IConfig;
     userInfo:adal.IOAuthData;
 
-    constructor($authInj:adal.IContextFactory) {
+    constructor($authInj:adal.ContextFactory<adal.IAuthenticationContext>) {
 
         var _adal:adal.IAuthenticationContext = null;
         var _oauthData:adal.IOAuthData = {isAuthenticated: false, userName: "", loginError: "", profile: null};
@@ -72,7 +71,7 @@ export class AdalAuthenticationService implements angular.IServiceProvider {
                 console.log("Initializing the Authentication Context");
 
                 // create instance with given config
-              _adal = $authInj(configOptions);
+              _adal = $authInj.Create<adal.IAuthenticationContext>(configOptions);
             } else {
                 throw new Error("You must set configOptions, when calling init");
             }
@@ -264,10 +263,10 @@ export interface IRootScope extends angular.IRootScopeService {
 }
 
 export class AdalAngularModule{
-    constructor($contextFactory:adal.IContextFactory){
+    constructor($contextFactory:adal.ContextFactory<adal.IAuthenticationContext>){
     var AdalModule= angular.module("AdalAngular", []);
     AdalModule.provider("adalAuthenticationService", () => {
-        return new AdalAuthenticationService($adal);
+        return new AdalAuthenticationService($contextFactory);
     });
     AdalModule.factory('ProtectedResourceInterceptor', [
         'adalAuthenticationService', '$q', '$rootScope',
@@ -278,8 +277,9 @@ export class AdalAngularModule{
     }
 }
 
-export function inject(injector:adal.IContextFactory):AdalAngularModule {
-    var AdalAngular=new AdalAngularModule(injector);
+export function inject():AdalAngularModule {
+    console.log("adal-angular:injecting");
+    var AdalAngular=new AdalAngularModule($Adal);
     return AdalAngular;
 }
 

@@ -1,4 +1,6 @@
 
+declare var $Adal:adalts.ContextFactory<adalts.IAuthenticationContext>;
+
 import adal=adalts;
 
 declare module "adal" {
@@ -6,6 +8,18 @@ declare module "adal" {
 }
 
 declare module adalts {
+    
+    class ContextFactory<T>{
+        Create<T>(C:IConfig):T;
+    }
+       
+    interface IFactory<T,C>{
+        (config:C):T
+    }
+
+    interface IFactoryMethod extends IFactory<IAuthenticationContext,IConfig>{
+        (config:IConfig):IAuthenticationContext;
+    }
 
     /**
   * @description Base Contract for OAuth Request Parameters
@@ -131,10 +145,6 @@ declare module adalts {
         slice: string;
     }
 
-    interface IContextFactory{
-        (config:IConfig):IAuthenticationContext;
-    }
-
     interface IErrorMessages {
         [key: string]: string;
     }
@@ -212,5 +222,3 @@ declare module adalts {
         saveItem(key: string, obj: any): boolean;      
     }
 }
-
-declare var $adal:adal.IContextFactory;
