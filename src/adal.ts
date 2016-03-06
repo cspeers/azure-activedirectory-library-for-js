@@ -1,6 +1,14 @@
 /// <reference path="adal/adal.d.ts" />
 "use strict";
 
+var module:any;
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports.inject=function(config:adal.IConfig){
+        return config.factory();
+    }
+}
+
 /**
  * @description Concrete implementation of OAuth Request Parameters
  */
@@ -80,7 +88,7 @@ export class CallbackMap<T> implements adal.ICallbackMap<T> {
  */
 export class User implements adal.IUser {
     userName: string;
-    profile: adal.IUserProfile;
+    profile: adal.IUserProfile=null;
 }
 
 /**
@@ -342,6 +350,8 @@ export class Logging {
  * @desc Concrete implementation of Configuration Options
  */
 export class Config implements adal.IConfig {
+
+    factory:()=>AuthenticationContext=()=>{return new AuthenticationContext(this)};
     displayCall: adal.IDisplayCall;
     tenant: string;
     clientId: string;
@@ -383,7 +393,7 @@ export class OAuthData implements adal.IOAuthData {
 export class AuthenticationContext implements adal.IAuthenticationContext {
 
     instance: string="https://login.microsoftonline.com/";
-    config: adal.IConfig;
+    config: Config;
     popUp: boolean = false;
     frameCallInProgress: boolean;
     callback: adal.IRequestCallback;
@@ -393,12 +403,15 @@ export class AuthenticationContext implements adal.IAuthenticationContext {
 
     REQUEST_TYPE = new RequestTypes();
     CONSTANTS = new Constants();
-    private _user: adal.IUser;
+
+    private _user: User;
     private _loginInProgress: boolean = false;
     private _libVersion(): string { return this.CONSTANTS.LIBRARY_VERSION; }
     private _idTokenNonce: string;
     private _renewStates: Array<string> = [];
     private _activeRenewals: RenewalList;
+
+    public Library_Version:string=this._libVersion();
 
     getResourceForEndpoint(endpoint: string): string {
         if (this.config && this.config.endpoints) {
@@ -759,7 +772,7 @@ export class AuthenticationContext implements adal.IAuthenticationContext {
         this._loadFrame(urlNavigate, 'adalRenewFrame');
     }
 
-    private _renewIdToken(callback: adal.IRequestCallback) {
+    private _renewIdToken(callback: adal.IRequestCallback):void {
         // use iframe to try refresh token
         this.info('renewIdToken is called');
         if (!this._hasResource(this.config.clientId)) {
@@ -794,7 +807,7 @@ export class AuthenticationContext implements adal.IAuthenticationContext {
         this._loadFrame(urlNavigate, 'adalIdTokenFrame');
     }
 
-    private _getNavigateUrl(responseType: string, resource: string) {
+    private _getNavigateUrl(responseType: string, resource: string):string {
         var tenant = "common";
         if (this.config.tenant) {
             tenant = this.config.tenant;
@@ -809,11 +822,11 @@ export class AuthenticationContext implements adal.IAuthenticationContext {
         return urlNavigate;
     }
 
-    private _deserialize(query: string): adal.IRequestParameters {
+    private _deserialize(query: string): RequestParameters {
         return RequestParameters.deserialize(query);
     }
 
-    private _serialize(responseType: string, obj: adal.IConfig, resource: string): string {
+    private _serialize(responseType: string, obj: Config, resource: string): string {
         return RequestParameters.serialize(responseType, obj, resource);
     }
 
@@ -850,7 +863,7 @@ export class AuthenticationContext implements adal.IAuthenticationContext {
         return null;
     }
 
-    private _createUser(idToken: string): adal.IUser {
+    private _createUser(idToken: string): User {
         var user: User = null;
         var parsedJson = this._extractIdToken(idToken);
         if (parsedJson && parsedJson.hasOwnProperty("aud")) {
@@ -876,7 +889,7 @@ export class AuthenticationContext implements adal.IAuthenticationContext {
 
     private _decode(base64IdToken: string): string { return Token.decode(base64IdToken); }
 
-    getUser(callback: adal.IRequestCallback): adal.IUser {
+    getUser(callback: adal.IRequestCallback): User {
         // IDToken is first call
         if (typeof callback !== 'function') {
             throw new Error('callback is not a function');
@@ -999,7 +1012,7 @@ export class AuthenticationContext implements adal.IAuthenticationContext {
 
     }
 
-    getCachedUser(): adal.IUser {
+    getCachedUser(): User {
         if (this._user) {
             return this._user;
         }
@@ -1009,7 +1022,7 @@ export class AuthenticationContext implements adal.IAuthenticationContext {
         return this._user;
     }
 
-    getRequestInfo(hash: string): adal.IRequestInfo {
+    getRequestInfo(hash: string): RequestInfo {
         hash = this._getHash(hash);
         var parameters = this._deserialize(hash);
         var requestInfo: RequestInfo = {
@@ -1231,5 +1244,7 @@ export class AuthenticationContext implements adal.IAuthenticationContext {
  * @param config {Config} The Authentication Context configuration to be used
  */
 export function inject(config:adal.IConfig):adal.IAuthenticationContext {
-    return new AuthenticationContext(config);
+    return config.factory();
 }
+
+

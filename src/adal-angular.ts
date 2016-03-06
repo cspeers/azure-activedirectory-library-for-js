@@ -3,6 +3,15 @@
 
 "use strict";
 
+var module:any;
+declare var AuthenticationContext:adal.IAuthenticationContext;
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports.inject=function(config:adal.IConfig){
+        return config.factory();
+    }
+}
+
 class AdalAuthenticationService implements angular.IServiceProvider {
 
     $get:any;
@@ -67,7 +76,7 @@ class AdalAuthenticationService implements angular.IServiceProvider {
                 }
 
                 // create instance with given config
-                //_adal = new adal.AuthenticationContext(configOptions);
+                _adal = configOptions.factory();
             } else {
                 throw new Error("You must set configOptions, when calling init");
             }
@@ -134,7 +143,7 @@ class AdalAuthenticationService implements angular.IServiceProvider {
                                             var paramsJSON = _adal.getItem(_adal.CONSTANTS.STORAGE.START_PAGE_PARAMS);
 
                                             if (paramsJSON) {
-                                                // If params were stored redirect to the page and then 
+                                                // If params were stored redirect to the page and then
                                                 // initialize the params
                                                 var loginStartPageParams = JSON.parse(paramsJSON);
                                                 $location.url(loginStartPage).search(loginStartPageParams);
@@ -253,6 +262,23 @@ class AdalHttpInterceptor implements angular.IHttpInterceptor {
     }
 }
 
-interface IAdalRootScope extends angular.IRootScopeService {
+interface IRootScope extends angular.IRootScopeService {
     userInfo: adal.IOAuthData
 }
+
+var AdalModule= angular.module("AdalAngular", []);
+AdalModule.provider("adalAuthenticationService", () => {
+    return new AdalAuthenticationService();
+});
+AdalModule.factory('ProtectedResourceInterceptor', [
+    'adalAuthenticationService', '$q', '$rootScope',
+    (authService:AdalAuthenticationService, $q:angular.IQService, $rootScope:IRootScope) => {
+        return new AdalHttpInterceptor(authService, $q, $rootScope);
+    }
+]);
+
+
+
+
+
+

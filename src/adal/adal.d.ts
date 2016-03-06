@@ -1,11 +1,4 @@
 
-
-import adal=adalts;
-
-declare module "adal" {
-    export =adal;
-}
-
 declare module adalts {
     /**
   * @description Base Contract for OAuth Request Parameters
@@ -113,6 +106,9 @@ declare module adalts {
      * @desc Base contract for Configuration Options
      */
     interface IConfig {
+
+        factory():IAuthenticationContext;
+
         displayCall: IDisplayCall;
         tenant: string;
         clientId: string;
@@ -208,4 +204,11 @@ declare module adalts {
         saveItem(key: string, obj: any): boolean;
     }
 
+}
+
+
+import adal=adalts;
+
+declare module "adal" {
+    export =adalts;
 }
