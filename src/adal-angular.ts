@@ -3,16 +3,10 @@
 
 "use strict";
 
-var module:any;
-declare var AuthenticationContext:adal.IAuthenticationContext;
+declare var $adal:adal.IContextFactory;
+console.log("adal-angular:loading beginning...");
 
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports.inject=function(config:adal.IConfig){
-        return config.factory();
-    }
-}
-
-class AdalAuthenticationService implements angular.IServiceProvider {
+export class AdalAuthenticationService implements angular.IServiceProvider {
 
     $get:any;
 
@@ -45,7 +39,7 @@ class AdalAuthenticationService implements angular.IServiceProvider {
     config:adal.IConfig;
     userInfo:adal.IOAuthData;
 
-    constructor() {
+    constructor($authInj:adal.IContextFactory) {
 
         var _adal:adal.IAuthenticationContext = null;
         var _oauthData:adal.IOAuthData = {isAuthenticated: false, userName: "", loginError: "", profile: null};
@@ -75,8 +69,10 @@ class AdalAuthenticationService implements angular.IServiceProvider {
                     httpProvider.interceptors.push("ProtectedResourceInterceptor");
                 }
 
+                console.log("Initializing the Authentication Context");
+
                 // create instance with given config
-                _adal = configOptions.factory();
+              _adal = $authInj(configOptions);
             } else {
                 throw new Error("You must set configOptions, when calling init");
             }
@@ -241,13 +237,14 @@ class AdalAuthenticationService implements angular.IServiceProvider {
     }
 }
 
-class AdalHttpInterceptor implements angular.IHttpInterceptor {
+export class AdalHttpInterceptor implements angular.IHttpInterceptor {
 
     request:(config:angular.IRequestConfig) => angular.IRequestConfig | angular.IPromise<angular.IRequestConfig>;
     response:(rejection:any) => void;
 
     constructor(authService:AdalAuthenticationService, $q:angular.IQService, $rootScope:angular.IRootScopeService) {
-        this.request = (config:angular.IRequestConfig):angular.IPromise<angular.IRequestConfig> | angular.IRequestConfig => {
+        this.request =
+            (config:angular.IRequestConfig):angular.IPromise<angular.IRequestConfig> | angular.IRequestConfig => {
             return config;
         };
 
@@ -262,23 +259,29 @@ class AdalHttpInterceptor implements angular.IHttpInterceptor {
     }
 }
 
-interface IRootScope extends angular.IRootScopeService {
+export interface IRootScope extends angular.IRootScopeService {
     userInfo: adal.IOAuthData
 }
 
-var AdalModule= angular.module("AdalAngular", []);
-AdalModule.provider("adalAuthenticationService", () => {
-    return new AdalAuthenticationService();
-});
-AdalModule.factory('ProtectedResourceInterceptor', [
-    'adalAuthenticationService', '$q', '$rootScope',
-    (authService:AdalAuthenticationService, $q:angular.IQService, $rootScope:IRootScope) => {
-        return new AdalHttpInterceptor(authService, $q, $rootScope);
+export class AdalAngularModule{
+    constructor($contextFactory:adal.IContextFactory){
+    var AdalModule= angular.module("AdalAngular", []);
+    AdalModule.provider("adalAuthenticationService", () => {
+        return new AdalAuthenticationService($adal);
+    });
+    AdalModule.factory('ProtectedResourceInterceptor', [
+        'adalAuthenticationService', '$q', '$rootScope',
+        (authService:AdalAuthenticationService, $q:angular.IQService, $rootScope:IRootScope) => {
+            return new AdalHttpInterceptor(authService, $q, $rootScope);
+        }
+    ]);       
     }
-]);
+}
 
+export function inject(injector:adal.IContextFactory):AdalAngularModule {
+    var AdalAngular=new AdalAngularModule(injector);
+    return AdalAngular;
+}
 
-
-
-
+console.log("adal-angular:loading complete!");
 

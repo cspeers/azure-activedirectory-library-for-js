@@ -1,12 +1,14 @@
 /// <reference path="adal/adal.d.ts" />
 "use strict";
+console.log("adal-ts:loading beginning...");
 
-var module:any;
-
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports.inject=function(config:adal.IConfig){
-        return config.factory();
-    }
+/**
+ * @description module dependency injection for commonjs
+ *
+ * @param config {Config} The Authentication Context configuration to be used
+ */
+export function inject(config:adal.IConfig):adal.IAuthenticationContext {
+    return new AuthenticationContext(config);
 }
 
 /**
@@ -259,7 +261,7 @@ export class BrowserHelpers {
     }
 }
 
-export class RenewalList implements adal.IRenewalList {
+class RenewalList implements adal.IRenewalList {
     [resource: string]: any;
 }
 
@@ -351,7 +353,6 @@ export class Logging {
  */
 export class Config implements adal.IConfig {
 
-    factory:()=>AuthenticationContext=()=>{return new AuthenticationContext(this)};
     displayCall: adal.IDisplayCall;
     tenant: string;
     clientId: string;
@@ -410,9 +411,9 @@ export class AuthenticationContext implements adal.IAuthenticationContext {
     private _idTokenNonce: string;
     private _renewStates: Array<string> = [];
     private _activeRenewals: RenewalList;
-
+    
     public Library_Version:string=this._libVersion();
-
+    
     getResourceForEndpoint(endpoint: string): string {
         if (this.config && this.config.endpoints) {
             for (var configEndpoint in this.config.endpoints) {
@@ -1211,26 +1212,29 @@ export class AuthenticationContext implements adal.IAuthenticationContext {
     }
 
     constructor(cfg: adal.IConfig) {
+
         if (!this.singletonInstance) {
             this.singletonInstance=this;
-            if (!cfg.clientId) {
-                throw new Error('clientId is required');
+            if (cfg) {
+                if (!cfg.clientId) {
+                    throw new Error('clientId is required');
+                }
+                this.config =this._cloneConfig(cfg);
+                if (!this.config.loginResource) {
+                    this.config.loginResource = this.config.clientId;
+                }
+                if (!this.config.redirectUri) {
+                    this.config.redirectUri = window.location.href;
+                }
+                if (!this.config.correlationId) {
+                    this.config.correlationId = Guid.newGuid();
+                }
+                this.config.resource = this.config.loginResource || "";
+                this._activeRenewals = new RenewalList();
+                (window as adal.IOAuthWindow).callBackMappedToRenewStates = new CallbackMap<adal.IRequestCallback>();
+                (window as adal.IOAuthWindow).callBacksMappedToRenewStates = new CallbackMap<Array<adal.IRequestCallback>>();
+                (window as adal.IOAuthWindow).AuthenticationContext = this;
             }
-            this.config =this._cloneConfig(cfg);
-            if (!this.config.loginResource) {
-                this.config.loginResource = this.config.clientId;
-            }
-            if (!this.config.redirectUri) {
-                this.config.redirectUri = window.location.href;
-            }
-            if (!this.config.correlationId) {
-                this.config.correlationId = Guid.newGuid();
-            }
-            this.config.resource = this.config.loginResource || "";
-            this._activeRenewals = new RenewalList();
-            (window as adal.IOAuthWindow).callBackMappedToRenewStates = new CallbackMap<adal.IRequestCallback>();
-            (window as adal.IOAuthWindow).callBacksMappedToRenewStates = new CallbackMap<Array<adal.IRequestCallback>>();
-            (window as adal.IOAuthWindow).AuthenticationContext = this;
         }
     }
 
@@ -1238,13 +1242,10 @@ export class AuthenticationContext implements adal.IAuthenticationContext {
 
 }
 
-/**
- * @description module dependency injection for commonjs
- * 
- * @param config {Config} The Authentication Context configuration to be used
- */
-export function inject(config:adal.IConfig):adal.IAuthenticationContext {
-    return config.factory();
+export class ContextFactory{
+    static Factory(config:Config):AuthenticationContext{return new AuthenticationContext(config);}    
 }
 
+let $adal=ContextFactory.Factory;
 
+console.log("adal-ts:loading complete! - " + $adal);

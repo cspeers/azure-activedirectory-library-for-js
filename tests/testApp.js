@@ -18,6 +18,9 @@
 
 'use strict';
 
+console.log("Starting the ng Tests...");
+
+console.log("Adal:" + $adal);
 // Test app
 var app = angular.module('TestApplication', ['ngResource', 'ngRoute', 'AdalAngular']);
 

@@ -1,5 +1,12 @@
 
+import adal=adalts;
+
+declare module "adal" {
+    export=adal;
+}
+
 declare module adalts {
+
     /**
   * @description Base Contract for OAuth Request Parameters
   */
@@ -106,9 +113,6 @@ declare module adalts {
      * @desc Base contract for Configuration Options
      */
     interface IConfig {
-
-        factory():IAuthenticationContext;
-
         displayCall: IDisplayCall;
         tenant: string;
         clientId: string;
@@ -125,6 +129,10 @@ declare module adalts {
         postLogoutRedirectUri: string;
         extraQueryParameter: string;
         slice: string;
+    }
+
+    interface IContextFactory{
+        (config:IConfig):IAuthenticationContext;
     }
 
     interface IErrorMessages {
@@ -201,14 +209,8 @@ declare module adalts {
         registerCallback(expectedState: string, resource: string, callback: IRequestCallback): void;
         getCachedToken(resource: string): string;
         getItem(key: string): any;
-        saveItem(key: string, obj: any): boolean;
+        saveItem(key: string, obj: any): boolean;      
     }
-
 }
 
-
-import adal=adalts;
-
-declare module "adal" {
-    export =adalts;
-}
+declare var $adal:adal.IContextFactory;
