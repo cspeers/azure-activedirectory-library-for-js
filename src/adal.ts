@@ -1,31 +1,23 @@
 /// <reference path="adal/adal.d.ts" />
+
 "use strict";
 console.log("adal-ts:loading beginning...");
-
 console.log("adal-ts:setting up context factory...");
-
-let $Adal:adal.ContextFactory<adal.IAuthenticationContext>={
-  Create:(cfg:adal.IConfig)=>{
-      return new AuthenticationContext(cfg);
-  }  
+declare var $Adal:adal.ContextFactory<adal.IAuthenticationContext,adal.IConfig>
+var $Adal:adal.ContextFactory<adal.IAuthenticationContext,adal.IConfig>={
+    Create:(cfg:adal.IConfig)=>{
+        return new AuthenticationContext(cfg);
+    }
 };
-
+console.log("Created Context factory:"+ $Adal.Create.toString());
 
 console.log("adal-ts:exporting classes and methods");
 
-/**
- * @description module dependency injection for commonjs
- *
- * @param config {Config} The Authentication Context configuration to be used
- */
-export function inject(config:adal.IConfig):adal.IAuthenticationContext {
-    return $Adal.Create<adal.IAuthenticationContext>(config);
-}
 
 /**
  * @description Concrete implementation of OAuth Request Parameters
  */
-export class RequestParameters implements adal.IRequestParameters {
+class RequestParameters implements adal.IRequestParameters {
     error: string;
     errorDescription: string;
     id_token: string;
@@ -80,7 +72,7 @@ export class RequestParameters implements adal.IRequestParameters {
 /**
 * @description Concrete implementation Token Requests
 */
-export class RequestInfo implements adal.IRequestInfo {
+class RequestInfo implements adal.IRequestInfo {
     valid: boolean;
     parameters: adal.IRequestParameters;
     stateMatch: boolean;
@@ -92,14 +84,14 @@ export class RequestInfo implements adal.IRequestInfo {
  * @description Concrete implementation of a dictionary of
  *  resource URI and Callbacks
  */
-export class CallbackMap<T> implements adal.ICallbackMap<T> {
+class CallbackMap<T> implements adal.ICallbackMap<T> {
     [index: string]: T;
 }
 
 /**
  * @description Concrete implementation of a User
  */
-export class User implements adal.IUser {
+class User implements adal.IUser {
     userName: string;
     profile: adal.IUserProfile=null;
 }
@@ -108,7 +100,7 @@ export class User implements adal.IUser {
 * @description Concrete implementation of JWT
 * @see IToken
 */
-export class Token implements adal.IToken {
+class Token implements adal.IToken {
 
     header: string;
     JWSPayload: string;
@@ -206,14 +198,14 @@ export class Token implements adal.IToken {
 /**
 * @description  Concrete implementation of Resource Uri to Endpoint Mapping
 */
-export class EndpointCollection implements adal.IEndpointCollection {
+class EndpointCollection implements adal.IEndpointCollection {
     [key: string]: string;
 }
 
 /**
 * @description Helper class for guids
 */
-export class Guid {
+class Guid {
 
     static newGuid(): string {
         var guidHolder = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx";
@@ -244,7 +236,7 @@ export class Guid {
 /**
  * @description Helper class for DateTime methods
  */
-export class DateTime {
+class DateTime {
     static now(): number {
         return Math.round(new Date().getTime() / 1000.0);
     };
@@ -253,7 +245,7 @@ export class DateTime {
 /**
 * @description Class containing Browser Helper Methods
 */
-export class BrowserHelpers {
+class BrowserHelpers {
 
     static supportsLocalStorage(): boolean {
         try {
@@ -279,7 +271,7 @@ class RenewalList implements adal.IRenewalList {
 /**
 * @description Enumeration for Token Request Types
 */
-export class RequestTypes implements adal.IRequestTypes{
+class RequestTypes implements adal.IRequestTypes{
     LOGIN: string = "LOGIN";
     RENEW_TOKEN: string = "RENEW_TOKEN";
     ID_TOKEN: string = "ID_TOKEN";
@@ -291,7 +283,7 @@ export class RequestTypes implements adal.IRequestTypes{
 /**
  * @description Enumeration for Error Messages
  */
-export class ErrorMessages implements adal.IErrorMessages{
+class ErrorMessages implements adal.IErrorMessages{
     NO_TOKEN: string = "User is not authorized";
     [key:string]:string;
 }
@@ -299,7 +291,7 @@ export class ErrorMessages implements adal.IErrorMessages{
 /**
  * @description Enumeration for Log Severity Levels
  */
-export class LoggingLevels {
+class LoggingLevels {
     ERROR = 0;
     WARN = 1;
     INFO = 2;
@@ -309,7 +301,7 @@ export class LoggingLevels {
 /**
  * @description Constants for token storage field names
  */
-export class StorageConstants {
+class StorageConstants {
     TOKEN_KEYS: string = "adal.token.keys";
     ACCESS_TOKEN_KEY: string = "adal.access.token.key";
     EXPIRATION_KEY: string = "adal.expiration.key";
@@ -333,7 +325,7 @@ export class StorageConstants {
 /**
  * @description General Constants
  */
-export class Constants {
+class Constants {
     ACCESS_TOKEN: string = "access_token";
     EXPIRES_IN: string = "expires_in";
     ID_TOKEN: string = "id_token";
@@ -354,7 +346,7 @@ export class Constants {
 /**
  * @description Generic logging class
  */
-export class Logging {
+class Logging {
     static level: number = 0;
     static log: adal.ILogFunction = (m: string) => { console.log(m); }
 }
@@ -362,7 +354,7 @@ export class Logging {
 /**
  * @desc Concrete implementation of Configuration Options
  */
-export class Config implements adal.IConfig {
+class Config implements adal.IConfig {
 
     displayCall: adal.IDisplayCall;
     tenant: string;
@@ -392,7 +384,7 @@ export class Config implements adal.IConfig {
 /**
 * OAuthData implements IOAuthData
 */
-export class OAuthData implements adal.IOAuthData {
+class OAuthData implements adal.IOAuthData {
     isAuthenticated: boolean;
     userName: string;
     loginError: string;
@@ -402,7 +394,7 @@ export class OAuthData implements adal.IOAuthData {
 /**
  * @description Concrete implementation of Azure Active Directory Authentication Context
  */
-export class AuthenticationContext implements adal.IAuthenticationContext {
+class AuthenticationContext implements adal.IAuthenticationContext {
 
     instance: string="https://login.microsoftonline.com/";
     config: Config;
@@ -1252,4 +1244,20 @@ export class AuthenticationContext implements adal.IAuthenticationContext {
     [key: string]: any;
 
 }
+
+
+var module:any;
+if(typeof module!=='undefined' && module.exports){
+    /**
+     * @description module dependency injection for commonjs
+     *
+     * @param config {Config} The Authentication Context configuration to be used
+     */
+    module.exports.inject=(config:adal.IConfig)=>{
+        return $Adal.Create<adal.IAuthenticationContext>(config);
+    }
+}
+
+
+
 console.log("adal-ts:loading complete! - " + $Adal);

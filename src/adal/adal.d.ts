@@ -1,5 +1,6 @@
 
-declare var $Adal:adalts.ContextFactory<adalts.IAuthenticationContext>;
+declare var $Adal:adal.ContextFactory<adal.IAuthenticationContext,adal.IConfig>;
+
 
 import adal=adalts;
 
@@ -7,10 +8,14 @@ declare module "adal" {
     export=adal;
 }
 
+
+
 declare module adalts {
-    
-    class ContextFactory<T>{
-        Create<T>(C:IConfig):T;
+
+    export function inject(config:adal.IConfig):adal.IAuthenticationContext;
+
+    class ContextFactory<T,C>{
+        Create<T>(Config:C):T;
     }
        
     interface IFactory<T,C>{
