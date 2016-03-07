@@ -1,7 +1,5 @@
 
 declare var $Adal:adal.IFactory;
-
-
 import adal=adalts;
 
 declare module "adal" {
@@ -216,6 +214,6 @@ declare module adalts {
         registerCallback(expectedState: string, resource: string, callback: IRequestCallback): void;
         getCachedToken(resource: string): string;
         getItem(key: string): any;
-        saveItem(key: string, obj: any): boolean;      
+        saveItem(key: string, obj: any): boolean;
     }
 }

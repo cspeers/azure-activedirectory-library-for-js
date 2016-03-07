@@ -2,13 +2,21 @@
 
 "use strict";
 console.log("adal-ts:loading beginning...");
-
 console.log("adal-ts:setting up context factory method...");
 declare var $Adal:adal.IFactory;
 var $Adal:adal.IFactory=(cfg:adal.IConfig)=>{
     return new AuthenticationContext(cfg);
 };
 
+var module:any;
+if(typeof module!=='undefined' && module.exports){
+    module.exports.inject=(config:adal.IConfig)=>{
+        if (!$Adal) {
+            $Adal = (c: adal.IConfig) => new AuthenticationContext(c);
+        }
+        return $Adal(config);
+    }
+}
 console.log("adal-ts:exporting classes and methods");
 
 /**
@@ -1242,17 +1250,4 @@ class AuthenticationContext implements adal.IAuthenticationContext {
 
 }
 
-
-var module:any;
-if(typeof module!=='undefined' && module.exports){
-    module.exports.inject=(config:adal.IConfig)=>{
-        if (!$Adal) {
-            $Adal = (c: adal.IConfig) => new AuthenticationContext(c);
-        }
-        return $Adal(config);
-    }
-}
-
-
-
-console.log("adal-ts:loading complete! - " + $Adal);
+console.log("adal-ts:loading complete!");

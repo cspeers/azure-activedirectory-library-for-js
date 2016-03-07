@@ -5,7 +5,7 @@ module.exports = function (grunt) {
         pkg: grunt.file.readJSON('package.json'),
         clean: {
             build: ['build'],
-            lib: ['lib/**/*.js', 'lib/**/*.d.ts', 'lib/**/*.*map'],
+            lib: ['lib/**/*.*'],
             src: ['src/**/*.js', 'src/**/*.*map']
         },
         ts: {
