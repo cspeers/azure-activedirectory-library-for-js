@@ -2,17 +2,14 @@
 
 "use strict";
 console.log("adal-ts:loading beginning...");
-console.log("adal-ts:setting up context factory...");
-declare var $Adal:adal.ContextFactory<adal.IAuthenticationContext,adal.IConfig>
-var $Adal:adal.ContextFactory<adal.IAuthenticationContext,adal.IConfig>={
-    Create:(cfg:adal.IConfig)=>{
-        return new AuthenticationContext(cfg);
-    }
+
+console.log("adal-ts:setting up context factory method...");
+declare var $Adal:adal.IFactory;
+var $Adal:adal.IFactory=(cfg:adal.IConfig)=>{
+    return new AuthenticationContext(cfg);
 };
-console.log("Created Context factory:"+ $Adal.Create.toString());
 
 console.log("adal-ts:exporting classes and methods");
-
 
 /**
  * @description Concrete implementation of OAuth Request Parameters
@@ -1248,13 +1245,11 @@ class AuthenticationContext implements adal.IAuthenticationContext {
 
 var module:any;
 if(typeof module!=='undefined' && module.exports){
-    /**
-     * @description module dependency injection for commonjs
-     *
-     * @param config {Config} The Authentication Context configuration to be used
-     */
     module.exports.inject=(config:adal.IConfig)=>{
-        return $Adal.Create<adal.IAuthenticationContext>(config);
+        if (!$Adal) {
+            $Adal = (c: adal.IConfig) => new AuthenticationContext(c);
+        }
+        return $Adal(config);
     }
 }
 
