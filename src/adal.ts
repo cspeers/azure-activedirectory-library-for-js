@@ -1,17 +1,12 @@
-/// <reference path="adal/adal.d.ts" />
+/// <reference path="adalts/adalts.d.ts" />
 
-import IContextConstructor = adalts.IContextConstructor;
 "use strict";
 console.log("adal-ts:loading beginning...");
-console.log("adal-ts:setting up context factory method...");
-declare var $adal:adal.IContextConstructor<adal.IAuthenticationContext>;
 
 var module:any;
-if(typeof module!=='undefined' && module.exports){
-    module.exports.inject=(config:adal.IConfig)=>{
-        if (!$adal) {
-                $adal=AuthenticationContext;
-        }
+if (typeof module !== "undefined" && module.exports) {
+    console.log("adal:Module inject required")
+    module.exports.inject = (config: adal.IConfig) => {
         return new $adal(config);
     }
 }
@@ -382,16 +377,6 @@ class Config implements adal.IConfig {
         this.correlationId = Guid.newGuid();
         this.endpoints = new EndpointCollection();
     }
-}
-
-/**
-* OAuthData implements IOAuthData
-*/
-class OAuthData implements adal.IOAuthData {
-    isAuthenticated: boolean;
-    userName: string;
-    loginError: string;
-    profile: adal.IUserProfile;
 }
 
 /**
@@ -1245,6 +1230,7 @@ class AuthenticationContext implements adal.IAuthenticationContext {
     }
 
 }
+
 
 var $adal:adal.IContextConstructor<adal.IAuthenticationContext>=AuthenticationContext;
 

@@ -143,7 +143,7 @@ declare module adalts {
         loginError: string;
         profile: IUserProfile;
     }
-
+    
     interface IOAuthHTMLElement {
         callBackMappedToRenewStates: ICallbackMap<IRequestCallback>;
         callBacksMappedToRenewStates: ICallbackMap<Array<IRequestCallback>>;
