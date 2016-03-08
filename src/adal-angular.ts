@@ -24,17 +24,17 @@ interface IAuthenticatedRequestHeaders extends ng.IHttpRequestConfigHeaders {
     Authorization?: string;
 }
 
-class AuthenticationInterceptor implements ng.IHttpInterceptor {
+class ProtectedResourceInterceptor implements ng.IHttpInterceptor {
 
     static $inject = ['adalAuthenticationService', '$q', '$rootScope'];
 
-    protected authService: AuthenticationService;
     protected $q: ng.IQService;
     protected $rootScope: ng.IRootScopeService;
+    authService:AuthenticationService;
 
-    request(config: angular.IRequestConfig): angular.IRequestConfig | angular.IPromise<angular.IRequestConfig> {
+    request(config: angular.IRequestConfig): ng.IRequestConfig|angular.IPromise<angular.IRequestConfig> {
+        console.log("adal-angular:HttpInterceptor[request]");
         if (config) {
-            console.log("adal-angular:HttpInterceptor[request]");
             // This interceptor needs to load service, but dependeny definition causes circular reference error.
             // Loading with injector is suggested at github. https://github.com/angular/angular.js/issues/2367
 
@@ -63,7 +63,7 @@ class AuthenticationInterceptor implements ng.IHttpInterceptor {
 
                 // Cancel request if login is starting
                 if (this.authService.loginInProgress()) {
-                    this.authService.info('login already start.');
+                    this.authService.info('login already started.');
                     return this.$q.reject();
                 } else if (this.authService.config && isEndpoint) {
                     // external endpoints
@@ -109,34 +109,38 @@ class AuthenticationInterceptor implements ng.IHttpInterceptor {
 class AuthenticationService {
 
     static $inject: Array<string> = ['$rootScope', '$window', '$q', '$location', '$timeout'];
+    static context:adal.IAuthenticationContext;
 
     //region Private variables
-    private _adal: adal.IAuthenticationContext;
     private _oauthData: adal.IOAuthData;
+    private $rootScope:ng.IRootScopeService;
+    private $window: ng.IWindowService;
+    private $location: ng.ILocationService;
+    private $timeout: ng.ITimeoutService;
     private $q: ng.IQService;
     //endregion
 
-    config: adal.IConfig;
+    config: adal.IConfig=AuthenticationService.context.config;
     userInfo: adal.IOAuthData;
 
     //region Service Methods
 
-    login(): void { this._adal.login(); }
+    login(): void { AuthenticationService.context.login(); }
 
-    loginInProgress(): boolean { return this._adal.loginInProgress(); }
+    loginInProgress(): boolean { return AuthenticationService.context.loginInProgress(); }
 
-    logOut(): void { this._adal.logOut(); }
+    logOut(): void { AuthenticationService.context.logOut(); }
 
     getCachedToken(resource: string): string {
-        return this._adal.getCachedToken(resource);
+        return AuthenticationService.context.getCachedToken(resource);
     }
 
     acquireToken(resource: string): ng.IPromise<any> {
         // automated token request call
         var deferred = this.$q.defer();
-        this._adal.acquireToken(resource, (error, tokenOut) => {
+        AuthenticationService.context.acquireToken(resource, (error, tokenOut) => {
             if (error) {
-                this._adal.error('Error when acquiring token for resource: ' + resource, error);
+                AuthenticationService.context.error('Error when acquiring token for resource: ' + resource, error);
                 deferred.reject(error);
             } else {
                 deferred.resolve(tokenOut);
@@ -148,9 +152,9 @@ class AuthenticationService {
 
     getUser(): angular.IPromise<adal.IUser> {
         var deferred = this.$q.defer();
-        this._adal.getUser(function (error, user) {
+        AuthenticationService.context.getUser(function (error, user) {
             if (error) {
-                this._adal.error('Error when getting user', error);
+                AuthenticationService.context.error('Error when getting user', error);
                 deferred.reject(error);
             } else {
                 deferred.resolve(user);
@@ -161,56 +165,29 @@ class AuthenticationService {
     }
 
     getResourceForEndpoint(endpoint: string): string {
-        return this._adal.getResourceForEndpoint(endpoint);
+        return AuthenticationService.context.getResourceForEndpoint(endpoint);
     }
 
-    clearCache(): void { this._adal.clearCache(); }
+    clearCache(): void { AuthenticationService.context.clearCache(); }
 
     clearCacheForResource(resource: string): void {
-        this._adal.clearCacheForResource(resource);
+        AuthenticationService.context.clearCacheForResource(resource);
     }
 
-    info(message: string): void {this._adal.info(message);}
+    info(message: string): void {AuthenticationService.context.info(message);}
 
-    verbose(message: string): void { this._adal.verbose(message); }
+    verbose(message: string): void { AuthenticationService.context.verbose(message); }
 
-    //endregion
-
-    constructor($rootScope: angular.IRootScopeService, $window: angular.IWindowService, $q: angular.IQService, $location: angular.ILocationService, $timeout: angular.ITimeoutService) {
-        this.$q = $q;
-        console.log("adal-angular:AuthenticationService.ctor()");
-    }
-
-}
-
-class AuthenticationServiceProvider implements ng.IServiceProvider {
-
-    static $inject: Array<string> = [];
-
-    //region Private variables
-    private _adal: adal.IAuthenticationContext;
-    private _oauthData: adal.IOAuthData;
-    private $rootScope:ng.IRootScopeService;
-    private $window: ng.IWindowService;
-    private $location: ng.ILocationService;
-    private $timeout: ng.ITimeoutService;
-    private $q: ng.IQService;
-    
-    //endregion
-
-    private AuthenticationService:AuthenticationService;
-
-    //region Service Handlers
     private loginHandler(): void {
-        this._adal.info("Login event for:" + (this.$location as any).$$url);
-        if (this._adal.config && this._adal.config.localLoginUrl) {
-            this.$location.path(this._adal.config.localLoginUrl);
+        AuthenticationService.context.info("Login event for:" + (this.$location as any).$$url);
+        if (AuthenticationService.context.config && AuthenticationService.context.config.localLoginUrl) {
+            this.$location.path(AuthenticationService.context.config.localLoginUrl);
         } else {
             // directly start login flow
-            this._adal.saveItem(this._adal.CONSTANTS.STORAGE.START_PAGE, (this.$location as any).$$url);
-            this._adal.info("Start login at:" + window.location.href);
+            AuthenticationService.context.saveItem(AuthenticationService.context.CONSTANTS.STORAGE.START_PAGE, (this.$location as any).$$url);
+            AuthenticationService.context.info("Start login at:" + window.location.href);
             this.$rootScope.$broadcast("adal:loginRedirect");
-            this._adal.login();
+            AuthenticationService.context.login();
         }
     }
 
@@ -219,7 +196,7 @@ class AuthenticationServiceProvider implements ng.IServiceProvider {
     }
 
     private stateChangeHandler(e: any, toState: any, toParams: any, fromState: any, fromParams: any): void {
-        if (toState && this.isADLoginRequired(toState, this._adal.config)) {
+        if (toState && this.isADLoginRequired(toState, AuthenticationService.context.config)) {
             if (!this._oauthData.isAuthenticated) {
                 // $location.$$url is set as the page we are coming from
                 // Update it so we can store the actual location we want to
@@ -228,9 +205,9 @@ class AuthenticationServiceProvider implements ng.IServiceProvider {
 
                 // Parameters are not stored in the url on stateChange so
                 // we store them
-                this._adal.saveItem(this._adal.CONSTANTS.STORAGE.START_PAGE_PARAMS, JSON.stringify(toParams));
+                AuthenticationService.context.saveItem(AuthenticationService.context.CONSTANTS.STORAGE.START_PAGE_PARAMS, JSON.stringify(toParams));
 
-                this._adal.info("State change event for:" + (this.$location as any).$$url);
+                AuthenticationService.context.info("State change event for:" + (this.$location as any).$$url);
                 this.loginHandler();
             }
         }
@@ -240,10 +217,10 @@ class AuthenticationServiceProvider implements ng.IServiceProvider {
 
         var hash = this.$window.location.hash;
 
-        if (this._adal.isCallback(hash)) {
+        if (AuthenticationService.context.isCallback(hash)) {
             // callback can come from login or iframe request
-            var requestInfo = this._adal.getRequestInfo(hash);
-            this._adal.saveTokenFromHash(requestInfo);
+            var requestInfo = AuthenticationService.context.getRequestInfo(hash);
+            AuthenticationService.context.saveTokenFromHash(requestInfo);
 
             if ((<any>this.$location).$$html5) {
                 this.$window.location.assign(this.$window.location.origin + this.$window.location.pathname);
@@ -251,40 +228,40 @@ class AuthenticationServiceProvider implements ng.IServiceProvider {
                 this.$window.location.hash = "";
             }
 
-            if (requestInfo.requestType !== this._adal.REQUEST_TYPE.LOGIN) {
-                this._adal.callback = (this.$window.parent as any).AuthenticationContext().callback;
-                if (requestInfo.requestType === this._adal.REQUEST_TYPE.RENEW_TOKEN) {
-                    this._adal.callback = (this.$window.parent as any).callBackMappedToRenewStates[requestInfo.stateResponse];
+            if (requestInfo.requestType !== AuthenticationService.context.REQUEST_TYPE.LOGIN) {
+                AuthenticationService.context.callback = (this.$window.parent as any).AuthenticationContext().callback;
+                if (requestInfo.requestType === AuthenticationService.context.REQUEST_TYPE.RENEW_TOKEN) {
+                    AuthenticationService.context.callback = (this.$window.parent as any).callBackMappedToRenewStates[requestInfo.stateResponse];
                 }
             }
 
             // Return to callback if it is send from iframe
             if (requestInfo.stateMatch) {
-                if (typeof this._adal.callback === "function") {
+                if (typeof AuthenticationService.context.callback === "function") {
                     // Call within the same context without full page redirect keeps the callback
-                    if (requestInfo.requestType === this._adal.REQUEST_TYPE.RENEW_TOKEN) {
+                    if (requestInfo.requestType === AuthenticationService.context.REQUEST_TYPE.RENEW_TOKEN) {
                         // Idtoken or Accestoken can be renewed
                         if (requestInfo.parameters["access_token"]) {
-                            this._adal.callback(this._adal.getItem(this._adal.CONSTANTS.STORAGE.ERROR_DESCRIPTION), requestInfo.parameters["access_token"]);
+                            AuthenticationService.context.callback(AuthenticationService.context.getItem(AuthenticationService.context.CONSTANTS.STORAGE.ERROR_DESCRIPTION), requestInfo.parameters["access_token"]);
                             return;
                         } else if (requestInfo.parameters["id_token"]) {
-                            this._adal.callback(this._adal.getItem(this._adal.CONSTANTS.STORAGE.ERROR_DESCRIPTION), requestInfo.parameters["id_token"]);
+                            AuthenticationService.context.callback(AuthenticationService.context.getItem(AuthenticationService.context.CONSTANTS.STORAGE.ERROR_DESCRIPTION), requestInfo.parameters["id_token"]);
                             return;
                         }
                     }
                 } else {
                     // normal full login redirect happened on the page
-                    this.updateDataFromCache(this._adal.config.loginResource);
+                    this.updateDataFromCache(AuthenticationService.context.config.loginResource);
                     if (this._oauthData.userName) {
                         //IDtoken is added as token for the app
                         this.$timeout(() => {
-                            this.updateDataFromCache(this._adal.config.loginResource);
+                            this.updateDataFromCache(AuthenticationService.context.config.loginResource);
                             (this.$rootScope as any).userInfo = this._oauthData;
                             // redirect to login requested page
-                            var loginStartPage = this._adal.getItem(this._adal.CONSTANTS.STORAGE.START_PAGE);
+                            var loginStartPage = AuthenticationService.context.getItem(AuthenticationService.context.CONSTANTS.STORAGE.START_PAGE);
                             if (loginStartPage) {
                                 // Check to see if any params were stored
-                                var paramsJSON = this._adal.getItem(this._adal.CONSTANTS.STORAGE.START_PAGE_PARAMS);
+                                var paramsJSON = AuthenticationService.context.getItem(AuthenticationService.context.CONSTANTS.STORAGE.START_PAGE_PARAMS);
 
                                 if (paramsJSON) {
                                     // If params were stored redirect to the page and then
@@ -298,18 +275,18 @@ class AuthenticationServiceProvider implements ng.IServiceProvider {
                         }, 1);
                         this.$rootScope.$broadcast("adal:loginSuccess");
                     } else {
-                        this.$rootScope.$broadcast("adal:loginFailure", this._adal.getItem(this._adal.CONSTANTS.STORAGE.ERROR_DESCRIPTION));
+                        this.$rootScope.$broadcast("adal:loginFailure", AuthenticationService.context.getItem(AuthenticationService.context.CONSTANTS.STORAGE.ERROR_DESCRIPTION));
                     }
                 }
             }
         } else {
             // No callback. App resumes after closing or moving to new page.
             // Check token and username
-            this.updateDataFromCache(this._adal.config.loginResource);
-            if (!this._adal.renewActive && !this._oauthData.isAuthenticated && this._oauthData.userName) {
-                if (!this._adal.getItem(this._adal.CONSTANTS.STORAGE.FAILED_RENEW)) {
+            this.updateDataFromCache(AuthenticationService.context.config.loginResource);
+            if (!AuthenticationService.context.renewActive && !this._oauthData.isAuthenticated && this._oauthData.userName) {
+                if (!AuthenticationService.context.getItem(AuthenticationService.context.CONSTANTS.STORAGE.FAILED_RENEW)) {
                     // Idtoken is expired or not present
-                    this._adal.acquireToken(this._adal.config.loginResource, (error, tokenOut) => {
+                    AuthenticationService.context.acquireToken(AuthenticationService.context.config.loginResource, (error, tokenOut) => {
                         if (error) {
                             this.$rootScope.$broadcast("adal:loginFailure", "auto renew failure");
                         } else {
@@ -323,37 +300,62 @@ class AuthenticationServiceProvider implements ng.IServiceProvider {
         }
 
         this.$timeout(() => {
-            this.updateDataFromCache(this._adal.config.loginResource);
+            this.updateDataFromCache(AuthenticationService.context.config.loginResource);
             (this.$rootScope as any).userInfo = this._oauthData;
         }, 1);
     }
 
     private routeChangeHandler(e: any, nextRoute: any): void {
-        if (nextRoute && nextRoute.$$route && this.isADLoginRequired(nextRoute.$$route, this._adal.config)) {
+        if (nextRoute && nextRoute.$$route && this.isADLoginRequired(nextRoute.$$route, AuthenticationService.context.config)) {
             if (!this._oauthData.isAuthenticated) {
-                this._adal.info("Route change event for:" + (this.$location as any).$$url);
+                AuthenticationService.context.info("Route change event for:" + (this.$location as any).$$url);
                 this.loginHandler();
             }
         }
     }
 
     private updateDataFromCache(resource: string): void {
+        console.log("adal-angular:AuthenticationService updating data from Cache")
         // only cache lookup here to not interrupt with events
-        var token = this._adal.getCachedToken(resource);
+        var token = AuthenticationService.context.getCachedToken(resource);
         this._oauthData.isAuthenticated = token !== null && token.length > 0;
-        var user = this._adal.getCachedUser() || { userName: "", profile: null };
+        var user = AuthenticationService.context.getCachedUser() || { userName: "", profile: null };
         this._oauthData.userName = user.userName;
         this._oauthData.profile = user.profile;
-        this._oauthData.loginError = this._adal.getLoginError();
+        this._oauthData.loginError = AuthenticationService.context.getLoginError();
     }
+
     //endregion
+
+    constructor($rootScope: angular.IRootScopeService, $window: angular.IWindowService, $q: angular.IQService, $location: angular.ILocationService, $timeout: angular.ITimeoutService) {
+
+        console.log("adal-angular:AuthenticationService.ctor()");
+
+        this._oauthData = new OAuthData();
+        this.$q = $q;
+        this.$rootScope=$rootScope;
+        this.$window=$window;
+        this.$location=$location;
+        this.$timeout=$timeout;
+        $rootScope.$on("$routeChangeStart", this.routeChangeHandler);
+        $rootScope.$on("$stateChangeStart", this.stateChangeHandler);
+        $rootScope.$on("$locationChangeStart", this.locationChangeHandler);
+        this.updateDataFromCache(AuthenticationService.context.config.loginResource);
+
+
+    }
+
+}
+
+class AuthenticationServiceProvider implements ng.IServiceProvider {
+
+    static $inject: Array<string> = [];
 
     init(configOptions: adal.IConfig, httpProvider: ng.IHttpProvider): void {
         console.log("adal-angular:AuthenticationServiceProvider.init()")
 
         if (configOptions) {
 
-            this._oauthData = new OAuthData();
             if (configOptions) {
 
                 // redirect and logout_redirect are set to current location by default
@@ -373,31 +375,21 @@ class AuthenticationServiceProvider implements ng.IServiceProvider {
                 console.log("adal-angular:Initializing the Authentication Context");
 
                 // create instance with given config
-                this._adal = new $adal(configOptions);
+                AuthenticationService.context = new $adal(configOptions);
             } else {
                 throw new Error("You must set configOptions, when calling init");
             }
-
-            //loginResource is used to set authenticated status
-            this.updateDataFromCache(this._adal.config.loginResource);
         }
     }
 
     $get($rootScope: ng.IRootScopeService, $window: ng.IWindowService, $q: ng.IQService,
         $location: ng.ILocationService, $timeout: ng.ITimeoutService): AuthenticationService {
         console.log("adal-angular:AuthenticationServiceProvider.$get");
-        
-        $rootScope.$on("$routeChangeStart", this.routeChangeHandler);
-        $rootScope.$on("$stateChangeStart", this.stateChangeHandler);
-        $rootScope.$on("$locationChangeStart", this.locationChangeHandler);
-        
-        this.AuthenticationService=new AuthenticationService($rootScope, $window, $q, $location, $timeout);
-        return this.AuthenticationService;
+        return new AuthenticationService($rootScope, $window, $q, $location, $timeout);
     }
 
     constructor() {
-        this._adal = null;
-        this._oauthData = new OAuthData();
+        AuthenticationService.context=null;
     }
 }
 
@@ -408,7 +400,7 @@ class AuthenticationModule {
     public initialize(): void {
         this._module=angular.module('AdalAngular', []);
         this._module.provider('adalAuthenticationService', AuthenticationServiceProvider);
-        this._module.factory('ProtectedResourceInterceptor', AuthenticationInterceptor);
+        this._module.factory('ProtectedResourceInterceptor', ProtectedResourceInterceptor);
     }
 
 }
