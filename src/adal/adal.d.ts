@@ -1,5 +1,6 @@
 
-declare var $Adal:adal.IFactory;
+declare var $adal:adal.IContextConstructor<adal.IAuthenticationContext>;
+
 import adal=adalts;
 
 declare module "adal" {
@@ -7,14 +8,6 @@ declare module "adal" {
 }
 
 declare module adalts {
-
-    interface IFactoryMethod<T,C>{
-        (config:C):T
-    }
-
-    interface IFactory extends IFactoryMethod<IAuthenticationContext,IConfig>{
-        (config:IConfig):IAuthenticationContext;
-    }
 
     /**
   * @description Base Contract for OAuth Request Parameters
@@ -215,5 +208,14 @@ declare module adalts {
         getCachedToken(resource: string): string;
         getItem(key: string): any;
         saveItem(key: string, obj: any): boolean;
+    }
+
+    interface IConstructable<TConfig,TContext>{
+        new(config:TConfig):TContext;
+    }
+
+    interface IContextConstructor<T extends IAuthenticationContext> extends IConstructable<IConfig,T>
+    {
+
     }
 }

@@ -1,16 +1,15 @@
 /// <reference path="../typings/angularjs/angular.d.ts" />
 /// <reference path="adal/adal.d.ts" />
-import IQService = angular.IQService;
+
 "use strict";
 
 console.log("adal-angular:loading beginning...");
 
-var $Adal: adal.IFactory;
 var module: any;
 if (typeof module !== "undefined" && module.exports) {
     module.exports.inject = (config: adal.IConfig) => {
 
-        return $Adal(config);
+        return new $adal(config);
     }
 }
 
@@ -267,7 +266,7 @@ class AuthenticationServiceProvider implements ng.IServiceProvider {
             console.log("adal-angular:Initializing the Authentication Context");
 
             // create instance with given config
-            this._adal = $Adal(configOptions);
+            this._adal = new $adal(configOptions);
         } else {
             throw new Error("You must set configOptions, when calling init");
         }
