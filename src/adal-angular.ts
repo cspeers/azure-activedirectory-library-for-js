@@ -20,25 +20,29 @@ class OAuthData implements adal.IOAuthData {
     profile: adal.IUserProfile;
 }
 
+interface IAuthenticatedRequestConfig extends ng.IRequestConfig {
+    headers: IAuthenticatedRequestHeaders;
+}
+
+interface IAuthenticationRootScope extends ng.IRootScopeService {
+    userInfo: adal.IOAuthData;
+}
+
 interface IAuthenticatedRequestHeaders extends ng.IHttpRequestConfigHeaders {
-    Authorization?: string;
+    Authorization: string;
 }
 
 class ProtectedResourceInterceptor implements ng.IHttpInterceptor {
 
     static $inject = ['adalAuthenticationService', '$q', '$rootScope'];
-
-    protected $q: ng.IQService;
-    protected $rootScope: ng.IRootScopeService;
-    authService:AuthenticationService;
-
-    request(config: angular.IRequestConfig): ng.IRequestConfig|angular.IPromise<angular.IRequestConfig> {
+    
+    request(config: IAuthenticatedRequestConfig): IAuthenticatedRequestConfig|angular.IPromise<IAuthenticatedRequestConfig> {
         console.log("adal-angular:HttpInterceptor[request]");
         if (config) {
             // This interceptor needs to load service, but dependeny definition causes circular reference error.
             // Loading with injector is suggested at github. https://github.com/angular/angular.js/issues/2367
 
-            var configHeaders:IAuthenticatedRequestHeaders=config.headers || {};
+            var configHeaders:IAuthenticatedRequestHeaders=config.headers || {Authorization:null};
 
             var resource = this.authService.getResourceForEndpoint(config.url);
             if (resource === null) {
@@ -97,11 +101,8 @@ class ProtectedResourceInterceptor implements ng.IHttpInterceptor {
         return this.$q.reject(rejection);
     }
 
-    constructor(authService: AuthenticationService, $q: angular.IQService, $rootScope: angular.IRootScopeService) {
+    constructor(private authService: AuthenticationService, private $q: angular.IQService, private $rootScope: angular.IRootScopeService) {
         console.log("adal-angular:AuthenticationInterceptor.ctor()");
-        this.authService = authService;
-        this.$q = $q;
-        this.$rootScope = $rootScope;
     }
 
 }
@@ -113,11 +114,6 @@ class AuthenticationService {
 
     //region Private variables
     private _oauthData: adal.IOAuthData;
-    private $rootScope:ng.IRootScopeService;
-    private $window: ng.IWindowService;
-    private $location: ng.ILocationService;
-    private $timeout: ng.ITimeoutService;
-    private $q: ng.IQService;
     //endregion
 
     config: adal.IConfig=AuthenticationService.context.config;
@@ -327,16 +323,11 @@ class AuthenticationService {
 
     //endregion
 
-    constructor($rootScope: angular.IRootScopeService, $window: angular.IWindowService, $q: angular.IQService, $location: angular.ILocationService, $timeout: angular.ITimeoutService) {
+    constructor( private $rootScope: IAuthenticationRootScope,  private $window: angular.IWindowService, private $q: angular.IQService,  private $location: angular.ILocationService,  private $timeout: angular.ITimeoutService) {
 
         console.log("adal-angular:AuthenticationService.ctor()");
 
         this._oauthData = new OAuthData();
-        this.$q = $q;
-        this.$rootScope=$rootScope;
-        this.$window=$window;
-        this.$location=$location;
-        this.$timeout=$timeout;
         $rootScope.$on("$routeChangeStart", this.routeChangeHandler);
         $rootScope.$on("$stateChangeStart", this.stateChangeHandler);
         $rootScope.$on("$locationChangeStart", this.locationChangeHandler);
@@ -382,7 +373,7 @@ class AuthenticationServiceProvider implements ng.IServiceProvider {
         }
     }
 
-    $get($rootScope: ng.IRootScopeService, $window: ng.IWindowService, $q: ng.IQService,
+    $get($rootScope: IAuthenticationRootScope, $window: ng.IWindowService, $q: ng.IQService,
         $location: ng.ILocationService, $timeout: ng.ITimeoutService): AuthenticationService {
         console.log("adal-angular:AuthenticationServiceProvider.$get");
         return new AuthenticationService($rootScope, $window, $q, $location, $timeout);
