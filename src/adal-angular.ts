@@ -19,7 +19,7 @@ if (typeof module !== "undefined" && module.exports) {
     module.exports.inject = (config: adal.IConfig) => {
 
         return new $adal(config);
-    }
+    };
 }
 
 /**
@@ -174,7 +174,7 @@ if (angular) {
                                         //IDtoken is added as token for the app
                                         $timeout(() => {
                                             updateDataFromCache(adalContext.config.loginResource);
-                                            ($rootScope as any).userInfo = oAuthData;
+                                            $rootScope.userInfo = oAuthData;
                                             // redirect to login requested page
                                             var loginStartPage = adalContext.getItem(adalContext.CONSTANTS.STORAGE.START_PAGE);
                                             if (loginStartPage) {
@@ -315,8 +315,8 @@ if (angular) {
                         clearCache: () => adalContext.clearCache(),
                         clearCacheForResource: (resource: string) => adalContext.clearCacheForResource(resource),
                         info: (message: string) => adalContext.info(message),
-                        verbose: (message: string) => adalContext.verbose(message),
-                    }
+                        verbose: (message: string) => adalContext.verbose(message)
+                    };
                 }
             ]
         }

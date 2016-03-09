@@ -15,9 +15,9 @@ declare module "adal" {
  * @description Shared ADAL Interfaces
  */
 declare module adalts {
-    
+
     interface IShimModule extends NodeModule{
-        
+
     }
 
     /**
@@ -371,7 +371,7 @@ if (typeof module !== "undefined" && module.exports) {
     console.log("adal:Module inject required");
     module.exports.inject = (config: adal.IConfig) => {
         return new $adal(config);
-    }
+    };
 }
 console.log("adal-ts:exporting classes and methods");
 
@@ -685,7 +685,7 @@ class Logging {
      * @desc    The Logging Level
      */
     static level: LoggingLevels = 0;
-    
+
     /**
      * @desc Logs the specified message
      */
@@ -720,9 +720,9 @@ class AuthenticationContext implements adal.IAuthenticationContext {
         UNKNOWN: "UNKNOWN"
     };
     CONSTANTS = new Constants();
-    
+
     public Library_Version:string=this._libVersion();
-    
+
     getResourceForEndpoint(endpoint: string): string {
         if (this.config && this.config.endpoints) {
             for (var configEndpoint in this.config.endpoints) {
@@ -740,8 +740,8 @@ class AuthenticationContext implements adal.IAuthenticationContext {
                 return this.config.loginResource;
             }
         } else {
-            // in angular level, the url for $http interceptor call could be relative url, 
-            // if it's relative call, we'll treat it as app backend call. 
+            // in angular level, the url for $http interceptor call could be relative url,
+            // if it's relative call, we'll treat it as app backend call.
             return this.config.loginResource;
         }
 
@@ -883,13 +883,13 @@ class AuthenticationContext implements adal.IAuthenticationContext {
         }
 
         this.callback = callback;
-    
+
         // user in memory
         if (this._user) {
             this.callback(null, this._user);
             return;
         }
-    
+
         // frame is used to get idtoken
         var idtoken = this._getItem(this.CONSTANTS.STORAGE.IDTOKEN);
         if (!this.isEmpty(idtoken)) {
@@ -927,7 +927,7 @@ class AuthenticationContext implements adal.IAuthenticationContext {
             callback('User login is required', null);
             return;
         }
-            
+
         // refresh attept with iframe
         //Already renewing for this resource, callback when we get the token.
         if (this._activeRenewals[resource]) {
@@ -1026,7 +1026,7 @@ class AuthenticationContext implements adal.IAuthenticationContext {
                 parameters.hasOwnProperty(this.CONSTANTS.ID_TOKEN)) {
 
                 requestInfo.valid = true;
-            
+
                 // which call
                 var stateResponse = "";
                 if (parameters.hasOwnProperty("state")) {
@@ -1037,7 +1037,7 @@ class AuthenticationContext implements adal.IAuthenticationContext {
                 }
 
                 requestInfo.stateResponse = stateResponse;
-            
+
                 // async calls can fire iframe and login request at the same time if developer does not use the API as expected
                 // incoming callback needs to be looked up to find the request type
                 switch (stateResponse) {
@@ -1052,7 +1052,7 @@ class AuthenticationContext implements adal.IAuthenticationContext {
                         requestInfo.stateMatch = true;
                         break;
                 }
-            
+
                 // external api requests may have many renewtoken requests for different resource
                 if (!requestInfo.stateMatch && window.parent && (window.parent as adal.IOAuthWindow).AuthenticationContext) {
                     var statesInParentContext = ((window.parent as adal.IOAuthWindow).AuthenticationContext as AuthenticationContext)._renewStates;
@@ -1074,7 +1074,7 @@ class AuthenticationContext implements adal.IAuthenticationContext {
         this.info("State status:" + requestInfo.stateMatch + "; Request type:" + requestInfo.requestType);
         this._saveItem(this.CONSTANTS.STORAGE.ERROR, "");
         this._saveItem(this.CONSTANTS.STORAGE.ERROR_DESCRIPTION, "");
-    
+
         // Record error
         if (requestInfo.parameters.hasOwnProperty(this.CONSTANTS.ERROR_DESCRIPTION)) {
             this.info("Error :" + requestInfo.parameters.error + "; Error description:" + requestInfo.parameters[this.CONSTANTS.ERROR_DESCRIPTION]);
@@ -1087,7 +1087,7 @@ class AuthenticationContext implements adal.IAuthenticationContext {
                 this._saveItem(this.CONSTANTS.STORAGE.LOGIN_ERROR, requestInfo.parameters.errorDescription);
             }
         } else {
-        
+
             // It must verify the state from redirect
             if (requestInfo.stateMatch) {
                 // record tokens to storage if exists
@@ -1110,7 +1110,7 @@ class AuthenticationContext implements adal.IAuthenticationContext {
                     if (requestInfo.requestType === this.REQUEST_TYPE.RENEW_TOKEN) {
                         resource = this.getResourceFromState(requestInfo.stateResponse);
                     }
-                
+
                     // save token with related resource
                     this._saveItem(this.CONSTANTS.STORAGE.ACCESS_TOKEN_KEY + resource, requestInfo.parameters[this.CONSTANTS.ACCESS_TOKEN]);
                     this._saveItem(this.CONSTANTS.STORAGE.EXPIRATION_KEY + resource, this.expiresIn(requestInfo.parameters[this.CONSTANTS.EXPIRES_IN]));
@@ -1125,7 +1125,7 @@ class AuthenticationContext implements adal.IAuthenticationContext {
                             this._saveItem(this.CONSTANTS.STORAGE.LOGIN_ERROR, "Nonce is not same as " + this._idTokenNonce);
                         } else {
                             this._saveItem(this.CONSTANTS.STORAGE.IDTOKEN, requestInfo.parameters[this.CONSTANTS.ID_TOKEN]);
-                        
+
                             // Save idtoken as access token for app itself
                             resource = this.config.loginResource ? this.config.loginResource : this.config.clientId;
                             if (!this.hasResource(resource)) {
