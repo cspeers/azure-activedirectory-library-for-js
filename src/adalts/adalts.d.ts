@@ -11,6 +11,7 @@
  */
 declare var $adal:adal.IContextConstructor<adal.IAuthenticationContext>;
 
+//fold back into adal
 import adal=adalts;
 
 declare module "adal" {
@@ -232,10 +233,6 @@ declare module adalts {
         slice: string;
     }
 
-    interface IErrorMessages {
-        [key: string]: string;
-    }
-
     interface IOAuthData {
         isAuthenticated: boolean;
         userName: string;
@@ -313,6 +310,9 @@ declare module adalts {
          */
         singletonInstance:IAuthenticationContext;
 
+        decode(base64idToken:string):string;
+        newGuid():string;
+        getHostFromUri(uri: string): string;
         login(): void;
         loginInProgress(): boolean;
         logOut(): void;

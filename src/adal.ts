@@ -5,7 +5,7 @@ console.log("adal-ts:loading beginning...");
 
 var module:any;
 if (typeof module !== "undefined" && module.exports) {
-    console.log("adal:Module inject required")
+    console.log("adal:Module inject required");
     module.exports.inject = (config: adal.IConfig) => {
         return new $adal(config);
     }
@@ -38,7 +38,7 @@ class RequestParameters implements adal.IRequestParameters {
     }
 
     static serialize(responseType: string, obj: adal.IConfig, resource: string): string {
-        var str = new Array<string>();
+        var str: Array<string> = [];
         if (obj !== null) {
             str.push("?response_type=" + responseType);
             str.push("client_id=" + encodeURIComponent(obj.clientId));
@@ -68,33 +68,6 @@ class RequestParameters implements adal.IRequestParameters {
 }
 
 /**
-* @description Concrete implementation Token Requests
-*/
-class RequestInfo implements adal.IRequestInfo {
-    valid: boolean;
-    parameters: adal.IRequestParameters;
-    stateMatch: boolean;
-    stateResponse: string;
-    requestType: string;
-}
-
-/**
- * @description Concrete implementation of a dictionary of
- *  resource URI and Callbacks
- */
-class CallbackMap<T> implements adal.ICallbackMap<T> {
-    [index: string]: T;
-}
-
-/**
- * @description Concrete implementation of a User
- */
-class User implements adal.IUser {
-    userName: string;
-    profile: adal.IUserProfile=null;
-}
-
-/**
 * @description Concrete implementation of JWT
 * @see IToken
 */
@@ -111,7 +84,7 @@ class Token implements adal.IToken {
     static decodeJwt(jwtToken: string): adal.IToken {
         if (jwtToken === null) {
             return null;
-        };
+        }
 
         var idTokenPartsRegex = /^([^\.\s]*)\.([^\.\s]+)\.([^\.\s]*)$/;
 
@@ -120,10 +93,8 @@ class Token implements adal.IToken {
             return null;
         }
 
-        var crackedToken = Token.toJwt(matches);
-
-        return crackedToken;
-    };
+        return Token.toJwt(matches);
+    }
 
     static decode(base64IdToken: string): string {
         var codes = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
@@ -153,7 +124,7 @@ class Token implements adal.IToken {
             }
             // if last one is '='
             else if (i + 1 === length - 1) {
-                bits = h1 << 18 | h2 << 12
+                bits = h1 << 18 | h2 << 12;
                 c1 = bits >> 16 & 255;
                 decoded += String.fromCharCode(c1);
                 break;
@@ -191,13 +162,6 @@ class Token implements adal.IToken {
         this.JWSPayload = payload;
         this.JWSSig = signature;
     }
-}
-
-/**
-* @description  Concrete implementation of Resource Uri to Endpoint Mapping
-*/
-class EndpointCollection implements adal.IEndpointCollection {
-    [key: string]: string;
 }
 
 /**
@@ -260,30 +224,6 @@ class BrowserHelpers {
             return false;
         }
     }
-}
-
-class RenewalList implements adal.IRenewalList {
-    [resource: string]: any;
-}
-
-/**
-* @description Enumeration for Token Request Types
-*/
-class RequestTypes implements adal.IRequestTypes{
-    LOGIN: string = "LOGIN";
-    RENEW_TOKEN: string = "RENEW_TOKEN";
-    ID_TOKEN: string = "ID_TOKEN";
-    UNKNOWN: string = "UNKNOWN";
-    
-    [key:string]:string;
-}
-
-/**
- * @description Enumeration for Error Messages
- */
-class ErrorMessages implements adal.IErrorMessages{
-    NO_TOKEN: string = "User is not authorized";
-    [key:string]:string;
 }
 
 /**
@@ -350,42 +290,12 @@ class Logging {
 }
 
 /**
- * @desc Concrete implementation of Configuration Options
- */
-class Config implements adal.IConfig {
-
-    displayCall: adal.IDisplayCall;
-    tenant: string;
-    clientId: string;
-    redirectUri: string;
-    instance: string;
-    endpoints: adal.IEndpointCollection;
-    correlationId: string;
-    cacheLocation: string;
-    resource: string;
-    loginResource: string;
-    state: string;
-    expireOffsetSeconds: number;
-    localLoginUrl: string;
-    postLogoutRedirectUri: string;
-    extraQueryParameter: string;
-    slice: string;
-
-    [key: string]: any;
-
-    constructor() {
-        this.correlationId = Guid.newGuid();
-        this.endpoints = new EndpointCollection();
-    }
-}
-
-/**
  * @description Concrete implementation of Azure Active Directory Authentication Context
  */
 class AuthenticationContext implements adal.IAuthenticationContext {
 
     instance: string="https://login.microsoftonline.com/";
-    config: Config;
+    config: adal.IConfig;
     popUp: boolean = false;
     frameCallInProgress: boolean;
     callback: adal.IRequestCallback;
@@ -393,15 +303,20 @@ class AuthenticationContext implements adal.IAuthenticationContext {
     renewActive = false;
     singletonInstance:AuthenticationContext;
 
-    REQUEST_TYPE = new RequestTypes();
+    REQUEST_TYPE:adal.IRequestTypes = {
+        LOGIN: "LOGIN",
+        RENEW_TOKEN: "RENEW_TOKEN",
+        ID_TOKEN: "ID_TOKEN",
+        UNKNOWN: "UNKNOWN"
+    };
     CONSTANTS = new Constants();
 
-    private _user: User;
+    private _user: adal.IUser;
     private _loginInProgress: boolean = false;
     private _libVersion(): string { return this.CONSTANTS.LIBRARY_VERSION; }
     private _idTokenNonce: string;
     private _renewStates: Array<string> = [];
-    private _activeRenewals: RenewalList;
+    private _activeRenewals: adal.IRenewalList;
     
     public Library_Version:string=this._libVersion();
     
@@ -418,7 +333,7 @@ class AuthenticationContext implements adal.IAuthenticationContext {
         // App will use idtoken for calls to itself
         // check if it's staring from http or https, needs to match with app host
         if (endpoint.indexOf('http://') > -1 || endpoint.indexOf('https://') > -1) {
-            if (this._getHostFromUri(endpoint) === this._getHostFromUri(this.config.redirectUri)) {
+            if (this.getHostFromUri(endpoint) === this.getHostFromUri(this.config.redirectUri)) {
                 return this.config.loginResource;
             }
         } else {
@@ -506,7 +421,7 @@ class AuthenticationContext implements adal.IAuthenticationContext {
 
     isCallback(hash: string): boolean {
         hash = this._getHash(hash);
-        var parameters = this._deserialize(hash);
+        var parameters = RequestParameters.deserialize(hash);
         return (
             parameters.hasOwnProperty(this.CONSTANTS.ERROR_DESCRIPTION) ||
             parameters.hasOwnProperty(this.CONSTANTS.ACCESS_TOKEN) ||
@@ -525,7 +440,7 @@ class AuthenticationContext implements adal.IAuthenticationContext {
         // If expiration is within offset, it will force renew
         var offset = this.config.expireOffsetSeconds || 120;
 
-        if (expired && (expired > this._now() + offset)) {
+        if (expired && (expired > DateTime.now() + offset)) {
             return token;
         } else {
             this._saveItem(this.CONSTANTS.STORAGE.ACCESS_TOKEN_KEY + resource, '');
@@ -534,7 +449,7 @@ class AuthenticationContext implements adal.IAuthenticationContext {
         }
     }
 
-    private _getHostFromUri(uri: string): string {
+    getHostFromUri(uri: string): string {
         // remove http:// or https:// from uri
         var extractedUri = String(uri).replace(/^(https?:)\/\//, '');
 
@@ -542,65 +457,12 @@ class AuthenticationContext implements adal.IAuthenticationContext {
         return extractedUri;
     }
 
-    private _logstatus(msg: string) {
-        if (console) {
-            console.log(msg);
-        }
+    decode(base64idToken:string):string{
+        return Token.decode(base64idToken);
     }
 
-    private _getHash(hash: string): string {
-        if (hash.indexOf("#/") > -1) {
-            hash = hash.substring(hash.indexOf("#/") + 2);
-        } else if (hash.indexOf("#") > -1) {
-            hash = hash.substring(1);
-        }
-
-        return hash;
-    }
-
-    private _expiresIn(expires: string): number {
-        return DateTime.now() + parseInt(expires, 10);
-    }
-
-    private _addClientId(): string {
-        // x-client-SKU
-        // x-client-Ver
-        return "&x-client-SKU=Js&x-client-Ver=" + this._libVersion();
-    };
-
-    private _supportsLocalStorage(): boolean {
-        return BrowserHelpers.supportsLocalStorage();
-    }
-
-    private _urlContainsQueryStringParameter(name: string, url: string): boolean {
-        // regex to detect pattern of a ? or & followed by the name parameter and an equals character
-        var regex = new RegExp("[\\?&]" + name + "=");
-        return regex.test(url);
-    }
-
-    private _supportsSessionStorage(): boolean {
-        return BrowserHelpers.supportsSessionStorage();
-    }
-
-    private _getItem(key: string): any {
-
-        if (this.config && this.config.cacheLocation && this.config.cacheLocation === "localStorage") {
-
-            if (!this._supportsLocalStorage()) {
-                this.info("Local storage is not supported");
-                return null;
-            }
-
-            return localStorage.getItem(key);
-        }
-    
-        // Default as session storage
-        if (!this._supportsSessionStorage()) {
-            this.info("Session storage is not supported");
-            return null;
-        }
-
-        return sessionStorage.getItem(key);
+    newGuid():string{
+        return Guid.newGuid();
     }
 
     getItem(key: string): any {
@@ -611,277 +473,7 @@ class AuthenticationContext implements adal.IAuthenticationContext {
         return this._saveItem(key, obj);
     }
 
-    private _saveItem(key: string, obj: any): boolean {
-
-        if (this.config && this.config.cacheLocation && this.config.cacheLocation === "localStorage") {
-
-            if (!this._supportsLocalStorage()) {
-                this.info("Local storage is not supported");
-                return false;
-            }
-
-            localStorage.setItem(key, obj);
-
-            return true;
-        }
-    
-        // Default as session storage
-        if (!this._supportsSessionStorage()) {
-            this.info("Session storage is not supported");
-            return false;
-        }
-
-        sessionStorage.setItem(key, obj);
-        return true;
-    };
-
-    private _getResourceFromState(state: string): string {
-        if (state) {
-            var splitIndex = state.indexOf("|");
-            if (splitIndex > -1 && splitIndex + 1 < state.length) {
-                return state.substring(splitIndex + 1);
-            }
-        }
-        return "";
-    }
-
-    private _isEmpty(str: string): boolean {
-        return (typeof str === "undefined" || !str || 0 === str.length);
-    }
-
-    private _hasResource(key: string): boolean {
-        var keys = this._getItem(this.CONSTANTS.STORAGE.TOKEN_KEYS) as string;
-        return keys && !this._isEmpty(keys) && (keys.indexOf(key + this.CONSTANTS.RESOURCE_DELIMETER) > -1);
-    }
-
-    private _guid(): string {
-        return Guid.newGuid();
-    }
-
-    private _now(): number {
-        return DateTime.now();
-    }
-
-    private _addAdalFrame(iframeId: string): HTMLIFrameElement {
-        if (typeof iframeId === "undefined") {
-            return null;
-        }
-
-        this._logstatus("Add AdalTS frame to document:" + iframeId);
-        var adalFrame = document.getElementById(iframeId) as HTMLIFrameElement;
-        if (!adalFrame) {
-            if (document.createElement && document.documentElement && window.navigator.userAgent.indexOf("MSIE 5.0") === -1) {
-                var ifr = document.createElement("iframe");
-                ifr.setAttribute("id", iframeId);
-                ifr.style.visibility = "hidden";
-                ifr.style.position = "absolute";
-                ifr.style.width = ifr.style.height = ifr.frameBorder = "0px";
-                adalFrame = document.getElementsByTagName('body')[0].appendChild(ifr) as HTMLIFrameElement;
-            }
-            else if (document.body && document.body.insertAdjacentHTML) {
-                document.body.insertAdjacentHTML('beforeEnd', '<iframe name="' + iframeId + '" id="' + iframeId + '" style="display:none"></iframe>');
-            }
-            if (window.frames && window.frames[iframeId as any]) {
-                adalFrame = (window.frames[iframeId as any] as any) as HTMLIFrameElement;
-            }
-        }
-        return adalFrame;
-    }
-
-    private _loadFrame(urlNavigate: string, frameName: string): void {
-        var self = this;
-        self.info("LoadFrame:" + frameName);
-        var frameCheck = frameName;
-        var setupFrame = () => {
-            var frameHandle = self._addAdalFrame(frameCheck);
-            if (frameHandle.src === '' || frameHandle.src === 'about:blank') {
-                frameHandle.src = urlNavigate;
-                self._loadFrame(urlNavigate, frameCheck);
-            }
-        }
-        setTimeout(setupFrame, 500);
-    }
-
-    /**
-    * @description Redirect the Browser to Azure AD Authorization endpoint
-    * @param {string}   urlNavigate The authorization request url
-    */
-    private promptUser(urlNavigate: string): void {
-        if (urlNavigate) {
-            this.info("Navigate to:" + urlNavigate);
-            window.location.replace(urlNavigate);
-        } else {
-            this.info("Navigate url is empty");
-        }
-    }
-
-    private _getDomainHint(): string {
-        if (this._user && this._user.userName && this._user.userName.indexOf('@') > -1) {
-            var parts = this._user.userName.split('@');
-            // local part can include @ in quotes. Sending last part handles that.
-            return parts[parts.length - 1];
-        }
-        return '';
-    }
-
-    // var errorResponse = {error:'', errorDescription:''};
-    // var token = 'string token';
-    // callback(errorResponse, token)
-    // with callback
-    /**
-    * Acquires access token with hidden iframe
-    * @param {string}   resource  ResourceUri identifying the target resource
-    * @param {IRequestCallback} callback The Request Callback
-    */
-    private _renewToken(resource: string, callback: adal.IRequestCallback): void {
-        // use iframe to try refresh token
-        // use given resource to create new authz url
-        this._logstatus('renewToken is called for resource:' + resource);
-        if (!this._hasResource(resource)) {
-            var keys = this._getItem(this.CONSTANTS.STORAGE.TOKEN_KEYS) || '';
-            this._saveItem(this.CONSTANTS.STORAGE.TOKEN_KEYS, keys + resource + this.CONSTANTS.RESOURCE_DELIMETER);
-        }
-
-        var frameHandle = this._addAdalFrame('adalRenewFrame');
-        var expectedState = this._guid() + '|' + resource;
-        this._idTokenNonce = this._guid();
-        this.config.state = expectedState;
-        // renew happens in iframe, so it keeps javascript context
-        this._renewStates.push(expectedState);
-
-        this._saveItem(this.CONSTANTS.STORAGE.FAILED_RENEW, '');
-
-        this._logstatus('Renew token Expected state: ' + expectedState);
-        var urlNavigate = this._getNavigateUrl('token', resource) + '&prompt=none&login_hint=' + encodeURIComponent(this._user.userName);
-        urlNavigate += '&domain_hint=' + encodeURIComponent(this._getDomainHint());
-        urlNavigate += '&nonce=' + encodeURIComponent(this._idTokenNonce);
-        this.callback = callback;
-        this.registerCallback(expectedState, resource, callback);
-        this.idTokenNonce = null;
-        this._logstatus('Navigate to:' + urlNavigate);
-        this._saveItem(this.CONSTANTS.STORAGE.LOGIN_REQUEST, '');
-        frameHandle.src = 'about:blank';
-        this._loadFrame(urlNavigate, 'adalRenewFrame');
-    }
-
-    private _renewIdToken(callback: adal.IRequestCallback):void {
-        // use iframe to try refresh token
-        this.info('renewIdToken is called');
-        if (!this._hasResource(this.config.clientId)) {
-            var keys = this._getItem(this.CONSTANTS.STORAGE.TOKEN_KEYS) || '';
-            this._saveItem(this.CONSTANTS.STORAGE.TOKEN_KEYS, keys + this.config.clientId + this.CONSTANTS.RESOURCE_DELIMETER);
-        }
-
-        var frameHandle = this._addAdalFrame('adalIdTokenFrame');
-        var expectedState = this._guid() + '|' + this.config.clientId;
-        this._idTokenNonce = this._guid();
-        this._saveItem(this.CONSTANTS.STORAGE.NONCE_IDTOKEN, this._idTokenNonce);
-        this.config.state = expectedState;
-        // renew happens in iframe, so it keeps javascript context
-        this._renewStates.push(expectedState);
-        this._saveItem(this.CONSTANTS.STORAGE.STATE_RENEW, expectedState);
-        this._saveItem(this.CONSTANTS.STORAGE.FAILED_RENEW, '');
-
-        this.verbose('Renew Idtoken Expected state: ' + expectedState);
-        var urlNavigate = this._getNavigateUrl('id_token', null) + '&prompt=none&login_hint=' + encodeURIComponent(this._user.userName);
-
-        // don't add domain_hint twice if user provided it in the extraQueryParameter value
-        if (!this._urlContainsQueryStringParameter("domain_hint", urlNavigate)) {
-            urlNavigate += '&domain_hint=' + encodeURIComponent(this._getDomainHint());
-        }
-
-        urlNavigate += '&nonce=' + encodeURIComponent(this._idTokenNonce);
-        this.registerCallback(expectedState, this.config.clientId, callback);
-        this.idTokenNonce = null;
-        this.verbose('Navigate to:' + urlNavigate);
-        this._saveItem(this.CONSTANTS.STORAGE.LOGIN_REQUEST, '');
-        frameHandle.src = 'about:blank';
-        this._loadFrame(urlNavigate, 'adalIdTokenFrame');
-    }
-
-    private _getNavigateUrl(responseType: string, resource: string):string {
-        var tenant = "common";
-        if (this.config.tenant) {
-            tenant = this.config.tenant;
-        }
-
-        if (this.config.instance) {
-            this.instance = this.config.instance;
-        }
-
-        var urlNavigate = this.instance + tenant + "/oauth2/authorize" + this._serialize(responseType, this.config, resource) + this._addClientId();
-        this.info("Navigate url:" + urlNavigate);
-        return urlNavigate;
-    }
-
-    private _deserialize(query: string): RequestParameters {
-        return RequestParameters.deserialize(query);
-    }
-
-    private _serialize(responseType: string, obj: Config, resource: string): string {
-        return RequestParameters.serialize(responseType, obj, resource);
-    }
-
-    private _cloneConfig(obj: any): Config {
-        if (null === obj || "object" !== typeof obj) {
-            return obj;
-        }
-        var copy = new Config();
-        Object.keys(obj).forEach((attr: string) => {
-            copy[attr] = obj[attr];
-        });
-        return copy;
-    }
-
-    private _extractIdToken(encodedIdToken: string): adal.IUserProfile {
-        // id token will be decoded to get the username
-        var decodedToken = Token.decodeJwt(encodedIdToken);
-        if (!decodedToken) {
-            return null;
-        }
-        try {
-            var base64IdToken = decodedToken.JWSPayload;
-            var base64Decoded = Token.base64DecodeStringUrlSafe(base64IdToken);
-            if (!base64Decoded) {
-                this.info("The returned id_token could not be base64 url safe decoded.");
-                return null;
-            }
-        
-            // ECMA script has JSON built-in support
-            return JSON.parse(base64Decoded);
-        } catch (err) {
-            this.error("The returned id_token could not be decoded", err);
-        }
-        return null;
-    }
-
-    private _createUser(idToken: string): User {
-        var user: User = null;
-        var parsedJson = this._extractIdToken(idToken);
-        if (parsedJson && parsedJson.hasOwnProperty("aud")) {
-
-            if (parsedJson.aud.toLowerCase() === this.config.clientId.toLowerCase()) {
-
-                user = {
-                    userName: "",
-                    profile: parsedJson
-                };
-
-                if (parsedJson.hasOwnProperty("upn")) {
-                    user.userName = parsedJson.upn;
-                } else if (parsedJson.hasOwnProperty("email")) {
-                    user.userName = parsedJson.email;
-                }
-            } else {
-                this.warn("IdToken has invalid aud field");
-            }
-        }
-        return user;
-    }
-
-    private _decode(base64IdToken: string): string { return Token.decode(base64IdToken); }
-
-    getUser(callback: adal.IRequestCallback): User {
+    getUser(callback: adal.IRequestCallback): adal.IUser {
         // IDToken is first call
         if (typeof callback !== 'function') {
             throw new Error('callback is not a function');
@@ -1004,7 +596,7 @@ class AuthenticationContext implements adal.IAuthenticationContext {
 
     }
 
-    getCachedUser(): User {
+    getCachedUser(): adal.IUser {
         if (this._user) {
             return this._user;
         }
@@ -1014,10 +606,10 @@ class AuthenticationContext implements adal.IAuthenticationContext {
         return this._user;
     }
 
-    getRequestInfo(hash: string): RequestInfo {
+    getRequestInfo(hash: string): adal.IRequestInfo {
         hash = this._getHash(hash);
-        var parameters = this._deserialize(hash);
-        var requestInfo: RequestInfo = {
+        var parameters = RequestParameters.deserialize(hash);
+        var requestInfo: adal.IRequestInfo = {
             valid: false,
             parameters: new RequestParameters(),
             requestType: this.REQUEST_TYPE.UNKNOWN,
@@ -1155,9 +747,9 @@ class AuthenticationContext implements adal.IAuthenticationContext {
     login(): void {
 
         // Token is not present and user needs to login
-        var expectedState = this._guid();
+        var expectedState = Guid.newGuid();
         this.config.state = expectedState;
-        this._idTokenNonce = this._guid();
+        this._idTokenNonce = Guid.newGuid();
         this.verbose("Expected state: " + expectedState + " startPage:" + window.location);
         this._saveItem(this.CONSTANTS.STORAGE.LOGIN_REQUEST, window.location);
         this._saveItem(this.CONSTANTS.STORAGE.LOGIN_ERROR, "");
@@ -1202,6 +794,320 @@ class AuthenticationContext implements adal.IAuthenticationContext {
         this.promptUser(urlNavigate);
     }
 
+    private _logstatus(msg: string) {
+        if (console) {
+            console.log(msg);
+        }
+    }
+
+    private _getHash(hash: string): string {
+        if (hash.indexOf("#/") > -1) {
+            hash = hash.substring(hash.indexOf("#/") + 2);
+        } else if (hash.indexOf("#") > -1) {
+            hash = hash.substring(1);
+        }
+
+        return hash;
+    }
+
+    private _expiresIn(expires: string): number {
+        return DateTime.now() + parseInt(expires, 10);
+    }
+
+    private _addClientId(): string {
+        // x-client-SKU
+        // x-client-Ver
+        return "&x-client-SKU=Js&x-client-Ver=" + this._libVersion();
+    };
+
+    private _supportsLocalStorage(): boolean {
+        return BrowserHelpers.supportsLocalStorage();
+    }
+
+    private _urlContainsQueryStringParameter(name: string, url: string): boolean {
+        // regex to detect pattern of a ? or & followed by the name parameter and an equals character
+        var regex = new RegExp("[\\?&]" + name + "=");
+        return regex.test(url);
+    }
+
+    private _supportsSessionStorage(): boolean {
+        return BrowserHelpers.supportsSessionStorage();
+    }
+
+    private _getItem(key: string): any {
+
+        if (this.config && this.config.cacheLocation && this.config.cacheLocation === "localStorage") {
+
+            if (!this._supportsLocalStorage()) {
+                this.info("Local storage is not supported");
+                return null;
+            }
+
+            return localStorage.getItem(key);
+        }
+
+        // Default as session storage
+        if (!this._supportsSessionStorage()) {
+            this.info("Session storage is not supported");
+            return null;
+        }
+
+        return sessionStorage.getItem(key);
+    }
+
+    private _saveItem(key: string, obj: any): boolean {
+
+        if (this.config && this.config.cacheLocation && this.config.cacheLocation === "localStorage") {
+
+            if (!this._supportsLocalStorage()) {
+                this.info("Local storage is not supported");
+                return false;
+            }
+
+            localStorage.setItem(key, obj);
+
+            return true;
+        }
+
+        // Default as session storage
+        if (!this._supportsSessionStorage()) {
+            this.info("Session storage is not supported");
+            return false;
+        }
+
+        sessionStorage.setItem(key, obj);
+        return true;
+    };
+
+    private _getResourceFromState(state: string): string {
+        if (state) {
+            var splitIndex = state.indexOf("|");
+            if (splitIndex > -1 && splitIndex + 1 < state.length) {
+                return state.substring(splitIndex + 1);
+            }
+        }
+        return "";
+    }
+
+    private _isEmpty(str: string): boolean {
+        return (typeof str === "undefined" || !str || 0 === str.length);
+    }
+
+    private _hasResource(key: string): boolean {
+        var keys = this._getItem(this.CONSTANTS.STORAGE.TOKEN_KEYS) as string;
+        return keys && !this._isEmpty(keys) && (keys.indexOf(key + this.CONSTANTS.RESOURCE_DELIMETER) > -1);
+    }
+
+    private _addAdalFrame(iframeId: string): HTMLIFrameElement {
+        if (typeof iframeId === "undefined") {
+            return null;
+        }
+
+        this._logstatus("Add AdalTS frame to document:" + iframeId);
+        var adalFrame = document.getElementById(iframeId) as HTMLIFrameElement;
+        if (!adalFrame) {
+            if (document.createElement && document.documentElement && window.navigator.userAgent.indexOf("MSIE 5.0") === -1) {
+                var ifr = document.createElement("iframe");
+                ifr.setAttribute("id", iframeId);
+                ifr.style.visibility = "hidden";
+                ifr.style.position = "absolute";
+                ifr.style.width = ifr.style.height = ifr.frameBorder = "0px";
+                adalFrame = document.getElementsByTagName('body')[0].appendChild(ifr) as HTMLIFrameElement;
+            }
+            else if (document.body && document.body.insertAdjacentHTML) {
+                document.body.insertAdjacentHTML('beforeEnd', '<iframe name="' + iframeId + '" id="' + iframeId + '" style="display:none"></iframe>');
+            }
+            if (window.frames && window.frames[iframeId as any]) {
+                adalFrame = (window.frames[iframeId as any] as any) as HTMLIFrameElement;
+            }
+        }
+        return adalFrame;
+    }
+
+    private _loadFrame(urlNavigate: string, frameName: string): void {
+        var self = this;
+        self.info("LoadFrame:" + frameName);
+        var frameCheck = frameName;
+        var setupFrame = () => {
+            var frameHandle = self._addAdalFrame(frameCheck);
+            if (frameHandle.src === '' || frameHandle.src === 'about:blank') {
+                frameHandle.src = urlNavigate;
+                self._loadFrame(urlNavigate, frameCheck);
+            }
+        };
+        setTimeout(setupFrame, 500);
+    }
+
+    /**
+     * @description Redirect the Browser to Azure AD Authorization endpoint
+     * @param {string}   urlNavigate The authorization request url
+     */
+    private promptUser(urlNavigate: string): void {
+        if (urlNavigate) {
+            this.info("Navigate to:" + urlNavigate);
+            window.location.replace(urlNavigate);
+        } else {
+            this.info("Navigate url is empty");
+        }
+    }
+
+    private _getDomainHint(): string {
+        if (this._user && this._user.userName && this._user.userName.indexOf('@') > -1) {
+            var parts = this._user.userName.split('@');
+            // local part can include @ in quotes. Sending last part handles that.
+            return parts[parts.length - 1];
+        }
+        return '';
+    }
+
+    // var errorResponse = {error:'', errorDescription:''};
+    // var token = 'string token';
+    // callback(errorResponse, token)
+    // with callback
+    /**
+     * @desc Acquires access token with hidden iframe
+     * @param {string}   resource  ResourceUri identifying the target resource
+     * @param {IRequestCallback} callback The Request Callback
+     */
+    private _renewToken(resource: string, callback: adal.IRequestCallback): void {
+        // use iframe to try refresh token
+        // use given resource to create new authz url
+        this._logstatus('renewToken is called for resource:' + resource);
+        if (!this._hasResource(resource)) {
+            var keys = this._getItem(this.CONSTANTS.STORAGE.TOKEN_KEYS) || '';
+            this._saveItem(this.CONSTANTS.STORAGE.TOKEN_KEYS, keys + resource + this.CONSTANTS.RESOURCE_DELIMETER);
+        }
+
+        var frameHandle = this._addAdalFrame('adalRenewFrame');
+        var expectedState = Guid.newGuid() + '|' + resource;
+        this._idTokenNonce = Guid.newGuid();
+        this.config.state = expectedState;
+        // renew happens in iframe, so it keeps javascript context
+        this._renewStates.push(expectedState);
+
+        this._saveItem(this.CONSTANTS.STORAGE.FAILED_RENEW, '');
+
+        this._logstatus('Renew token Expected state: ' + expectedState);
+        var urlNavigate = this._getNavigateUrl('token', resource) + '&prompt=none&login_hint=' + encodeURIComponent(this._user.userName);
+        urlNavigate += '&domain_hint=' + encodeURIComponent(this._getDomainHint());
+        urlNavigate += '&nonce=' + encodeURIComponent(this._idTokenNonce);
+        this.callback = callback;
+        this.registerCallback(expectedState, resource, callback);
+        this.idTokenNonce = null;
+        this._logstatus('Navigate to:' + urlNavigate);
+        this._saveItem(this.CONSTANTS.STORAGE.LOGIN_REQUEST, '');
+        frameHandle.src = 'about:blank';
+        this._loadFrame(urlNavigate, 'adalRenewFrame');
+    }
+
+    private _renewIdToken(callback: adal.IRequestCallback):void {
+        // use iframe to try refresh token
+        this.info('renewIdToken is called');
+        if (!this._hasResource(this.config.clientId)) {
+            var keys = this._getItem(this.CONSTANTS.STORAGE.TOKEN_KEYS) || '';
+            this._saveItem(this.CONSTANTS.STORAGE.TOKEN_KEYS, keys + this.config.clientId + this.CONSTANTS.RESOURCE_DELIMETER);
+        }
+
+        var frameHandle = this._addAdalFrame('adalIdTokenFrame');
+        var expectedState = Guid.newGuid() + '|' + this.config.clientId;
+        this._idTokenNonce = Guid.newGuid();
+        this._saveItem(this.CONSTANTS.STORAGE.NONCE_IDTOKEN, this._idTokenNonce);
+        this.config.state = expectedState;
+        // renew happens in iframe, so it keeps javascript context
+        this._renewStates.push(expectedState);
+        this._saveItem(this.CONSTANTS.STORAGE.STATE_RENEW, expectedState);
+        this._saveItem(this.CONSTANTS.STORAGE.FAILED_RENEW, '');
+
+        this.verbose('Renew Idtoken Expected state: ' + expectedState);
+        var urlNavigate = this._getNavigateUrl('id_token', null) + '&prompt=none&login_hint=' + encodeURIComponent(this._user.userName);
+
+        // don't add domain_hint twice if user provided it in the extraQueryParameter value
+        if (!this._urlContainsQueryStringParameter("domain_hint", urlNavigate)) {
+            urlNavigate += '&domain_hint=' + encodeURIComponent(this._getDomainHint());
+        }
+
+        urlNavigate += '&nonce=' + encodeURIComponent(this._idTokenNonce);
+        this.registerCallback(expectedState, this.config.clientId, callback);
+        this.idTokenNonce = null;
+        this.verbose('Navigate to:' + urlNavigate);
+        this._saveItem(this.CONSTANTS.STORAGE.LOGIN_REQUEST, '');
+        frameHandle.src = 'about:blank';
+        this._loadFrame(urlNavigate, 'adalIdTokenFrame');
+    }
+
+    private _getNavigateUrl(responseType: string, resource: string):string {
+        var tenant = "common";
+        if (this.config.tenant) {
+            tenant = this.config.tenant;
+        }
+
+        if (this.config.instance) {
+            this.instance = this.config.instance;
+        }
+
+        var urlNavigate = this.instance + tenant + "/oauth2/authorize" + RequestParameters.serialize(responseType, this.config, resource) + this._addClientId();
+        this.info("Navigate url:" + urlNavigate);
+        return urlNavigate;
+    }
+
+    private _cloneConfig(obj: any): adal.IConfig {
+        if (null === obj || "object" !== typeof obj) {
+            return obj;
+        }
+        var copy:any={};
+        Object.keys(obj).forEach((attr: string) => {
+            copy[attr] = obj[attr];
+        });
+        //TODO:something more graceful than this cast
+        return copy as adal.IConfig;
+    }
+
+    private _extractIdToken(encodedIdToken: string): adal.IUserProfile {
+        // id token will be decoded to get the username
+        var decodedToken = Token.decodeJwt(encodedIdToken);
+        if (!decodedToken) {
+            return null;
+        }
+        try {
+            var base64IdToken = decodedToken.JWSPayload;
+            var base64Decoded = Token.base64DecodeStringUrlSafe(base64IdToken);
+            if (!base64Decoded) {
+                this.info("The returned id_token could not be base64 url safe decoded.");
+                return null;
+            }
+
+            // ECMA script has JSON built-in support
+            return JSON.parse(base64Decoded);
+        } catch (err) {
+            this.error("The returned id_token could not be decoded", err);
+        }
+        return null;
+    }
+
+    private _createUser(idToken: string): adal.IUser {
+        var user: adal.IUser = null;
+        var parsedJson = this._extractIdToken(idToken);
+        if (parsedJson && parsedJson.hasOwnProperty("aud")) {
+
+            if (parsedJson.aud.toLowerCase() === this.config.clientId.toLowerCase()) {
+
+                user = {
+                    userName: "",
+                    profile: parsedJson
+                };
+
+                if (parsedJson.hasOwnProperty("upn")) {
+                    user.userName = parsedJson.upn;
+                } else if (parsedJson.hasOwnProperty("email")) {
+                    user.userName = parsedJson.email;
+                }
+            } else {
+                this.warn("IdToken has invalid aud field");
+            }
+        }
+        return user;
+    }
+
     constructor(cfg: adal.IConfig) {
 
         if (!this.singletonInstance) {
@@ -1221,16 +1127,15 @@ class AuthenticationContext implements adal.IAuthenticationContext {
                     this.config.correlationId = Guid.newGuid();
                 }
                 this.config.resource = this.config.loginResource || "";
-                this._activeRenewals = new RenewalList();
-                (window as adal.IOAuthWindow).callBackMappedToRenewStates = new CallbackMap<adal.IRequestCallback>();
-                (window as adal.IOAuthWindow).callBacksMappedToRenewStates = new CallbackMap<Array<adal.IRequestCallback>>();
+                this._activeRenewals = {};
+                (window as adal.IOAuthWindow).callBackMappedToRenewStates = { };
+                (window as adal.IOAuthWindow).callBacksMappedToRenewStates = { values:new Array<adal.IRequestCallback>()};
                 (window as adal.IOAuthWindow).AuthenticationContext = this;
             }
         }
     }
 
 }
-
 
 var $adal:adal.IContextConstructor<adal.IAuthenticationContext>=AuthenticationContext;
 

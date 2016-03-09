@@ -308,28 +308,28 @@ describe('Adal', function () {
             return 0.1;
         };
         // 1->0001 after masked with & 0011 | 1000  1001
-        expect(adal._guid()).toBe('11111111-1111-4111-9111-111111111111');
+        expect(adal.newGuid()).toBe('11111111-1111-4111-9111-111111111111');
         mathMock.random = function () {
             return 0.3;
         };
         // 4->0100 after masked with & 0011 | 1000  1000
-        expect(adal._guid()).toBe('44444444-4444-4444-8444-444444444444');
+        expect(adal.newGuid()).toBe('44444444-4444-4444-8444-444444444444');
         mathMock.random = function () {
             return 0.99;
         };
         // 15->1111 after masked with & 0011 | 1000  1011
-        expect(adal._guid()).toBe('ffffffff-ffff-4fff-bfff-ffffffffffff');
+        expect(adal.newGuid()).toBe('ffffffff-ffff-4fff-bfff-ffffffffffff');
         
         mathMock.random = function () {
             return 0.9;
         };
         // 14->1110 after masked with & 0011 | 1000  1010
-        expect(adal._guid()).toBe('eeeeeeee-eeee-4eee-aeee-eeeeeeeeeeee');
+        expect(adal.newGuid()).toBe('eeeeeeee-eeee-4eee-aeee-eeeeeeeeeeee');
         mathMock.random = function () {
             return 0.2;
         };
         // 3->0011 after masked with & 0011 | 1000  1011
-        expect(adal._guid()).toBe('33333333-3333-4333-b333-333333333333');
+        expect(adal.newGuid()).toBe('33333333-3333-4333-b333-333333333333');
     });
 
     it('prompts user if url is given', function () {
@@ -591,20 +591,20 @@ describe('Adal', function () {
     });
 
     it ('test decode with no padding', function () {
-        expect(adal._decode('ZGVjb2RlIHRlc3Rz')).toBe('decode tests');
+        expect(adal.decode('ZGVjb2RlIHRlc3Rz')).toBe('decode tests');
     });
 
     it ('test decode with one = padding', function () {
-        expect(adal._decode('ZWNvZGUgdGVzdHM=')).toBe('ecode tests');        
+        expect(adal.decode('ZWNvZGUgdGVzdHM=')).toBe('ecode tests');
     });
 
     it ('test decode with two == padding', function () {
-        expect(adal._decode('Y29kZSB0ZXN0cw==')).toBe('code tests');        
+        expect(adal.decode('Y29kZSB0ZXN0cw==')).toBe('code tests');
     })
 
     it ('test decode throw error', function () {
         try{
-           adal._decode('YW55I');
+           adal.decode('YW55I');
         } catch(e) {
             expect(e.message).toBe('The token to be decoded is not correctly encoded.');
         }
@@ -620,11 +620,11 @@ describe('Adal', function () {
     });
 
     it ('test host extraction', function () {
-        expect(adal._getHostFromUri('https://a.com/b/c')).toBe('a.com');
-        expect(adal._getHostFromUri('http://a.com')).toBe('a.com');
-        expect(adal._getHostFromUri('a.com/b/c')).toBe('a.com');
-        expect(adal._getHostFromUri('http://a.com/')).toBe('a.com');
-        expect(adal._getHostFromUri('http://localhost:8080')).toBe('localhost:8080');
+        expect(adal.getHostFromUri('https://a.com/b/c')).toBe('a.com');
+        expect(adal.getHostFromUri('http://a.com')).toBe('a.com');
+        expect(adal.getHostFromUri('a.com/b/c')).toBe('a.com');
+        expect(adal.getHostFromUri('http://a.com/')).toBe('a.com');
+        expect(adal.getHostFromUri('http://localhost:8080')).toBe('localhost:8080');
     });
 
     // TODO angular intercepptor
