@@ -1,4 +1,4 @@
-/// <reference path="adalts/adalts.d.ts" />
+/// <reference path="adal.ts" />
 
 "use strict";
 
