@@ -1,13 +1,13 @@
 /**
- * @description Interface definition t
+ * @description Interface definition for ADALTS
+ * @summary The common interfaces used by the authentication
+ * context and the associated angular binding
  */
 
-
-
 /**
- * @description Global contructor instance.
- * since we are defining the interface in an ambient context it will be incumbent
- * on the context implementation to declare this
+ * @summary Global contructor instance.
+ * @description Since we are defining the interface in an ambient context it will be incumbent
+ * on the context implementation to declare and instantiate this in the angular binding
  */
 declare var $adal:adal.IContextConstructor<adal.IAuthenticationContext>;
 
@@ -24,7 +24,7 @@ declare module adalts {
      * @description Contract for a token based Authentication service
      */
     interface IAuthenticationService {
-        config: adal.IConfig;
+        config: IConfig;
         login(): void;
         loginInProgress(): boolean;
         logOut(): void;

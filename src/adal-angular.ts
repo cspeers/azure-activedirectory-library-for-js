@@ -5,6 +5,10 @@
 
 console.log("adal-angular:Initializing Angular HTTP binding service...");
 
+/**
+ * TODO:Figure out less hacky way to have this thing play nice
+ * when not loading in a CommonJS fashion.
+ */
 var module: any;
 if (typeof module !== "undefined" && module.exports) {
     module.exports.inject = (config: adal.IConfig) => {
