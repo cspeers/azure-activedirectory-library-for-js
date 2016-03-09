@@ -1,5 +1,4 @@
 /// <reference path="adal.ts" />
-/// <reference path="../typings/node/node.d.ts" />
 
 "use strict";
 
@@ -26,6 +25,27 @@ if (typeof module !== "undefined" && module.exports) {
  * @description ADAL Interfaces used by angular bindings.
  */
 declare module adalangular {
+    
+        /**
+     * @description Contract for a token based Authentication service
+     */
+    interface IAuthenticationService {
+        config: adal.IConfig;
+        login(): void;
+        loginInProgress(): boolean;
+        logOut(): void;
+        getCachedToken(resource: string): string;
+        acquireToken(resource: string): ng.IPromise<any>;
+        getUser(): angular.IPromise<adal.IUser>;
+        getResourceForEndpoint(endpoint: string): string;
+        clearCache(): void;
+        clearCacheForResource(resource: string): void;
+        info(message: string): void;
+        verbose(message: string): void;
+    }
+
+    
+    
     /**
      * @description Contract for an angular HTTP request configuration
      */
@@ -127,7 +147,7 @@ if (angular) {
             },
             $get: [
                 "$rootScope", "$window", "$q", "$location", "$timeout", ($rootScope: adalangular.IAuthenticationRootScope, $window: ng.IWindowService, $q: ng.IQService,
-                    $location: ng.ILocationService, $timeout: ng.ITimeoutService): adal.IAuthenticationService => {
+                    $location: ng.ILocationService, $timeout: ng.ITimeoutService): adalangular.IAuthenticationService => {
 
                     console.log("adal-angular:adalAuthenticationService.$get() -> BEGIN");
 
@@ -323,7 +343,7 @@ if (angular) {
     });
     AdalModule.factory("ProtectedResourceInterceptor", [
         "adalAuthenticationService", "$q", "$rootScope",
-        (authService: adal.IAuthenticationService, $q: ng.IQService, $rootScope: adalangular.IAuthenticationRootScope): ng.IHttpInterceptor => {
+        (authService: adalangular.IAuthenticationService, $q: ng.IQService, $rootScope: adalangular.IAuthenticationRootScope): ng.IHttpInterceptor => {
             console.log('adal-angular:intializing ProtectedResourceInterceptor...');
             return {
                 request: (config: adalangular.IAuthenticatedRequestConfig): adalangular.IAuthenticatedRequestConfig | ng.IPromise<adalangular.IAuthenticatedRequestConfig> => {

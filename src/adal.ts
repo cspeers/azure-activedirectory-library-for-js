@@ -21,24 +21,6 @@ declare module adalts {
     }
 
     /**
-     * @description Contract for a token based Authentication service
-     */
-    interface IAuthenticationService {
-        config: IConfig;
-        login(): void;
-        loginInProgress(): boolean;
-        logOut(): void;
-        getCachedToken(resource: string): string;
-        acquireToken(resource: string): ng.IPromise<any>;
-        getUser(): angular.IPromise<adal.IUser>;
-        getResourceForEndpoint(endpoint: string): string;
-        clearCache(): void;
-        clearCacheForResource(resource: string): void;
-        info(message: string): void;
-        verbose(message: string): void;
-    }
-
-    /**
      * @description Base Contract for OAuth Url encoded request parameters
      */
     interface IRequestParameters {
