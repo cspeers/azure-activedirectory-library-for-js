@@ -1,5 +1,5 @@
 Active Directory Authentication Library (ADAL) for JavaScript (in TypeScript)
-====================================
+=============================================================================
 
 This is just ADAL for JavaScript "reimplemented" (some might say copied and pasted like the content below)
 There have been a few liberties taken with variable naming on all private variables with respect to underscores.
@@ -10,16 +10,21 @@ e.g.
 [ASP SPA Sample](https://github.com/Azure-Samples/active-directory-angularjs-singlepageapp). 
 and passes all existing unit-tests, with no 
 modifications except a couple of variable declarations.
-##  Notable Unit Test related changes
 
-Notable Changes:
+
+
+Some Notes
+----------
+>Notable Changes:
+   
     *   _decode is now a public method decode
     *   _getHostFromUri is now a public method getHostFromUri
+    *   _addClientId is now a public method addClientId
     *   Browser-related methods, Guid, and DateTime functions moved to
         static methods on helper classes
             
 
-## Why does this exist??
+>Why does this exist??
 
     There was not an existing typescript declaration for the existing library as I embarked on
     my first real TypeScript driven project. It seemed like a good learning excercise for both the
@@ -51,7 +56,6 @@ You need to install the karma command line.
 Install grunt; call
 
     grunt doc
-
 
 
 **Quick usage guide**

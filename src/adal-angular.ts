@@ -1,4 +1,3 @@
-/// <reference path="../typings/angularjs/angular.d.ts" />
 /// <reference path="adalts/adalts.d.ts" />
 
 "use strict";
@@ -17,51 +16,9 @@ if (typeof module !== "undefined" && module.exports) {
     }
 }
 
-/**
- * @description Contract for an angular HTTP request configuration
- */
-interface IAuthenticatedRequestConfig extends ng.IRequestConfig {
-    /**
-     * @description {IAuthenticatedRequestHeaders} The request header collection
-     */
-    headers: IAuthenticatedRequestHeaders;
-}
-
-/**
- * @description Contract for an angular Root scope within an OAuth authentication service
- */
-interface IAuthenticationRootScope extends ng.IRootScopeService {
-    /**
-     * @description {adal.iOAuthData}   The current user profile
-     */
-    userInfo: adal.IOAuthData;
-}
-
-/**
- * @description Contract for angular request header configuration
- */
-interface IAuthenticatedRequestHeaders extends ng.IHttpRequestConfigHeaders {
-    /**
-     * @description {string} Authorization Header
-     */
-    Authorization: string;
-}
-
-/**
- * @description Contract for an angular Authorization Service Provider
- */
-interface IAuthenticationServiceProvider extends ng.IServiceProvider {
-    /**
-     *
-     * @param configOptions {adal.IConfig}  Configuration options for the authentication context
-     * @param httpProvider  {ng.IHttpProvider}  The angular http provider
-     */
-    init(configOptions: adal.IConfig, httpProvider: ng.IHttpProvider): void;
-}
-
 if (angular) {
     var AdalModule = angular.module('AdalAngular', []);
-    AdalModule.provider("adalAuthenticationService", (): IAuthenticationServiceProvider => {
+    AdalModule.provider("adalAuthenticationService", (): adalangular.IAuthenticationServiceProvider => {
 
         console.log("adal-angular:initializing adalAuthenticationService...");
         let adalContext: adal.IAuthenticationContext = null;
@@ -116,7 +73,7 @@ if (angular) {
                 console.log("adal-angular:AuthenticationServiceProvider.init() - END");
             },
             $get: [
-                "$rootScope", "$window", "$q", "$location", "$timeout", ($rootScope: IAuthenticationRootScope, $window: ng.IWindowService, $q: ng.IQService,
+                "$rootScope", "$window", "$q", "$location", "$timeout", ($rootScope: adalangular.IAuthenticationRootScope, $window: ng.IWindowService, $q: ng.IQService,
                     $location: ng.ILocationService, $timeout: ng.ITimeoutService): adal.IAuthenticationService => {
 
                     console.log("adal-angular:adalAuthenticationService.$get() -> BEGIN");
@@ -313,10 +270,10 @@ if (angular) {
     });
     AdalModule.factory("ProtectedResourceInterceptor", [
         "adalAuthenticationService", "$q", "$rootScope",
-        (authService: adal.IAuthenticationService, $q: ng.IQService, $rootScope: IAuthenticationRootScope): ng.IHttpInterceptor => {
+        (authService: adal.IAuthenticationService, $q: ng.IQService, $rootScope: adalangular.IAuthenticationRootScope): ng.IHttpInterceptor => {
             console.log('adal-angular:intializing ProtectedResourceInterceptor...');
             return {
-                request: (config: IAuthenticatedRequestConfig): IAuthenticatedRequestConfig | ng.IPromise<IAuthenticatedRequestConfig> => {
+                request: (config: adalangular.IAuthenticatedRequestConfig): adalangular.IAuthenticatedRequestConfig | ng.IPromise<adalangular.IAuthenticatedRequestConfig> => {
 
                     // This interceptor needs to load service, but dependeny definition causes circular reference error.
                     // Loading with injector is suggested at github. https://github.com/angular/angular.js/issues/2367

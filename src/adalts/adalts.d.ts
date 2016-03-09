@@ -1,3 +1,4 @@
+/// <reference path="../../typings/angularjs/angular.d.ts" />
 /**
  * @description Interface definition for ADALTS
  * @summary The common interfaces used by the authentication
@@ -12,7 +13,7 @@
 declare var $adal:adal.IContextConstructor<adal.IAuthenticationContext>;
 
 //fold back into adal
-import adal=adalts;
+import adal = adalts;
 
 //expose as ambient
 declare module "adal" {
@@ -362,5 +363,52 @@ declare module adalts {
     interface IContextConstructor<T extends IAuthenticationContext> extends IConstructable<IConfig,T>
     {
 
+    }
+}
+
+/**
+ * @description ADAL Interfaces used by angular bindings.
+ */
+declare module adalangular {
+    /**
+ * @description Contract for an angular HTTP request configuration
+ */
+    interface IAuthenticatedRequestConfig extends ng.IRequestConfig {
+        /**
+         * @description {IAuthenticatedRequestHeaders} The request header collection
+         */
+        headers: IAuthenticatedRequestHeaders;
+    }
+
+    /**
+     * @description Contract for an angular Root scope within an OAuth authentication service
+     */
+    interface IAuthenticationRootScope extends ng.IRootScopeService {
+        /**
+         * @description {adal.iOAuthData}   The current user profile
+         */
+        userInfo: adal.IOAuthData;
+    }
+
+    /**
+     * @description Contract for angular request header configuration
+     */
+    interface IAuthenticatedRequestHeaders extends ng.IHttpRequestConfigHeaders {
+        /**
+         * @description {string} Authorization Header
+         */
+        Authorization: string;
+    }
+
+    /**
+     * @description Contract for an angular Authorization Service Provider
+     */
+    interface IAuthenticationServiceProvider extends ng.IServiceProvider {
+        /**
+         *
+         * @param configOptions {adal.IConfig}  Configuration options for the authentication context
+         * @param httpProvider  {ng.IHttpProvider}  The angular http provider
+         */
+        init(configOptions: adal.IConfig, httpProvider: ng.IHttpProvider): void;
     }
 }
