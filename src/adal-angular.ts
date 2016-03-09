@@ -1,18 +1,71 @@
 /// <reference path="adal.ts" />
+/// <reference path="../typings/node/node.d.ts" />
 
 "use strict";
 
 console.log("adal-angular:Initializing Angular HTTP binding service...");
+import adalangularts = adalangular;
+
+declare module "adal-angular" {
+    export=adalangularts;
+}
 
 /**
  * TODO:Figure out less hacky way to have this thing play nice
  * when not loading in a CommonJS fashion.
  */
-var module: any;
+var module: adal.IShimModule;
 if (typeof module !== "undefined" && module.exports) {
     module.exports.inject = (config: adal.IConfig) => {
 
         return new $adal(config);
+    }
+}
+
+/**
+ * @description ADAL Interfaces used by angular bindings.
+ */
+declare module adalangular {
+    /**
+     * @description Contract for an angular HTTP request configuration
+     */
+    interface IAuthenticatedRequestConfig extends ng.IRequestConfig {
+        /**
+         * @description {IAuthenticatedRequestHeaders} The request header collection
+         */
+        headers: IAuthenticatedRequestHeaders;
+    }
+
+    /**
+     * @description Contract for an angular Root scope within an OAuth authentication service
+     */
+    interface IAuthenticationRootScope extends ng.IRootScopeService {
+        /**
+         * @description {adal.iOAuthData}   The current user profile
+         */
+        userInfo: adal.IOAuthData;
+    }
+
+    /**
+     * @description Contract for angular request header configuration
+     */
+    interface IAuthenticatedRequestHeaders extends ng.IHttpRequestConfigHeaders {
+        /**
+         * @description {string} Authorization Header
+         */
+        Authorization: string;
+    }
+
+    /**
+     * @description Contract for an angular Authorization Service Provider
+     */
+    interface IAuthenticationServiceProvider extends ng.IServiceProvider {
+        /**
+         *
+         * @param configOptions {adal.IConfig}  Configuration options for the authentication context
+         * @param httpProvider  {ng.IHttpProvider}  The angular http provider
+         */
+        init(configOptions: adal.IConfig, httpProvider: ng.IHttpProvider): void;
     }
 }
 
@@ -341,7 +394,6 @@ if (angular) {
 } else {
     console.error('Angular.JS is not included');
 }
-
 
 console.log("adal-angular:loading complete!");
 

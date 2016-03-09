@@ -1,3 +1,6 @@
+/// <reference path="../typings/angularjs/angular.d.ts" />
+/// <reference path="../typings/node/node.d.ts" />
+
 "use strict";
 
 //fold back into adal
@@ -12,6 +15,10 @@ declare module "adal" {
  * @description Shared ADAL Interfaces
  */
 declare module adalts {
+    
+    interface IShimModule extends NodeModule{
+        
+    }
 
     /**
      * @description Contract for a token based Authentication service
@@ -208,22 +215,22 @@ declare module adalts {
      * @desc Base contract for Configuration Options
      */
     interface IConfig {
-        displayCall: IDisplayCall;
+        displayCall?:IDisplayCall;
+        instance: string;
         tenant: string;
         clientId: string;
-        redirectUri: string;
-        instance: string;
-        endpoints: IEndpointCollection;
-        correlationId: string;
-        cacheLocation: string;
-        resource: string;
-        loginResource: string;
-        state: string;
-        expireOffsetSeconds: number;
-        localLoginUrl: string;
-        postLogoutRedirectUri: string;
-        extraQueryParameter: string;
-        slice: string;
+        redirectUri?: string;
+        endpoints?: IEndpointCollection;
+        correlationId?: string;
+        cacheLocation?: string;
+        resource?: string;
+        loginResource?: string;
+        state?: string;
+        expireOffsetSeconds?: number;
+        localLoginUrl?: string;
+        postLogoutRedirectUri?: string;
+        extraQueryParameter?: string;
+        slice?: string;
     }
 
     interface IOAuthData {
@@ -354,58 +361,12 @@ declare module adalts {
     }
 }
 
-/**
- * @description ADAL Interfaces used by angular bindings.
- */
-declare module adalangular {
-    /**
-     * @description Contract for an angular HTTP request configuration
-     */
-    interface IAuthenticatedRequestConfig extends ng.IRequestConfig {
-        /**
-         * @description {IAuthenticatedRequestHeaders} The request header collection
-         */
-        headers: IAuthenticatedRequestHeaders;
-    }
-
-    /**
-     * @description Contract for an angular Root scope within an OAuth authentication service
-     */
-    interface IAuthenticationRootScope extends ng.IRootScopeService {
-        /**
-         * @description {adal.iOAuthData}   The current user profile
-         */
-        userInfo: adal.IOAuthData;
-    }
-
-    /**
-     * @description Contract for angular request header configuration
-     */
-    interface IAuthenticatedRequestHeaders extends ng.IHttpRequestConfigHeaders {
-        /**
-         * @description {string} Authorization Header
-         */
-        Authorization: string;
-    }
-
-    /**
-     * @description Contract for an angular Authorization Service Provider
-     */
-    interface IAuthenticationServiceProvider extends ng.IServiceProvider {
-        /**
-         *
-         * @param configOptions {adal.IConfig}  Configuration options for the authentication context
-         * @param httpProvider  {ng.IHttpProvider}  The angular http provider
-         */
-        init(configOptions: adal.IConfig, httpProvider: ng.IHttpProvider): void;
-    }
-}
 
 /**
  * TODO:Figure out less hacky way to have this thing play nice
  * when not loading in a CommonJS fashion.
  */
-var module:any;
+var module:adal.IShimModule;
 if (typeof module !== "undefined" && module.exports) {
     console.log("adal:Module inject required");
     module.exports.inject = (config: adal.IConfig) => {
