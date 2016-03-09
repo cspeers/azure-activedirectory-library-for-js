@@ -1,4 +1,14 @@
+/**
+ * @description Interface definition t
+ */
 
+
+
+/**
+ * @description Global contructor instance.
+ * since we are defining the interface in an ambient context it will be incumbent
+ * on the context implementation to declare this
+ */
 declare var $adal:adal.IContextConstructor<adal.IAuthenticationContext>;
 
 import adal=adalts;
@@ -27,7 +37,7 @@ declare module adalts {
         verbose(message: string): void;
     }
 
-    /**
+   /**
   * @description Base Contract for OAuth Url encoded request parameters
   */
     interface IRequestParameters {
@@ -60,23 +70,23 @@ declare module adalts {
      */
     interface IRequestInfo {
         /**
-         * @description Is the request valid?
+         * @desc    {boolean}   Is the request valid?
          */
         valid: boolean;
         /**
-         * @description URL Parameters for the request
+         * @desc    {IRequestParameters}    URL Parameters for the request
          */
         parameters: IRequestParameters;
         /**
-         * @description nonce state match
+         * @desc    {boolean}   The nonce state match
          */
         stateMatch: boolean;
         /**
-         * @description nonce state response
+         * @desc    {string}    The nonce state response
          */
         stateResponse: string;
         /**
-         * @description request type
+         * @desc    {string}    The token request type
          */
         requestType: string;
     }
@@ -165,17 +175,29 @@ declare module adalts {
      * @description Interface for JWT
      */
     interface IToken {
+        /**
+         * @desc    {string} JWT Header
+         */
         header: string;
+        /**
+         * @desc    {string} JWT Signed Payload
+         */
         JWSPayload: string;
+        /**
+         * @desc    {string} JWT Signature
+         */
         JWSSig: string;
     }
 
+    /**
+     * @description Dictionary to hold Token renewals
+     */
     interface IRenewalList {
         [resource: string]: any;
     }
 
     /**
-     * @description Delgate method for Logger Log method
+     * @description Delegate method for Logger Log method
      */
     export interface ILogFunction {
         (message: string): void;
@@ -250,21 +272,50 @@ declare module adalts {
      */
     interface IAuthenticationContext {
 
+        /**
+         * @desc    {RequestTypes}  Enumeration of Request Types
+         */
         REQUEST_TYPE: IRequestTypes;
+        /**
+         * @desc    {any}  Property Bag of constants
+         */
         CONSTANTS: any;
+        /**
+         * @desc    {string}  The authentication authority
+         */
         instance: string;
+        /**
+         * @desc    {IConfig} The configuration options
+         */
         config: IConfig;
+        /**
+         * @desc    {boolean}  Whether popup token requests
+         */
         popUp: boolean;
+        /**
+         * @desc    IRequestCallback    Whether an IFrame token request is in progress
+         */
         frameCallInProgress: boolean;
+        /**
+         * @desc    IRequestCallback    The token request callback
+         */
         callback: IRequestCallback;
+        /**
+         * @desc    {string} The current user token nonce value
+         */
         idTokenNonce: string;
+        /**
+         * @desc    {string}  Whether token renewal is in progress
+         */
         renewActive: boolean;
+        /**
+         * @desc    {IAuthenticationContext}    Context singleton instance
+         */
         singletonInstance:IAuthenticationContext;
 
         login(): void;
         loginInProgress(): boolean;
         logOut(): void;
-
         acquireToken(resource: string, callback: IRequestCallback): void;
         clearCache(): void;
         clearCacheForResource(resource: string): void;
@@ -287,10 +338,23 @@ declare module adalts {
         saveItem(key: string, obj: any): boolean;
     }
 
+    /**
+     * @description Generic Interface for casting the context constructor
+     * @param   TConfig     The type of the configuration constructor parameter
+     * @param   TContext    The type of the object
+     */
     interface IConstructable<TConfig,TContext>{
+        /**
+         *
+         * @param config {TConfig}  The context configuration options
+         */
         new(config:TConfig):TContext;
     }
 
+    /**
+     * @description Generic Interface for casting the context constructor
+     * @param T the type constraint to Authentication Contexts
+     */
     interface IContextConstructor<T extends IAuthenticationContext> extends IConstructable<IConfig,T>
     {
 

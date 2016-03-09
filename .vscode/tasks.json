@@ -21,6 +21,12 @@
             "taskName": "angular",
             "args": ["angular"],
             "isBuildCommand": false
+        },
+        {
+        "taskName": "e2e",
+        "isTestCommand": true,
+        "args": ["e2e"],
+        "showOutput": "always"
         },        
         {
             "taskName": "doc",

@@ -57,7 +57,7 @@ interface IAuthenticationServiceProvider extends ng.IServiceProvider {
 
 if (angular) {
     var AdalModule = angular.module('AdalAngular', []);
-    AdalModule.provider('adalAuthenticationService', (): IAuthenticationServiceProvider => {
+    AdalModule.provider("adalAuthenticationService", (): IAuthenticationServiceProvider => {
 
         console.log("adal-angular:initializing adalAuthenticationService...");
         let adalContext: adal.IAuthenticationContext = null;
@@ -88,6 +88,7 @@ if (angular) {
 
                     var existingHash = window.location.hash;
                     var pathDefault = window.location.href;
+                    console.log("adal-angular:Existing [window] location:" + pathDefault + " hash:" + existingHash);
 
                     if (existingHash) {
                         pathDefault = pathDefault.replace(existingHash, "");
@@ -96,7 +97,7 @@ if (angular) {
                     configOptions.postLogoutRedirectUri = configOptions.postLogoutRedirectUri || pathDefault;
 
                     if (httpProvider && httpProvider.interceptors) {
-                        console.log("pushed ProtectedResourceInterceptor");
+                        console.log("adal-angular:pushed ProtectedResourceInterceptor");
                         httpProvider.interceptors.push("ProtectedResourceInterceptor");
                     }
 
@@ -111,8 +112,8 @@ if (angular) {
                 console.log("adal-angular:AuthenticationServiceProvider.init() - END");
             },
             $get: [
-                '$rootScope', '$window', '$q', '$location', '$timeout', ($rootScope: IAuthenticationRootScope, $window: ng.IWindowService, $q: ng.IQService,
-                    $location: ng.ILocationService, $timeout: ng.ITimeoutService): IAuthenticationService => {
+                "$rootScope", "$window", "$q", "$location", "$timeout", ($rootScope: IAuthenticationRootScope, $window: ng.IWindowService, $q: ng.IQService,
+                    $location: ng.ILocationService, $timeout: ng.ITimeoutService): adal.IAuthenticationService => {
 
                     console.log("adal-angular:adalAuthenticationService.$get() -> BEGIN");
 
@@ -252,11 +253,11 @@ if (angular) {
                         }
                     };
 
-                    $rootScope.$on('$routeChangeStart', routeChangeHandler);
+                    $rootScope.$on("$routeChangeStart", routeChangeHandler);
 
-                    $rootScope.$on('$stateChangeStart', stateChangeHandler);
+                    $rootScope.$on("$stateChangeStart", stateChangeHandler);
 
-                    $rootScope.$on('$locationChangeStart', locationChangeHandler);
+                    $rootScope.$on("$locationChangeStart", locationChangeHandler);
 
                     updateDataFromCache(adalContext.config.loginResource);
 
@@ -306,8 +307,8 @@ if (angular) {
             ]
         }
     });
-    AdalModule.factory('ProtectedResourceInterceptor', [
-        'adalAuthenticationService', '$q', '$rootScope',
+    AdalModule.factory("ProtectedResourceInterceptor", [
+        "adalAuthenticationService", "$q", "$rootScope",
         (authService: adal.IAuthenticationService, $q: ng.IQService, $rootScope: IAuthenticationRootScope): ng.IHttpInterceptor => {
             console.log('adal-angular:intializing ProtectedResourceInterceptor...');
             return {
@@ -365,11 +366,11 @@ if (angular) {
                 },
                 responseError: (rejection: any): any | ng.IPromise<any> => {
                     console.log("adal-angular:AuthenticationInterceptor.responseError");
-                    authService.info('Getting error in the response');
+                    authService.info("Getting error in the response");
                     if (rejection && rejection.status === 401) {
                         var resource = authService.getResourceForEndpoint(rejection.config.url);
                         authService.clearCacheForResource(resource);
-                        $rootScope.$broadcast('adal:notAuthorized', rejection, resource);
+                        $rootScope.$broadcast("adal:notAuthorized", rejection, resource);
                     }
                     return $q.reject(rejection);
                 }

@@ -28,6 +28,14 @@ module.exports = function (grunt) {
                 }
             }
         },
+        jshint: {
+            src: {
+                options: {
+                    jshintrc: '.jshintrc'
+                },
+                src: ['lib/*.js']
+            }
+        },
         jasmine_node: {
             options: {
                 forceExit: true,
@@ -52,17 +60,18 @@ module.exports = function (grunt) {
                 // Because these src-dest file mappings are manually specified, every
                 // time a new file is added or removed, the Gruntfile has to be updated.
                 files: [
-                    { src: 'lib/AdalTS.js', dest: 'build/AdalTS.min.js' },
-                    { src: 'lib/AdalTS-angular.js', dest: 'build/AdalTS-angular.min.js' }
-                ]
+                    { src: 'lib/adal.js', dest: 'build/adal.min.js' },
+                    { src: 'lib/adal-angular.js', dest: 'build/adal-angular.min.js' },
+                ],
             }
-        }
+        },
     });
 
     // Load the plugin that provides the "uglify" task.
     grunt.loadNpmTasks('grunt-jsdoc');
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-ts');
+    grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-jasmine-node');
     grunt.loadNpmTasks('grunt-contrib-copy');
@@ -70,9 +79,10 @@ module.exports = function (grunt) {
     // uglify task is producing invalid js file
 
     // jasmine node directly js api 
-    grunt.registerTask('default', ['clean', 'ts', 'jasmine_node']);
+    grunt.registerTask('default', ['clean', 'ts','jasmine_node']);
     grunt.registerTask('angular', ['clean', 'ts', 'karma']);
+    grunt.registerTask('e2e',["clean","ts",'karma','jasmine_node']);
     grunt.registerTask('doc', ['clean', 'ts', 'jsdoc']);
     grunt.registerTask('minify', ['uglify']);
-
+    grunt.registerTask('dist',['clean','ts','jsdoc',"uglify"]);
 };

@@ -4,7 +4,7 @@
     "noImplicitAny": true,
     "removeComments": false,
     "preserveConstEnums": true,
-    "declaration": false,
+    "declaration": true,
     "noEmitOnError": true,
     "diagnostics": true,
     "listFiles": true,
