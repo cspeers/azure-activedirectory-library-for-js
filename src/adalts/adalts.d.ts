@@ -10,14 +10,48 @@ declare module "adal" {
 declare module adalts {
 
     /**
-  * @description Base Contract for OAuth Request Parameters
+     * @description Contract for a token based Authentication service
+     */
+    interface IAuthenticationService {
+        config: adal.IConfig;
+        login(): void;
+        loginInProgress(): boolean;
+        logOut(): void;
+        getCachedToken(resource: string): string;
+        acquireToken(resource: string): ng.IPromise<any>;
+        getUser(): angular.IPromise<adal.IUser>;
+        getResourceForEndpoint(endpoint: string): string;
+        clearCache(): void;
+        clearCacheForResource(resource: string): void;
+        info(message: string): void;
+        verbose(message: string): void;
+    }
+
+    /**
+  * @description Base Contract for OAuth Url encoded request parameters
   */
     interface IRequestParameters {
+        /**
+         * @desc    {string}    The current error
+         */
         error: string;
+        /**
+         * @desc    {string}    The current error description
+         */
         errorDescription: string;
+        /**
+         * @desc    {string}    The current id token
+         */
         id_token: string;
+        /**
+         * @desc    {string}    The current access token
+         */
         access_token: string;
+        /**
+         * @desc    {string}    The current nonce state
+         */
         state: string;
+
         [key: string]: any;
     }
 
@@ -25,15 +59,31 @@ declare module adalts {
      * @description Interface for representing Token Requests
      */
     interface IRequestInfo {
+        /**
+         * @description Is the request valid?
+         */
         valid: boolean;
+        /**
+         * @description URL Parameters for the request
+         */
         parameters: IRequestParameters;
+        /**
+         * @description nonce state match
+         */
         stateMatch: boolean;
+        /**
+         * @description nonce state response
+         */
         stateResponse: string;
+        /**
+         * @description request type
+         */
         requestType: string;
     }
 
     /**
      * @description Interface for Navigations
+     * @param   {string}    The url to be forwarded
      */
     export interface IDisplayCall {
         (urlNavigate: string): void;
@@ -58,20 +108,47 @@ declare module adalts {
      * @description Interface for JWT User Claims
      */
     interface IUserProfile {
+        /**
+         * @desc    The user principal name
+         */
         upn: string;
+        /**
+         * @desc    The claim audience
+         */
         aud: string;
+        /**
+         * @desc    The user email address
+         */
         email: string;
         nbf: number;
+        /**
+         * @desc    The claim expiration
+         */
         exp: number;
         iat: number;
+        /**
+         * @desc    The claim issuer
+         */
         iss: number;
         prn: string;
+        /**
+         * @desc    The claim type
+         */
         typ: string;
         nonce: string;
     }
 
+    /**
+     * @description Base contract for an OAuth authenticated user
+     */
     interface IUser {
+        /**
+         * @description {string} The user name
+         */
         userName: string;
+        /**
+         * @description {IUserProfile} The user profile
+         */
         profile?: IUserProfile;
     }
 
