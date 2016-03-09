@@ -1,7 +1,6 @@
 /// <reference path="adalts/adalts.d.ts" />
 
 "use strict";
-console.log("adal-ts:loading beginning...");
 
 /**
  * TODO:Figure out less hacky way to have this thing play nice
@@ -271,35 +270,11 @@ class BrowserHelpers {
 /**
  * @description Enumeration for Log Severity Levels
  */
-class LoggingLevels {
-    ERROR = 0;
-    WARN = 1;
-    INFO = 2;
-    VERBOSE = 3;
-}
-
-/**
- * @description Constants for token storage field names
- */
-class StorageConstants {
-    TOKEN_KEYS: string = "adal.token.keys";
-    ACCESS_TOKEN_KEY: string = "adal.access.token.key";
-    EXPIRATION_KEY: string = "adal.expiration.key";
-    START_PAGE: string = "adal.start.page";
-    START_PAGE_PARAMS: string = "adal.start.page.params";
-    FAILED_RENEW: string = "adal.failed.renew";
-    STATE_LOGIN: string = "adal.state.login";
-    STATE_RENEW: string = "adal.state.renew";
-    STATE_RENEW_RESOURCE: string = "adal.state.renew.resource";
-    STATE_IDTOKEN: string = "adal.state.idtoken";
-    NONCE_IDTOKEN: string = "adal.nonce.idtoken";
-    SESSION_STATE: string = "adal.session.state";
-    USERNAME: string = "adal.username";
-    IDTOKEN: string = "adal.idtoken";
-    ERROR: string = "adal.error";
-    ERROR_DESCRIPTION: string = "adal.error.description";
-    LOGIN_REQUEST: string = "adal.login.request";
-    LOGIN_ERROR: string = "adal.login.error";
+enum LoggingLevels {
+    ERROR = 0,
+    WARN = 1,
+    INFO = 2,
+    VERBOSE = 3
 }
 
 /**
@@ -311,16 +286,35 @@ class Constants {
     ID_TOKEN: string = "id_token";
     ERROR_DESCRIPTION: string = "error_description";
     SESSION_STATE: string = "session_state";
-    STORAGE = new StorageConstants();
+    STORAGE = {
+        TOKEN_KEYS:"adal.token.keys",
+        ACCESS_TOKEN_KEY:"adal.access.token.key",
+        EXPIRATION_KEY:"adal.expiration.key",
+        START_PAGE:"adal.start.page",
+        START_PAGE_PARAMS:"adal.start.page.params",
+        FAILED_RENEW:"adal.failed.renew",
+        STATE_LOGIN:"adal.state.login",
+        STATE_RENEW:"adal.state.renew",
+        STATE_RENEW_RESOURCE:"adal.state.renew.resource",
+        STATE_IDTOKEN:"adal.state.idtoken",
+        NONCE_IDTOKEN:"adal.nonce.idtoken",
+        SESSION_STATE:"adal.session.state",
+        USERNAME:"adal.username",
+        IDTOKEN:"adal.idtoken",
+        ERROR:"adal.error",
+        ERROR_DESCRIPTION:"adal.error.description",
+        LOGIN_REQUEST:"adal.login.request",
+        LOGIN_ERROR:"adal.login.error"
+    };
     RESOURCE_DELIMETER: string = "|";
-    LOGGING_LEVEL = new LoggingLevels();
+    LOGGING_LEVEL = LoggingLevels;
     LEVEL_STRING_MAP: adal.IStringMap = {
         0: "ERROR:",
         1: "WARNING:",
         2: "INFO:",
         3: "VERBOSE:"
     };
-    LIBRARY_VERSION: string = "1.0.8";
+    static LIBRARY_VERSION: string = "1.0.8";
 }
 
 /**
@@ -330,7 +324,7 @@ class Logging {
     /**
      * @desc    The Logging Level
      */
-    static level: number = 0;
+    static level: LoggingLevels = 0;
     
     /**
      * @desc Logs the specified message
@@ -345,7 +339,7 @@ class AuthenticationContext implements adal.IAuthenticationContext {
 
     private _user: adal.IUser;
     private _loginInProgress: boolean = false;
-    private _libVersion(): string { return this.CONSTANTS.LIBRARY_VERSION; }
+    private _libVersion(): string { return Constants.LIBRARY_VERSION; }
     private _idTokenNonce: string;
     private _renewStates: Array<string> = [];
     private _activeRenewals: adal.IRenewalList;
@@ -1199,7 +1193,9 @@ class AuthenticationContext implements adal.IAuthenticationContext {
     }
 
     constructor(cfg: adal.IConfig) {
-
+        var currentdate = new Date();
+        console.log("adal-ts:loading complete!");
+        this.logstatus("adal:[" + currentdate.getDate() + "]Initializing Active Directory Authentication Library for JS/TS " + Constants.LIBRARY_VERSION);
         if (!this.singletonInstance) {
             this.singletonInstance=this;
             if (cfg) {
@@ -1223,6 +1219,7 @@ class AuthenticationContext implements adal.IAuthenticationContext {
                 (window as adal.IOAuthWindow).AuthenticationContext = this;
             }
         }
+        console.log("adal-ts:loading complete!");
     }
 
 }
@@ -1231,5 +1228,3 @@ class AuthenticationContext implements adal.IAuthenticationContext {
  * Establish the global context contructor declared in adalts/adalts.d.ts
  */
 var $adal:adal.IContextConstructor<adal.IAuthenticationContext>=AuthenticationContext;
-
-console.log("adal-ts:loading complete!");

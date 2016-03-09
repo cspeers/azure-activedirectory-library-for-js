@@ -14,10 +14,14 @@ declare var $adal:adal.IContextConstructor<adal.IAuthenticationContext>;
 //fold back into adal
 import adal=adalts;
 
+//expose as ambient
 declare module "adal" {
     export=adal;
 }
 
+/**
+ * @description Shared ADAL Interfaces
+ */
 declare module adalts {
 
     /**

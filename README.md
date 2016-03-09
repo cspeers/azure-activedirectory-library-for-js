@@ -2,12 +2,35 @@ Active Directory Authentication Library (ADAL) for JavaScript (in TypeScript)
 ====================================
 
 This is just ADAL for JavaScript "reimplemented" (some might say copied and pasted like the content below)
+There have been a few liberties taken with variable naming on all private variables with respect to underscores.
+I've added a few more tasks, and projects for both VS2015 and VSCode.
+
+It is drop-in replacement with the current AzureAD samples 
+e.g.
+[ASP SPA Sample](https://github.com/Azure-Samples/active-directory-angularjs-singlepageapp). 
+and passes all existing unit-tests, with no 
+modifications except a couple of variable declarations.
+##  Notable Unit Test related changes
+
+Notable Changes:
+    *   _decode is now a public method decode
+    *   _getHostFromUri is now a public method getHostFromUri
+    *   Browser-related methods, Guid, and DateTime functions moved to
+        static methods on helper classes
+            
+
+## Why does this exist??
+
+    There was not an existing typescript declaration for the existing library as I embarked on
+    my first real TypeScript driven project. It seemed like a good learning excercise for both the
+    language and AngularJS.
 
 ## Samples, tests and documentation
 
 For a sample demonstrating basic usage of ADAL JS please refer to [this repo](https://github.com/AzureADSamples/SinglePageApp-DotNet).
 
 CORS API [sample ](https://github.com/AzureADSamples/SinglePageApp-WebAPI-AngularJS-DotNet).
+
 
 **To run tests**
 
