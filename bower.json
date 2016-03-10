@@ -3,9 +3,10 @@
   "version": "1.0.8",
   "homepage": "https://github.com/cspeers/azure-activedirectory-library-for-ts",
   "authors": [
-    "MSOpentech","Chris Speers"
+    "MSOpentech",
+    "Chris Speers"
   ],
-  "description": "Azure Active Directory Client Library for js/TypeScript.  A Port of ADAL JS to TypeScript",
+  "description": "Azure Active Directory Client Library for JavaScript/TypeScript.  A wholly compatible port of ADAL Client JS library to TypeScript",
   "main": ["./lib/adal.js",
 	"./lib/adal-angular.js"
   ],
