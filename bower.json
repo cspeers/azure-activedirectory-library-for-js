@@ -1,11 +1,11 @@
 {
-  "name": "angular-adal-ts",
+  "name": "adalts-angular",
   "version": "1.0.8",
   "homepage": "https://github.com/cspeers/azure-activedirectory-library-for-js",
   "authors": [
     "MSOpentech","Chris Speers"
   ],
-  "description": "Azure Active Directory Client Library for js/TypeScript",
+  "description": "Azure Active Directory Client Library for js/TypeScript.  A Port of ADAL JS to TypeScript",
   "main": ["./lib/adal.js",
 	"./lib/adal-angular.js"
   ],

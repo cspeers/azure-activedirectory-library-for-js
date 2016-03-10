@@ -26,20 +26,41 @@ if (typeof module !== "undefined" && module.exports) {
  */
 declare module adalangular {
     
-        /**
+    /**
      * @description Contract for a token based Authentication service
      */
     interface IAuthenticationService {
+        /**
+         *@desc The context configuration
+         */
         config: adal.IConfig;
+        /**
+         * @desc Login
+         */
         login(): void;
+        /**
+         * @desc    Is a login currently in progress
+         */
         loginInProgress(): boolean;
+        /**
+         * @desc    Log out
+         */
         logOut(): void;
+        /**
+         * @desc Retrieve a token from the cache
+         * @param resource  {string} The desired target audience
+         */
         getCachedToken(resource: string): string;
+        /**
+         * @desc    Acquire a token for the desired audience
+         * @param resource {string} The desired target audience
+         */
         acquireToken(resource: string): ng.IPromise<any>;
         getUser(): angular.IPromise<adal.IUser>;
         getResourceForEndpoint(endpoint: string): string;
         clearCache(): void;
         clearCacheForResource(resource: string): void;
+
         info(message: string): void;
         verbose(message: string): void;
     }

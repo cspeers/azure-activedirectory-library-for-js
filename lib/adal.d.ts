@@ -334,7 +334,19 @@ declare class RequestParameters implements adal.IRequestParameters {
      * @desc    {string}    The current nonce state
      */
     state: string;
+    /**
+     * @desc    Deserializes OAuth request parameters from a URL string
+     * @param query {string} The URL query string to deserialize
+     * @returns {RequestParameters}
+     */
     static deserialize(query: string): adal.IRequestParameters;
+    /**
+     * @desc    Serializes OAuth request parameters to a URL string
+     * @param responseType {string} The desired OAuth response type
+     * @param obj   {adal.IConfig}  The context configuration
+     * @param resource  {string}    The desired resource
+     * @returns {string}
+     */
     static serialize(responseType: string, obj: adal.IConfig, resource: string): string;
     [key: string]: any;
 }
@@ -355,12 +367,32 @@ declare class Token implements adal.IToken {
      * @desc    {string} JWT Signature
      */
     JWSSig: string;
+    /**
+     * @desc    Converts a regex match set to a JWT
+     * @param matches   The regex match set to evaluate
+     * @returns {Token}
+     */
     static toJwt(matches: RegExpMatchArray): Token;
+    /**
+     * @desc    Decodes a JWT from a string
+     * @param jwtToken  {string}    The encoded token
+     * @returns {adal.IToken} The decoded token
+     */
     static decodeJwt(jwtToken: string): adal.IToken;
+    /**
+     * @desc    Decodes a Base64 encoded JWT
+     * @param base64IdToken {string} The encoded token string
+     * @returns {string}
+     */
     static decode(base64IdToken: string): string;
+    /**
+     * @desc    Url decodes a base64 encoded string
+     * @param base64IdToken {string} the base64 encoded token
+     * @returns {string}
+     */
     static base64DecodeStringUrlSafe(base64IdToken: string): string;
     static convertUrlSafeToRegularBase64EncodedString(str: string): string;
-    constructor(header: string, payload: string, signature: string);
+    constructor(...args: any[]);
 }
 /**
 * @description Helper class for guids

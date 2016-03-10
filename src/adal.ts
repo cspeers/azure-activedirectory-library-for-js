@@ -343,7 +343,6 @@ declare module adalts {
     }
 }
 
-
 /**
  * TODO:Figure out less hacky way to have this thing play nice
  * when not loading in a CommonJS fashion.
@@ -382,6 +381,11 @@ class RequestParameters implements adal.IRequestParameters {
      */
     state: string;
 
+    /**
+     * @desc    Deserializes OAuth request parameters from a URL string
+     * @param query {string} The URL query string to deserialize
+     * @returns {RequestParameters}
+     */
     static deserialize(query: string): adal.IRequestParameters {
         var match: RegExpMatchArray,
             pl = /\+/g,  // Regex for replacing addition symbol with a space
@@ -397,6 +401,13 @@ class RequestParameters implements adal.IRequestParameters {
         return obj;
     }
 
+    /**
+     * @desc    Serializes OAuth request parameters to a URL string
+     * @param responseType {string} The desired OAuth response type
+     * @param obj   {adal.IConfig}  The context configuration
+     * @param resource  {string}    The desired resource
+     * @returns {string}
+     */
     static serialize(responseType: string, obj: adal.IConfig, resource: string): string {
         var str: Array<string> = [];
         if (obj !== null) {
@@ -446,10 +457,20 @@ class Token implements adal.IToken {
      */
     public JWSSig: string;
 
+    /**
+     * @desc    Converts a regex match set to a JWT
+     * @param matches   The regex match set to evaluate
+     * @returns {Token}
+     */
     static toJwt(matches: RegExpMatchArray): Token {
         return new Token(matches[1], matches[2], matches[3]);
     }
 
+    /**
+     * @desc    Decodes a JWT from a string
+     * @param jwtToken  {string}    The encoded token
+     * @returns {adal.IToken} The decoded token
+     */
     static decodeJwt(jwtToken: string): adal.IToken {
         if (jwtToken === null) {
             return null;
@@ -465,6 +486,11 @@ class Token implements adal.IToken {
         return Token.toJwt(matches);
     }
 
+    /**
+     * @desc    Decodes a Base64 encoded JWT
+     * @param base64IdToken {string} The encoded token string
+     * @returns {string}
+     */
     static decode(base64IdToken: string): string {
         var codes = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
         base64IdToken = String(base64IdToken).replace(/=+$/, "");
@@ -512,6 +538,11 @@ class Token implements adal.IToken {
         return decoded;
     }
 
+    /**
+     * @desc    Url decodes a base64 encoded string
+     * @param base64IdToken {string} the base64 encoded token
+     * @returns {string}
+     */
     static base64DecodeStringUrlSafe(base64IdToken: string): string {
         // html5 should support atob function for decoding
         base64IdToken = base64IdToken.replace(/-/g, "+").replace(/_/g, "/");
@@ -526,6 +557,7 @@ class Token implements adal.IToken {
         return str.replace("-", "+").replace("_", "/");
     }
 
+    constructor(...args:any[])
     constructor(header: string, payload: string, signature: string) {
         this.header = header;
         this.JWSPayload = payload;
