@@ -82,7 +82,7 @@ module.exports = function (grunt) {
     grunt.registerTask('default', ['clean', 'ts','jasmine_node']);
     grunt.registerTask('angular', ['clean', 'ts', 'karma']);
     grunt.registerTask('e2e',["clean","ts",'karma','jasmine_node']);
-    grunt.registerTask('doc', ['clean', 'ts', 'jsdoc']);
+    grunt.registerTask('doc', ['jsdoc']);
     grunt.registerTask('minify', ['uglify']);
     grunt.registerTask('dist',['clean','ts','jsdoc',"uglify"]);
 };

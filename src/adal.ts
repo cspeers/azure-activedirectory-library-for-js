@@ -1,6 +1,3 @@
-/// <reference path="../typings/angularjs/angular.d.ts" />
-/// <reference path="../typings/node/node.d.ts" />
-
 "use strict";
 
 //fold back into adal
@@ -16,8 +13,18 @@ declare module "adal" {
  */
 declare module adalts {
 
-    interface IShimModule extends NodeModule{
+    interface IShimModuleFunction{
+        (id: string): any;
+    }
 
+    interface IShimModule {
+        exports: any;
+        require?: IShimModuleFunction;
+        id?: string;
+        filename?: string;
+        loaded?: boolean;
+        parent?: any;
+        children?: any[];
     }
 
     /**
@@ -198,27 +205,75 @@ declare module adalts {
      */
     interface IConfig {
         displayCall?:IDisplayCall;
+        /**
+         * @desc The logon authority
+         */
         instance: string;
-        tenant: string;
+        /**
+         * @desc The tenant to authorize (optional) as default to 'common'
+         */
+        tenant?: string;
+        /**
+         * @desc The application id
+         */
         clientId: string;
+        /**
+         * @desc The target redirect URI
+         */
         redirectUri?: string;
+        /**
+         * @desc The resource to endpoint mapping
+         */
         endpoints?: IEndpointCollection;
+        /**
+         * @desc A correlation id for requests
+         */
         correlationId?: string;
+        /**
+         * @desc The location for the token cache
+         */
         cacheLocation?: string;
+        /**
+         * @desc The target resource
+         */
         resource?: string;
         loginResource?: string;
+        /**
+         * @desc The id nonce state
+         */
         state?: string;
+        /**
+         * @desc The length of token validity
+         */
         expireOffsetSeconds?: number;
+        /**
+         * @desc Extra parameters to add to the request
+         */
+        extraQueryParameter?: string;
         localLoginUrl?: string;
         postLogoutRedirectUri?: string;
-        extraQueryParameter?: string;
         slice?: string;
     }
 
+    /**
+     * @desc Base contract for representing OAuth user data
+     */
     interface IOAuthData {
+        /**
+         * @desc Whether the user is currently authenticated
+         */
         isAuthenticated: boolean;
+        /**
+         * @desc The current user name
+         */
         userName: string;
+        /**
+         * @desc Any current login error message
+         */
         loginError: string;
+        /**
+         * @desc The OAuth user claim set
+         */
         profile: IUserProfile;
     }
 
@@ -237,6 +292,9 @@ declare module adalts {
         parent: IOAuthWindow;
     }
 
+    /**
+     * @desc Interface for OAuth request type constants
+     */
     interface IRequestTypes {
         LOGIN: string;
         RENEW_TOKEN: string;
@@ -383,7 +441,7 @@ class RequestParameters implements adal.IRequestParameters {
 
     /**
      * @desc    Deserializes OAuth request parameters from a URL string
-     * @param query {string} The URL query string to deserialize
+     * @param   query {string} The URL query string to deserialize
      * @returns {RequestParameters}
      */
     static deserialize(query: string): adal.IRequestParameters {
@@ -403,9 +461,9 @@ class RequestParameters implements adal.IRequestParameters {
 
     /**
      * @desc    Serializes OAuth request parameters to a URL string
-     * @param responseType {string} The desired OAuth response type
-     * @param obj   {adal.IConfig}  The context configuration
-     * @param resource  {string}    The desired resource
+     * @param   responseType {string} The desired OAuth response type
+     * @param   obj   {adal.IConfig}  The context configuration
+     * @param   resource  {string}    The desired resource
      * @returns {string}
      */
     static serialize(responseType: string, obj: adal.IConfig, resource: string): string {

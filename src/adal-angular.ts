@@ -1,5 +1,5 @@
 /// <reference path="adal.ts" />
-
+/// <reference path="../typings/angularjs/angular.d.ts" />
 "use strict";
 
 console.log("adal-angular:Initializing Angular HTTP binding service...");
@@ -64,8 +64,6 @@ declare module adalangular {
         info(message: string): void;
         verbose(message: string): void;
     }
-
-    
     
     /**
      * @description Contract for an angular HTTP request configuration
@@ -108,8 +106,11 @@ declare module adalangular {
          */
         init(configOptions: adal.IConfig, httpProvider: ng.IHttpProvider): void;
     }
+    
 }
 
+
+//why bother otherwise?? this is an angular binding
 if (angular) {
     var AdalModule = angular.module('AdalAngular', []);
     AdalModule.provider("adalAuthenticationService", (): adalangular.IAuthenticationServiceProvider => {
