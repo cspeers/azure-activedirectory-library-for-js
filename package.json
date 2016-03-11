@@ -48,15 +48,17 @@
     "grunt-junit": "^0.1.6",
     "grunt-karma": "^0.9.0",
     "grunt-ts": "",
+    "grunt-tslint": "^3.0.3",
     "jasmine-node": "~1.14.5",
     "jasmine-reporters": "~1.0.0",
     "jshint": "*",
     "karma": "~0.12.24",
     "karma-chrome-launcher": "~0.1.5",
+    "karma-firefox-launcher": "~0.1.5",
     "karma-ie-launcher": "~0.1.5",
-    "karma-firefox-launcher":"~0.1.5",
     "karma-jasmine": "^0.3.7",
-    "taffydb": "^2.7.2"
+    "taffydb": "^2.7.2",
+    "tslint": "^3.5.0"
   },
   "directories": {
     "test": "tests"

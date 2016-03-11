@@ -10,22 +10,9 @@ declare module "adal-angular" {
 }
 
 /**
- * TODO:Figure out less hacky way to have this thing play nice
- * when not loading in a CommonJS fashion.
- */
-var module: adal.IShimModule;
-if (typeof module !== "undefined" && module.exports) {
-    module.exports.inject = (config: adal.IConfig) => {
-
-        return new $adal(config);
-    };
-}
-
-/**
  * @description ADAL Interfaces used by angular bindings.
  */
 declare module adalangular {
-    
     /**
      * @description Contract for a token based Authentication service
      */
@@ -64,7 +51,6 @@ declare module adalangular {
         info(message: string): void;
         verbose(message: string): void;
     }
-    
     /**
      * @description Contract for an angular HTTP request configuration
      */
@@ -106,13 +92,12 @@ declare module adalangular {
          */
         init(configOptions: adal.IConfig, httpProvider: ng.IHttpProvider): void;
     }
-    
 }
 
 
 //why bother otherwise?? this is an angular binding
 if (angular) {
-    var AdalModule = angular.module('AdalAngular', []);
+    var AdalModule = angular.module("AdalAngular", []);
     AdalModule.provider("adalAuthenticationService", (): adalangular.IAuthenticationServiceProvider => {
 
         console.log("adal-angular:initializing adalAuthenticationService...");
@@ -128,11 +113,13 @@ if (angular) {
             console.log("adal-angular:Updating data from cache for resource:" + resource);
             // only cache lookup here to not interrupt with events
             var token = adalContext.getCachedToken(resource);
-            oAuthData.isAuthenticated = token !== null && token.length > 0;
-            var user = adalContext.getCachedUser() || { userName: '' };
-            oAuthData.userName = user.userName;
-            oAuthData.profile = user.profile;
-            oAuthData.loginError = adalContext.getLoginError();
+            if (token) {
+                oAuthData.isAuthenticated = token !== null && token.length > 0;
+                var user = adalContext.getCachedUser() || { userName: "" };
+                oAuthData.userName = user.userName;
+                oAuthData.profile = user.profile;
+                oAuthData.loginError = adalContext.getLoginError();
+            }
         };
 
         return {
@@ -361,12 +348,12 @@ if (angular) {
                     };
                 }
             ]
-        }
+        };
     });
     AdalModule.factory("ProtectedResourceInterceptor", [
         "adalAuthenticationService", "$q", "$rootScope",
         (authService: adalangular.IAuthenticationService, $q: ng.IQService, $rootScope: adalangular.IAuthenticationRootScope): ng.IHttpInterceptor => {
-            console.log('adal-angular:intializing ProtectedResourceInterceptor...');
+            console.log("adal-angular:intializing ProtectedResourceInterceptor...");
             return {
                 request: (config: adalangular.IAuthenticatedRequestConfig): adalangular.IAuthenticatedRequestConfig | ng.IPromise<adalangular.IAuthenticatedRequestConfig> => {
 
@@ -384,9 +371,9 @@ if (angular) {
                     var isEndpoint = false;
 
                     if (tokenStored) {
-                        authService.info('Token is avaliable for this url ' + config.url);
+                        authService.info("Token is avaliable for this url " + config.url);
                         // check endpoint mapping if provided
-                        config.headers.Authorization = 'Bearer ' + tokenStored;
+                        config.headers.Authorization = "Bearer " + tokenStored;
                         return config;
                     } else {
                         if (authService.config) {
@@ -399,15 +386,15 @@ if (angular) {
 
                         // Cancel request if login is starting
                         if (authService.loginInProgress()) {
-                            authService.info('login already start.');
+                            authService.info("login already start.");
                             return $q.reject();
                         } else if (authService.config && isEndpoint) {
                             // external endpoints
                             // delayed request to return after iframe completes
                             var delayedRequest = $q.defer();
                             authService.acquireToken(resource).then((token) => {
-                                authService.verbose('Token is avaliable');
-                                config.headers.Authorization = 'Bearer ' + token;
+                                authService.verbose("Token is avaliable");
+                                config.headers.Authorization = "Bearer " + token;
                                 delayedRequest.resolve(config);
                             }, (err) => {
                                 delayedRequest.reject(err);
@@ -430,11 +417,23 @@ if (angular) {
                     }
                     return $q.reject(rejection);
                 }
-            }
+            };
         }
     ]);
 } else {
-    console.error('Angular.JS is not included');
+    console.error("Angular.JS is not included");
+}
+
+/**
+ * TODO:Figure out less hacky way to have this thing play nice
+ * when not loading in a CommonJS fashion.
+ */
+var module: adal.IShimModule;
+if (typeof module !== "undefined" && module.exports) {
+    module.exports.inject = (config: adal.IConfig) => {
+
+        return new $adal(config);
+    };
 }
 
 console.log("adal-angular:loading complete!");

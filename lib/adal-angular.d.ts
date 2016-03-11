@@ -5,11 +5,6 @@ declare module "adal-angular" {
     export = adalangularts;
 }
 /**
- * TODO:Figure out less hacky way to have this thing play nice
- * when not loading in a CommonJS fashion.
- */
-declare var module: adal.IShimModule;
-/**
  * @description ADAL Interfaces used by angular bindings.
  */
 declare module adalangular {
@@ -89,3 +84,8 @@ declare module adalangular {
         init(configOptions: adal.IConfig, httpProvider: ng.IHttpProvider): void;
     }
 }
+/**
+ * TODO:Figure out less hacky way to have this thing play nice
+ * when not loading in a CommonJS fashion.
+ */
+declare var module: adal.IShimModule;

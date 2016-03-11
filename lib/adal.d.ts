@@ -3,6 +3,11 @@ declare module "adal" {
     export = adal;
 }
 /**
+ * TODO:Figure out less hacky way to have this thing play nice
+ * when not loading in a CommonJS fashion.
+ */
+declare var module: adal.IShimModule;
+/**
  * @description Shared ADAL Interfaces
  */
 declare module adalts {
@@ -364,11 +369,6 @@ declare module adalts {
     interface IContextConstructor<T extends IAuthenticationContext> extends IConstructable<IConfig, T> {
     }
 }
-/**
- * TODO:Figure out less hacky way to have this thing play nice
- * when not loading in a CommonJS fashion.
- */
-declare var module: adal.IShimModule;
 /**
  * @description Concrete implementation of OAuth Request Parameters
  */
