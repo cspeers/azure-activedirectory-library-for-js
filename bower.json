@@ -1,6 +1,6 @@
 {
   "name": "adalts-angular",
-  "version": "1.0.1-typescript",
+  "version": "1.0.2-typescript",
   "homepage": "https://github.com/cspeers/azure-activedirectory-library-for-ts",
   "authors": [
     "MSOpentech",
@@ -32,6 +32,7 @@
     "bower_components",
     "test",
     "tests",
+    "build",
     "tsconfig.json"
   ],
   "dependencies": {

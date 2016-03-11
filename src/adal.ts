@@ -6,7 +6,7 @@
  */
 
 /* tslint:disable:* */
-var module: any;
+declare var module: any;
 if (typeof module !== "undefined" && module.exports) {
     console.log("adal:Module inject required");
     module.exports.inject = (config: adal.IConfig) => {
@@ -31,7 +31,7 @@ declare module adalts {
     /**
      * @description Base Contract for OAuth Url encoded request parameters
      */
-    interface IRequestParameters {
+    export interface IRequestParameters {
         /**
          * @desc    {string}    The current error
          */
@@ -59,7 +59,7 @@ declare module adalts {
     /**
      * @description Interface for representing Token Requests
      */
-    interface IRequestInfo {
+    export interface IRequestInfo {
         /**
          * @desc    {boolean}   Is the request valid?
          */
@@ -101,14 +101,14 @@ declare module adalts {
      * @description Base contract representing a dictionary of
      *  resource URI and Callbacks
      */
-    interface ICallbackMap<T> {
+    export interface ICallbackMap<T> {
         [expectedState: string]: T;
     }
 
     /**
      * @description Interface for JWT User Claims
      */
-    interface IUserProfile {
+    export interface IUserProfile {
         /**
          * @desc    The user principal name
          */
@@ -142,7 +142,7 @@ declare module adalts {
     /**
      * @description Base contract for an OAuth authenticated user
      */
-    interface IUser {
+    export interface IUser {
         /**
          * @description {string} The user name
          */
@@ -158,14 +158,14 @@ declare module adalts {
      * @param {string} message
      * @param {any} item
      */
-    interface IRequestCallback {
+    export interface IRequestCallback {
         (message: string, item?: any): void;
     }
 
     /**
      * @description Interface for JWT
      */
-    interface IToken {
+    export interface IToken {
         /**
          * @desc    {string} JWT Header
          */
@@ -183,7 +183,7 @@ declare module adalts {
     /**
      * @description Dictionary to hold Token renewals
      */
-    interface IRenewalList {
+    export interface IRenewalList {
         [resource: string]: any;
     }
 
@@ -204,7 +204,7 @@ declare module adalts {
     /**
      * @desc Base contract for Configuration Options
      */
-    interface IConfig {
+    export interface IConfig {
         displayCall?:IDisplayCall;
         /**
          * @desc The logon authority
@@ -259,7 +259,7 @@ declare module adalts {
     /**
      * @desc Base contract for representing OAuth user data
      */
-    interface IOAuthData {
+    export interface IOAuthData {
         /**
          * @desc Whether the user is currently authenticated
          */
@@ -278,25 +278,25 @@ declare module adalts {
         profile: IUserProfile;
     }
 
-    interface IOAuthHTMLElement {
+    export interface IOAuthHTMLElement {
         callBackMappedToRenewStates: ICallbackMap<IRequestCallback>;
         callBacksMappedToRenewStates: ICallbackMap<Array<IRequestCallback>>;
         oauth2Callback: any;
         AuthenticationContext: IAuthenticationContext;
     }
 
-    interface IOAuthWindow extends Window, IOAuthHTMLElement {
+    export interface IOAuthWindow extends Window, IOAuthHTMLElement {
 
     }
 
-    interface IOAuthIFrame extends HTMLIFrameElement, IOAuthHTMLElement {
+    export interface IOAuthIFrame extends HTMLIFrameElement, IOAuthHTMLElement {
         parent: IOAuthWindow;
     }
 
     /**
      * @desc Interface for OAuth request type constants
      */
-    interface IRequestTypes {
+    export interface IRequestTypes {
         LOGIN: string;
         RENEW_TOKEN: string;
         ID_TOKEN: string;
@@ -308,7 +308,7 @@ declare module adalts {
     /**
      * @description Contract for an Authentication Context
      */
-    interface IAuthenticationContext {
+    export interface IAuthenticationContext {
 
         /**
          * @desc    {RequestTypes}  Enumeration of Request Types
@@ -384,7 +384,7 @@ declare module adalts {
      * @param   TConfig     The type of the configuration constructor parameter
      * @param   TContext    The type of the object
      */
-    interface IConstructable<TConfig,TContext>{
+    export interface IConstructable<TConfig,TContext>{
         /**
          *
          * @param config {TConfig}  The context configuration options
@@ -396,7 +396,7 @@ declare module adalts {
      * @description Generic Interface for casting the context constructor
      * @param T the type constraint to Authentication Contexts
      */
-    interface IContextConstructor<T extends IAuthenticationContext> extends IConstructable<IConfig,T> {
+    export interface IContextConstructor<T extends IAuthenticationContext> extends IConstructable<IConfig,T> {
 
     }
 }

@@ -14,7 +14,6 @@ declare module "adal-angular" {
  */
 
 /* tslint:disable:* */
-var module: any;
 if (typeof module !== "undefined" && module.exports) {
     module.exports.inject = (config: adal.IConfig) => {
 
