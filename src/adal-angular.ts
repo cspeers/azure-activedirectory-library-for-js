@@ -2,6 +2,18 @@
 /// <reference path="../typings/angularjs/angular.d.ts" />
 "use strict";
 
+/**
+ * TODO:Figure out less hacky way to have this thing play nice
+ * when not loading in a CommonJS fashion.
+ */
+var module: any;
+if (typeof module !== "undefined" && module.exports) {
+    module.exports.inject = (config: adal.IConfig) => {
+
+        return new $adal(config);
+    };
+}
+
 console.log("adal-angular:Initializing Angular HTTP binding service...");
 import adalangularts = adalangular;
 
@@ -424,17 +436,7 @@ if (angular) {
     console.error("Angular.JS is not included");
 }
 
-/**
- * TODO:Figure out less hacky way to have this thing play nice
- * when not loading in a CommonJS fashion.
- */
-var module: adal.IShimModule;
-if (typeof module !== "undefined" && module.exports) {
-    module.exports.inject = (config: adal.IConfig) => {
 
-        return new $adal(config);
-    };
-}
 
 console.log("adal-angular:loading complete!");
 

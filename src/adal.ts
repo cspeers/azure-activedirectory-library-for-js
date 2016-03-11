@@ -1,5 +1,19 @@
 "use strict";
 
+/**
+ * TODO:Figure out less hacky way to have this thing play nice
+ * when not loading in a CommonJS fashion.
+ */
+/* tslint:disable:* */
+var module: any;
+if (typeof module !== "undefined" && module.exports) {
+    console.log("adal:Module inject required");
+    module.exports.inject = (config: adal.IConfig) => {
+        return new AuthenticationContext(config);
+    };
+}
+
+
 //fold back into adal
 import adal = adalts;
 
@@ -8,38 +22,13 @@ declare module "adal" {
     export=adal;
 }
 
-/**
- * TODO:Figure out less hacky way to have this thing play nice
- * when not loading in a CommonJS fashion.
- */
-var module: adal.IShimModule;
-if (typeof module !== "undefined" && module.exports) {
-    console.log("adal:Module inject required");
-    module.exports.inject = (config: adal.IConfig) => {
-        return new AuthenticationContext(config);
-    };
-}
-console.log("adal-ts:exporting classes and methods");
 
+console.log("adal-ts:exporting classes and methods");
 
 /**
  * @description Shared ADAL Interfaces
  */
 declare module adalts {
-
-    interface IShimModuleFunction {
-        (id: string): any;
-    }
-
-    interface IShimModule {
-        exports: any;
-        require?: IShimModuleFunction;
-        id?: string;
-        filename?: string;
-        loaded?: boolean;
-        parent?: any;
-        children?: any[];
-    }
 
     /**
      * @description Base Contract for OAuth Url encoded request parameters
@@ -445,7 +434,7 @@ class RequestParameters implements adal.IRequestParameters {
      * @returns {RequestParameters}
      */
     static deserialize(query: string): adal.IRequestParameters {
-        var match: RegExpMatchArray,
+        let match: RegExpMatchArray,
             pl = /\+/g,  // Regex for replacing addition symbol with a space
             search = /([^&=]+)=?([^&]*)/g,
             decode = (s: string) => decodeURIComponent(s.replace(pl, " ")),
@@ -534,9 +523,9 @@ class Token implements adal.IToken {
             return null;
         }
 
-        var idTokenPartsRegex = /^([^\.\s]*)\.([^\.\s]+)\.([^\.\s]*)$/;
+        let idTokenPartsRegex: RegExp = /^([^\.\s]*)\.([^\.\s]+)\.([^\.\s]*)$/;
 
-        var matches = idTokenPartsRegex.exec(jwtToken);
+        let matches: RegExpMatchArray = idTokenPartsRegex.exec(jwtToken);
         if (!matches || matches.length < 4) {
             return null;
         }
@@ -550,16 +539,16 @@ class Token implements adal.IToken {
      * @returns {string}
      */
     static decode(base64IdToken: string): string {
-        var codes = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+        let codes:string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
         base64IdToken = String(base64IdToken).replace(/=+$/, "");
 
-        var length = base64IdToken.length;
+        let length: number = base64IdToken.length;
         if (length % 4 === 1) {
             throw new Error("The token to be decoded is not correctly encoded.");
         }
 
-        var h1: number, h2: number, h3: number, h4: number, bits: number, c1: number, c2: number, c3: number, decoded = "";
-        for (var i = 0; i < length; i += 4) {
+        var h1: number, h2: number, h3: number, h4: number, bits: number, c1: number, c2: number, c3: number, decoded: string = "";
+        for (let i: number = 0; i < length; i += 4) {
             //Every 4 base64 encoded character will be converted to 3 byte string, which is 24 bits
             // then 6 bits per base64 encoded character
             h1 = codes.indexOf(base64IdToken.charAt(i));
@@ -632,10 +621,10 @@ class Guid {
      * @description returns a new GUID
      */
     static newGuid(): string {
-        var guidHolder = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx";
-        var hex = "0123456789abcdef";
-        var r = 0;
-        var guidResponse = "";
+        const guidHolder: string = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx";
+        const hex: string  = "0123456789abcdef";
+        var r: number = 0;
+        let guidResponse: string = "";
         for (var i = 0; i < 36; i++) {
             if (guidHolder[i] !== "-" && guidHolder[i] !== "4") {
                 // each x and y needs to be random
@@ -680,7 +669,7 @@ class BrowserHelpers {
      */
     static supportsLocalStorage(): boolean {
         try {
-            return Boolean("localStorage" in window && window["localStorage"]);
+            return Boolean("localStorage" in window && window.localStorage);
         } catch (e) {
             return false;
         }
@@ -692,7 +681,7 @@ class BrowserHelpers {
      */
     static supportsSessionStorage(): boolean {
         try {
-            return Boolean("sessionStorage" in window && window["sessionStorage"]);
+            return Boolean("sessionStorage" in window && window.sessionStorage);
         } catch (e) {
             return false;
         }
@@ -713,12 +702,15 @@ enum LoggingLevels {
  * @description General Constants
  */
 class Constants {
-    ACCESS_TOKEN: string = "access_token";
-    EXPIRES_IN: string = "expires_in";
-    ID_TOKEN: string = "id_token";
-    ERROR_DESCRIPTION: string = "error_description";
-    SESSION_STATE: string = "session_state";
-    STORAGE = {
+
+    public static LIBRARY_VERSION: string = "1.0.8";
+
+    public ACCESS_TOKEN: string = "access_token";
+    public EXPIRES_IN: string = "expires_in";
+    public ID_TOKEN: string = "id_token";
+    public ERROR_DESCRIPTION: string = "error_description";
+    public SESSION_STATE: string = "session_state";
+    public STORAGE = {
         TOKEN_KEYS:"adal.token.keys",
         ACCESS_TOKEN_KEY:"adal.access.token.key",
         EXPIRATION_KEY:"adal.expiration.key",
@@ -738,15 +730,14 @@ class Constants {
         LOGIN_REQUEST:"adal.login.request",
         LOGIN_ERROR:"adal.login.error"
     };
-    RESOURCE_DELIMETER: string = "|";
-    LOGGING_LEVEL = LoggingLevels;
-    LEVEL_STRING_MAP: adal.IStringMap = {
+    public RESOURCE_DELIMETER: string = "|";
+    public LOGGING_LEVEL = LoggingLevels;
+    public LEVEL_STRING_MAP: adal.IStringMap = {
         0: "ERROR:",
         1: "WARNING:",
         2: "INFO:",
         3: "VERBOSE:"
     };
-    static LIBRARY_VERSION: string = "1.0.8";
 }
 
 /**
@@ -756,12 +747,12 @@ class Logging {
     /**
      * @desc    The Logging Level
      */
-    static level: LoggingLevels = 0;
+    public static level: LoggingLevels = 0;
 
     /**
      * @desc Logs the specified message
      */
-    static log: adal.ILogFunction = (m: string) => { console.log(m); };
+    public static log: adal.ILogFunction = (m: string) => { console.log(m); };
 }
 
 /**
@@ -776,16 +767,16 @@ class AuthenticationContext implements adal.IAuthenticationContext {
     private _renewStates: Array<string> = [];
     private _activeRenewals: adal.IRenewalList;
 
-    instance: string="https://login.microsoftonline.com/";
-    config: adal.IConfig;
-    popUp: boolean = false;
-    frameCallInProgress: boolean;
-    callback: adal.IRequestCallback;
-    idTokenNonce: string;
-    renewActive = false;
-    singletonInstance:AuthenticationContext;
+    public instance: string="https://login.microsoftonline.com/";
+    public config: adal.IConfig;
+    public popUp: boolean = false;
+    public frameCallInProgress: boolean;
+    public callback: adal.IRequestCallback;
+    public idTokenNonce: string;
+    public renewActive = false;
+    public singletonInstance:AuthenticationContext;
 
-    REQUEST_TYPE:adal.IRequestTypes = {
+    public REQUEST_TYPE:adal.IRequestTypes = {
         LOGIN: "LOGIN",
         RENEW_TOKEN: "RENEW_TOKEN",
         ID_TOKEN: "ID_TOKEN",
@@ -795,7 +786,7 @@ class AuthenticationContext implements adal.IAuthenticationContext {
 
     public Library_Version:string=this._libVersion();
 
-    getResourceForEndpoint(endpoint: string): string {
+    public getResourceForEndpoint(endpoint: string): string {
         if (this.config && this.config.endpoints) {
             for (var configEndpoint in this.config.endpoints) {
                 // configEndpoint is like /api/Todo requested endpoint can be /api/Todo/1
@@ -821,9 +812,9 @@ class AuthenticationContext implements adal.IAuthenticationContext {
         return null;
     }
 
-    loginInProgress(): boolean { return this._loginInProgress; }
+    public loginInProgress(): boolean { return this._loginInProgress; }
 
-    clearCache(): void {
+    public clearCache(): void {
         this._saveItem(this.CONSTANTS.STORAGE.ACCESS_TOKEN_KEY, "");
         this._saveItem(this.CONSTANTS.STORAGE.EXPIRATION_KEY, 0);
         this._saveItem(this.CONSTANTS.STORAGE.FAILED_RENEW, "");
@@ -849,7 +840,7 @@ class AuthenticationContext implements adal.IAuthenticationContext {
         this._saveItem(this.CONSTANTS.STORAGE.TOKEN_KEYS, "");
     }
 
-    clearCacheForResource(resource: string): void {
+    public clearCacheForResource(resource: string): void {
         this._saveItem(this.CONSTANTS.STORAGE.FAILED_RENEW, "");
         this._saveItem(this.CONSTANTS.STORAGE.STATE_RENEW, "");
         this._saveItem(this.CONSTANTS.STORAGE.STATE_IDTOKEN, "");
@@ -861,11 +852,11 @@ class AuthenticationContext implements adal.IAuthenticationContext {
         }
     }
 
-    getLoginError(): string {
+    public getLoginError(): string {
         return this._getItem(this.CONSTANTS.STORAGE.LOGIN_ERROR);
     }
 
-    log(level: number, message: string, error: any): void {
+    public log(level: number, message: string, error: any): void {
         if (level <= Logging.level) {
             var correlationId = this.config.correlationId;
             var timestamp = new Date().toUTCString();
@@ -878,23 +869,23 @@ class AuthenticationContext implements adal.IAuthenticationContext {
         }
     }
 
-    error(message: string, error: any): void {
+    public error(message: string, error: any): void {
         this.log(this.CONSTANTS.LOGGING_LEVEL.ERROR, message, error);
     };
 
-    warn(message: string): void {
+    public warn(message: string): void {
         this.log(this.CONSTANTS.LOGGING_LEVEL.WARN, message, null);
     };
 
-    info(message: string): void {
+    public info(message: string): void {
         this.log(this.CONSTANTS.LOGGING_LEVEL.INFO, message, null);
     };
 
-    verbose(message: string): void {
+    public verbose(message: string): void {
         this.log(this.CONSTANTS.LOGGING_LEVEL.VERBOSE, message, null);
     };
 
-    isCallback(hash: string): boolean {
+    public isCallback(hash: string): boolean {
         hash = this.getHash(hash);
         var parameters = RequestParameters.deserialize(hash);
         return (
@@ -904,7 +895,7 @@ class AuthenticationContext implements adal.IAuthenticationContext {
         );
     }
 
-    getCachedToken(resource: string): string {
+    public getCachedToken(resource: string): string {
         if (!this.hasResource(resource)) {
             return null;
         }
@@ -924,7 +915,7 @@ class AuthenticationContext implements adal.IAuthenticationContext {
         }
     }
 
-    getHostFromUri(uri: string): string {
+    public getHostFromUri(uri: string): string {
         // remove http:// or https:// from uri
         var extractedUri = String(uri).replace(/^(https?:)\/\//, "");
 
@@ -932,23 +923,23 @@ class AuthenticationContext implements adal.IAuthenticationContext {
         return extractedUri;
     }
 
-    decode(base64idToken: string): string {
+    public decode(base64idToken: string): string {
         return Token.decode(base64idToken);
     }
 
-    newGuid(): string {
+    public newGuid(): string {
         return Guid.newGuid();
     }
 
-    getItem(key: string): any {
+    public getItem(key: string): any {
         return this._getItem(key);
     }
 
-    saveItem(key: string, obj: any): boolean {
+    public saveItem(key: string, obj: any): boolean {
         return this._saveItem(key, obj);
     }
 
-    getUser(callback: adal.IRequestCallback): adal.IUser {
+    public getUser(callback: adal.IRequestCallback): adal.IUser {
         // IDToken is first call
         if (typeof callback !== "function") {
             throw new Error("callback is not a function");
@@ -963,7 +954,7 @@ class AuthenticationContext implements adal.IAuthenticationContext {
         }
 
         // frame is used to get idtoken
-        var idtoken = this._getItem(this.CONSTANTS.STORAGE.IDTOKEN);
+        let idtoken:string = this._getItem(this.CONSTANTS.STORAGE.IDTOKEN);
         if (!this.isEmpty(idtoken)) {
             this.info("User exists in cache: ");
             this._user = this.createUser(idtoken);
@@ -974,14 +965,14 @@ class AuthenticationContext implements adal.IAuthenticationContext {
         }
     }
 
-    acquireToken(resource: string, callback: adal.IRequestCallback): void {
+    public acquireToken(resource: string, callback: adal.IRequestCallback): void {
         if (this.isEmpty(resource)) {
             this.warn("resource is required");
             callback("resource is required", null);
             return;
         }
 
-        var token = this.getCachedToken(resource);
+        let token: string = this.getCachedToken(resource);
         if (token) {
             this.info("Token is already in cache for resource:" + resource);
             callback(null, token);
@@ -1078,15 +1069,15 @@ class AuthenticationContext implements adal.IAuthenticationContext {
             return this._user;
         }
 
-        var idtoken = this._getItem(this.CONSTANTS.STORAGE.IDTOKEN);
+        let idtoken:string = this._getItem(this.CONSTANTS.STORAGE.IDTOKEN);
         this._user = this.createUser(idtoken);
         return this._user;
     }
 
     getRequestInfo(hash: string): adal.IRequestInfo {
         hash = this.getHash(hash);
-        var parameters = RequestParameters.deserialize(hash);
-        var requestInfo: adal.IRequestInfo = {
+        let parameters: adal.IRequestParameters = RequestParameters.deserialize(hash);
+        let requestInfo: adal.IRequestInfo = {
             valid: false,
             parameters: new RequestParameters(),
             requestType: this.REQUEST_TYPE.UNKNOWN,
@@ -1102,7 +1093,7 @@ class AuthenticationContext implements adal.IAuthenticationContext {
                 requestInfo.valid = true;
 
                 // which call
-                var stateResponse = "";
+                let stateResponse: string = "";
                 if (parameters.hasOwnProperty("state")) {
                     this.verbose("State: " + parameters.state);
                     stateResponse = parameters.state;
@@ -1119,18 +1110,19 @@ class AuthenticationContext implements adal.IAuthenticationContext {
                         requestInfo.requestType = this.REQUEST_TYPE.LOGIN;
                         requestInfo.stateMatch = true;
                         break;
-
                     case this._getItem(this.CONSTANTS.STORAGE.STATE_IDTOKEN):
                         requestInfo.requestType = this.REQUEST_TYPE.ID_TOKEN;
                         this._saveItem(this.CONSTANTS.STORAGE.STATE_IDTOKEN, "");
                         requestInfo.stateMatch = true;
+                        break;
+                    default:
                         break;
                 }
 
                 // external api requests may have many renewtoken requests for different resource
                 if (!requestInfo.stateMatch && window.parent && (window.parent as adal.IOAuthWindow).AuthenticationContext) {
                     var statesInParentContext = ((window.parent as adal.IOAuthWindow).AuthenticationContext as AuthenticationContext)._renewStates;
-                    for (var i = 0; i < statesInParentContext.length; i++) {
+                    for (let i: number = 0; i < statesInParentContext.length; i++) {
                         if (statesInParentContext[i] === requestInfo.stateResponse) {
                             requestInfo.requestType = this.REQUEST_TYPE.RENEW_TOKEN;
                             requestInfo.stateMatch = true;
@@ -1170,7 +1162,7 @@ class AuthenticationContext implements adal.IAuthenticationContext {
                     this._saveItem(this.CONSTANTS.STORAGE.SESSION_STATE, requestInfo.parameters[this.CONSTANTS.SESSION_STATE]);
                 }
 
-                var keys: any, resource: string;
+                let keys: any, resource: string;
 
                 if (requestInfo.parameters.hasOwnProperty(this.CONSTANTS.ACCESS_TOKEN)) {
                     this.info("Fragment has access token");
@@ -1224,7 +1216,7 @@ class AuthenticationContext implements adal.IAuthenticationContext {
     login(): void {
 
         // Token is not present and user needs to login
-        var expectedState = Guid.newGuid();
+        let expectedState: string = Guid.newGuid();
         this.config.state = expectedState;
         this._idTokenNonce = Guid.newGuid();
         this.verbose("Expected state: " + expectedState + " startPage:" + window.location);
@@ -1237,7 +1229,7 @@ class AuthenticationContext implements adal.IAuthenticationContext {
         this._saveItem(this.CONSTANTS.STORAGE.ERROR_DESCRIPTION, "");
 
 
-        var urlNavigate = this.getNavigateUrl("id_token", null) + "&nonce=" + encodeURIComponent(this._idTokenNonce);
+        let urlNavigate:string = this.getNavigateUrl("id_token", null) + "&nonce=" + encodeURIComponent(this._idTokenNonce);
         this.frameCallInProgress = false;
         this._loginInProgress = true;
         if (this.config.displayCall) {
@@ -1251,9 +1243,9 @@ class AuthenticationContext implements adal.IAuthenticationContext {
 
     logOut(): void {
         this.clearCache();
-        var tenant = "common";
-        var logout = "";
-        this._user = null;
+        let tenant:string = "common";
+        let logout:string = "";
+        this._user = undefined;
         if (this.config.tenant) {
             tenant = this.config.tenant;
         }
@@ -1501,12 +1493,12 @@ class AuthenticationContext implements adal.IAuthenticationContext {
         // use iframe to try refresh token
         this.info("adal:[renewIdToken]Renewing Id Token...");
         if (!this.hasResource(this.config.clientId)) {
-            var keys = this._getItem(this.CONSTANTS.STORAGE.TOKEN_KEYS) || "";
+            let keys: string = this._getItem(this.CONSTANTS.STORAGE.TOKEN_KEYS) || "";
             this._saveItem(this.CONSTANTS.STORAGE.TOKEN_KEYS, keys + this.config.clientId + this.CONSTANTS.RESOURCE_DELIMETER);
         }
 
-        var frameHandle = this.addAdalFrame("adalIdTokenFrame");
-        var expectedState = Guid.newGuid() + "|" + this.config.clientId;
+        let frameHandle: HTMLIFrameElement = this.addAdalFrame("adalIdTokenFrame");
+        let expectedState: string = Guid.newGuid() + "|" + this.config.clientId;
         this._idTokenNonce = Guid.newGuid();
         this._saveItem(this.CONSTANTS.STORAGE.NONCE_IDTOKEN, this._idTokenNonce);
         this.config.state = expectedState;
@@ -1520,7 +1512,7 @@ class AuthenticationContext implements adal.IAuthenticationContext {
 
         // don't add domain_hint twice if user provided it in the extraQueryParameter value
         if (!this.urlContainsQueryStringParameter("domain_hint", urlNavigate)) {
-            let domainHint = this.getDomainHint();
+            let domainHint: string = this.getDomainHint();
             this.info("adal:[renewIdToken]Domain hint:" + domainHint);
             urlNavigate += "&domain_hint=" + encodeURIComponent(domainHint);
         }
@@ -1549,7 +1541,7 @@ class AuthenticationContext implements adal.IAuthenticationContext {
             this.instance = this.config.instance;
         }
 
-        var urlNavigate = this.instance + tenant + "/oauth2/authorize" + RequestParameters.serialize(responseType, this.config, resource) + this.addClientId();
+        let urlNavigate: string = this.instance + tenant + "/oauth2/authorize" + RequestParameters.serialize(responseType, this.config, resource) + this.addClientId();
         this.info("Navigate url:" + urlNavigate);
         return urlNavigate;
     }
@@ -1563,7 +1555,7 @@ class AuthenticationContext implements adal.IAuthenticationContext {
         if (null === obj || "object" !== typeof obj) {
             return obj;
         }
-        var copy: any = {};
+        let copy: any = {};
         Object.keys(obj).forEach((attr: string) => {
             copy[attr] = obj[attr];
         });

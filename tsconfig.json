@@ -10,6 +10,7 @@
     "listFiles": true,
     "outDir": "lib"
   },
+  "compileOnSave": true,
   "exclude": [
       "node_modules","bower_components","lib"
   ]

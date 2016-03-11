@@ -1,28 +1,16 @@
+/**
+ * TODO:Figure out less hacky way to have this thing play nice
+ * when not loading in a CommonJS fashion.
+ */
+declare var module: any;
 import adal = adalts;
 declare module "adal" {
     export = adal;
 }
 /**
- * TODO:Figure out less hacky way to have this thing play nice
- * when not loading in a CommonJS fashion.
- */
-declare var module: adal.IShimModule;
-/**
  * @description Shared ADAL Interfaces
  */
 declare module adalts {
-    interface IShimModuleFunction {
-        (id: string): any;
-    }
-    interface IShimModule {
-        exports: any;
-        require?: IShimModuleFunction;
-        id?: string;
-        filename?: string;
-        loaded?: boolean;
-        parent?: any;
-        children?: any[];
-    }
     /**
      * @description Base Contract for OAuth Url encoded request parameters
      */
@@ -499,6 +487,7 @@ declare enum LoggingLevels {
  * @description General Constants
  */
 declare class Constants {
+    static LIBRARY_VERSION: string;
     ACCESS_TOKEN: string;
     EXPIRES_IN: string;
     ID_TOKEN: string;
@@ -527,7 +516,6 @@ declare class Constants {
     RESOURCE_DELIMETER: string;
     LOGGING_LEVEL: typeof LoggingLevels;
     LEVEL_STRING_MAP: adal.IStringMap;
-    static LIBRARY_VERSION: string;
 }
 /**
  * @description Generic logging class
