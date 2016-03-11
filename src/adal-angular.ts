@@ -2,10 +2,18 @@
 /// <reference path="../typings/angularjs/angular.d.ts" />
 "use strict";
 
+import adalangularts = adalangular;
+
+declare module "adal-angular" {
+    export =adalangularts;
+}
+
 /**
  * TODO:Figure out less hacky way to have this thing play nice
  * when not loading in a CommonJS fashion.
  */
+
+/* tslint:disable:* */
 var module: any;
 if (typeof module !== "undefined" && module.exports) {
     module.exports.inject = (config: adal.IConfig) => {
@@ -13,13 +21,7 @@ if (typeof module !== "undefined" && module.exports) {
         return new $adal(config);
     };
 }
-
-console.log("adal-angular:Initializing Angular HTTP binding service...");
-import adalangularts = adalangular;
-
-declare module "adal-angular" {
-    export=adalangularts;
-}
+/* tslint:enable:* */
 
 /**
  * @description ADAL Interfaces used by angular bindings.
@@ -105,7 +107,6 @@ declare module adalangular {
         init(configOptions: adal.IConfig, httpProvider: ng.IHttpProvider): void;
     }
 }
-
 
 //why bother otherwise?? this is an angular binding
 if (angular) {
@@ -435,8 +436,4 @@ if (angular) {
 } else {
     console.error("Angular.JS is not included");
 }
-
-
-
-console.log("adal-angular:loading complete!");
 

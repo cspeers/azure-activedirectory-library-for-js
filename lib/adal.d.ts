@@ -358,289 +358,262 @@ declare module adalts {
     }
 }
 /**
- * @description Concrete implementation of OAuth Request Parameters
+ * @desc Concrete Adal Interfaces
  */
-declare class RequestParameters implements adal.IRequestParameters {
+declare module adalts {
+    function inject(config: IConfig): IAuthenticationContext;
     /**
-     * @desc    {string}    The current error
+     * @description Concrete implementation of OAuth Request Parameters
      */
-    error: string;
+    class RequestParameters implements adal.IRequestParameters {
+        /**
+         * @desc    {string}    The current error
+         */
+        error: string;
+        /**
+         * @desc    {string}    The current error description
+         */
+        errorDescription: string;
+        /**
+         * @desc    {string}    The current id token
+         */
+        id_token: string;
+        /**
+         * @desc    {string}    The current access token
+         */
+        access_token: string;
+        /**
+         * @desc    {string}    The current nonce state
+         */
+        state: string;
+        /**
+         * @desc    Deserializes OAuth request parameters from a URL string
+         * @param   query {string} The URL query string to deserialize
+         * @returns {RequestParameters}
+         */
+        static deserialize(query: string): adal.IRequestParameters;
+        /**
+         * @desc    Serializes OAuth request parameters to a URL string
+         * @param   responseType {string} The desired OAuth response type
+         * @param   obj   {adal.IConfig}  The context configuration
+         * @param   resource  {string}    The desired resource
+         * @returns {string}
+         */
+        static serialize(responseType: string, obj: adal.IConfig, resource: string): string;
+        [key: string]: any;
+    }
     /**
-     * @desc    {string}    The current error description
-     */
-    errorDescription: string;
+    * @description Concrete implementation of JWT
+    * @see IToken
+    */
+    class Token implements adal.IToken {
+        /**
+         * @desc    {string} JWT Header
+         */
+        header: string;
+        /**
+         * @desc    {string} JWT Signed Payload
+         */
+        JWSPayload: string;
+        /**
+         * @desc    {string} JWT Signature
+         */
+        JWSSig: string;
+        /**
+         * @desc    Converts a regex match set to a JWT
+         * @param matches   The regex match set to evaluate
+         * @returns {Token}
+         */
+        static toJwt(matches: RegExpMatchArray): Token;
+        /**
+         * @desc    Decodes a JWT from a string
+         * @param jwtToken  {string}    The encoded token
+         * @returns {adal.IToken} The decoded token
+         */
+        static decodeJwt(jwtToken: string): adal.IToken;
+        /**
+         * @desc    Decodes a Base64 encoded JWT
+         * @param base64IdToken {string} The encoded token string
+         * @returns {string}
+         */
+        static decode(base64IdToken: string): string;
+        /**
+         * @desc    Url decodes a base64 encoded string
+         * @param base64IdToken {string} the base64 encoded token
+         * @returns {string}
+         */
+        static base64DecodeStringUrlSafe(base64IdToken: string): string;
+        static convertUrlSafeToRegularBase64EncodedString(str: string): string;
+        constructor(...args: any[]);
+    }
     /**
-     * @desc    {string}    The current id token
+     * @description Enumeration for Log Severity Levels
      */
-    id_token: string;
+    enum LoggingLevels {
+        ERROR = 0,
+        WARN = 1,
+        INFO = 2,
+        VERBOSE = 3,
+    }
     /**
-     * @desc    {string}    The current access token
+     * @description General Constants
      */
-    access_token: string;
-    /**
-     * @desc    {string}    The current nonce state
-     */
-    state: string;
-    /**
-     * @desc    Deserializes OAuth request parameters from a URL string
-     * @param   query {string} The URL query string to deserialize
-     * @returns {RequestParameters}
-     */
-    static deserialize(query: string): adal.IRequestParameters;
-    /**
-     * @desc    Serializes OAuth request parameters to a URL string
-     * @param   responseType {string} The desired OAuth response type
-     * @param   obj   {adal.IConfig}  The context configuration
-     * @param   resource  {string}    The desired resource
-     * @returns {string}
-     */
-    static serialize(responseType: string, obj: adal.IConfig, resource: string): string;
-    [key: string]: any;
-}
-/**
-* @description Concrete implementation of JWT
-* @see IToken
-*/
-declare class Token implements adal.IToken {
-    /**
-     * @desc    {string} JWT Header
-     */
-    header: string;
-    /**
-     * @desc    {string} JWT Signed Payload
-     */
-    JWSPayload: string;
-    /**
-     * @desc    {string} JWT Signature
-     */
-    JWSSig: string;
-    /**
-     * @desc    Converts a regex match set to a JWT
-     * @param matches   The regex match set to evaluate
-     * @returns {Token}
-     */
-    static toJwt(matches: RegExpMatchArray): Token;
-    /**
-     * @desc    Decodes a JWT from a string
-     * @param jwtToken  {string}    The encoded token
-     * @returns {adal.IToken} The decoded token
-     */
-    static decodeJwt(jwtToken: string): adal.IToken;
-    /**
-     * @desc    Decodes a Base64 encoded JWT
-     * @param base64IdToken {string} The encoded token string
-     * @returns {string}
-     */
-    static decode(base64IdToken: string): string;
-    /**
-     * @desc    Url decodes a base64 encoded string
-     * @param base64IdToken {string} the base64 encoded token
-     * @returns {string}
-     */
-    static base64DecodeStringUrlSafe(base64IdToken: string): string;
-    static convertUrlSafeToRegularBase64EncodedString(str: string): string;
-    constructor(...args: any[]);
-}
-/**
-* @description Helper class for guids
-*/
-declare class Guid {
-    /**
-     * @description returns a new GUID
-     */
-    static newGuid(): string;
-}
-/**
- * @description Helper class for DateTime methods
- */
-declare class DateTime {
-    /**
-     * @desc returns the current time as seconds
-     */
-    static now(): number;
-}
-/**
-* @description Class containing Browser Helper Methods
-*/
-declare class BrowserHelpers {
-    /**
-     * @desc Whether the current browser supports local storage
-     * @returns {boolean}
-     */
-    static supportsLocalStorage(): boolean;
-    /**
-     * @desc Whether the current browser supports session storage
-     * @returns {boolean}
-     */
-    static supportsSessionStorage(): boolean;
-}
-/**
- * @description Enumeration for Log Severity Levels
- */
-declare enum LoggingLevels {
-    ERROR = 0,
-    WARN = 1,
-    INFO = 2,
-    VERBOSE = 3,
-}
-/**
- * @description General Constants
- */
-declare class Constants {
-    static LIBRARY_VERSION: string;
-    ACCESS_TOKEN: string;
-    EXPIRES_IN: string;
-    ID_TOKEN: string;
-    ERROR_DESCRIPTION: string;
-    SESSION_STATE: string;
-    STORAGE: {
-        TOKEN_KEYS: string;
-        ACCESS_TOKEN_KEY: string;
-        EXPIRATION_KEY: string;
-        START_PAGE: string;
-        START_PAGE_PARAMS: string;
-        FAILED_RENEW: string;
-        STATE_LOGIN: string;
-        STATE_RENEW: string;
-        STATE_RENEW_RESOURCE: string;
-        STATE_IDTOKEN: string;
-        NONCE_IDTOKEN: string;
-        SESSION_STATE: string;
-        USERNAME: string;
-        IDTOKEN: string;
-        ERROR: string;
+    class Constants {
+        static LIBRARY_VERSION: string;
+        ACCESS_TOKEN: string;
+        EXPIRES_IN: string;
+        ID_TOKEN: string;
         ERROR_DESCRIPTION: string;
-        LOGIN_REQUEST: string;
-        LOGIN_ERROR: string;
-    };
-    RESOURCE_DELIMETER: string;
-    LOGGING_LEVEL: typeof LoggingLevels;
-    LEVEL_STRING_MAP: adal.IStringMap;
-}
-/**
- * @description Generic logging class
- */
-declare class Logging {
+        SESSION_STATE: string;
+        STORAGE: {
+            TOKEN_KEYS: string;
+            ACCESS_TOKEN_KEY: string;
+            EXPIRATION_KEY: string;
+            START_PAGE: string;
+            START_PAGE_PARAMS: string;
+            FAILED_RENEW: string;
+            STATE_LOGIN: string;
+            STATE_RENEW: string;
+            STATE_RENEW_RESOURCE: string;
+            STATE_IDTOKEN: string;
+            NONCE_IDTOKEN: string;
+            SESSION_STATE: string;
+            USERNAME: string;
+            IDTOKEN: string;
+            ERROR: string;
+            ERROR_DESCRIPTION: string;
+            LOGIN_REQUEST: string;
+            LOGIN_ERROR: string;
+        };
+        RESOURCE_DELIMETER: string;
+        LOGGING_LEVEL: typeof LoggingLevels;
+        LEVEL_STRING_MAP: adal.IStringMap;
+    }
     /**
-     * @desc    The Logging Level
+     * @description Generic logging class
      */
-    static level: LoggingLevels;
+    class Logging {
+        /**
+         * @desc    The Logging Level
+         */
+        static level: LoggingLevels;
+        /**
+         * @desc Logs the specified message
+         */
+        static log: adal.ILogFunction;
+    }
     /**
-     * @desc Logs the specified message
+     * @description Concrete implementation of Azure Active Directory Authentication Context
      */
-    static log: adal.ILogFunction;
-}
-/**
- * @description Concrete implementation of Azure Active Directory Authentication Context
- */
-declare class AuthenticationContext implements adal.IAuthenticationContext {
-    private _user;
-    private _loginInProgress;
-    private _libVersion();
-    private _idTokenNonce;
-    private _renewStates;
-    private _activeRenewals;
-    instance: string;
-    config: adal.IConfig;
-    popUp: boolean;
-    frameCallInProgress: boolean;
-    callback: adal.IRequestCallback;
-    idTokenNonce: string;
-    renewActive: boolean;
-    singletonInstance: AuthenticationContext;
-    REQUEST_TYPE: adal.IRequestTypes;
-    CONSTANTS: Constants;
-    Library_Version: string;
-    getResourceForEndpoint(endpoint: string): string;
-    loginInProgress(): boolean;
-    clearCache(): void;
-    clearCacheForResource(resource: string): void;
-    getLoginError(): string;
-    log(level: number, message: string, error: any): void;
-    error(message: string, error: any): void;
-    warn(message: string): void;
-    info(message: string): void;
-    verbose(message: string): void;
-    isCallback(hash: string): boolean;
-    getCachedToken(resource: string): string;
-    getHostFromUri(uri: string): string;
-    decode(base64idToken: string): string;
-    newGuid(): string;
-    getItem(key: string): any;
-    saveItem(key: string, obj: any): boolean;
-    getUser(callback: adal.IRequestCallback): adal.IUser;
-    acquireToken(resource: string, callback: adal.IRequestCallback): void;
-    registerCallback(expectedState: string, resource: string, callback: adal.IRequestCallback): void;
-    handleWindowCallback(): void;
-    getCachedUser(): adal.IUser;
-    getRequestInfo(hash: string): adal.IRequestInfo;
-    saveTokenFromHash(requestInfo: adal.IRequestInfo): void;
-    login(): void;
-    logOut(): void;
-    private logstatus(msg);
-    private getHash(hash);
-    private expiresIn(expires);
-    private addClientId();
-    private supportsLocalStorage();
-    private urlContainsQueryStringParameter(name, url);
-    private supportsSessionStorage();
-    private _getItem(key);
-    private _saveItem(key, obj);
-    private getResourceFromState(state);
-    private isEmpty(str);
-    private hasResource(key);
-    /**
-     * @desc Creates or repurposes an iframe for authentication
-     * @param iframeId {string} the iframe id
-     */
-    private addAdalFrame(iframeId);
-    /**
-     * @description Loads an iframe for authentication navigation
-     * @param urlNavigate {string}  The url to navigate to
-     * @param frameName {string} the id of the iframe
-     */
-    private loadFrame(urlNavigate, frameName);
-    /**
-     * @description Redirect the Browser to Azure AD Authorization endpoint
-     * @param {string}   urlNavigate The authorization request url
-     */
-    private promptUser(urlNavigate);
-    /**
-     * @desc Retrieves a domain hint for the OAuth request Url
-     * @returns {string}
-     */
-    private getDomainHint();
-    /**
-     * @desc Acquires access token with hidden iframe
-     * @param {string}   resource  ResourceUri identifying the target resource
-     * @param {IRequestCallback} callback The Request Callback
-     */
-    private renewToken(resource, callback);
-    private renewIdToken(callback);
-    /**
-     * @desc    Retrieves the navigation url for the desired response type
-     * @param responseType {string} the desired response type
-     * @param resource  {string}    the target resource uri
-     */
-    private getNavigateUrl(responseType, resource);
-    /**
-     * @description Copies configuration settings
-     * @param obj {any} The input configuration object
-     * @returns {adal.IConfig}  The cloned configuration
-     */
-    private cloneConfig(obj);
-    /**
-     * @desc Decodes a JWT from a base64 encoded payload
-     * @param encodedIdToken The encoded string
-     * @returns {adal.IUserProfile} The decoded JWT Claims
-     */
-    private extractIdToken(encodedIdToken);
-    /**
-     * @description Creates an instance of a user for a given token
-     * @param idToken {string} the JWT containing the claims
-     */
-    private createUser(idToken);
-    constructor(cfg: adal.IConfig);
+    class AuthenticationContext implements adal.IAuthenticationContext {
+        private _user;
+        private _loginInProgress;
+        private _libVersion();
+        private _idTokenNonce;
+        private _renewStates;
+        private _activeRenewals;
+        instance: string;
+        config: adal.IConfig;
+        popUp: boolean;
+        frameCallInProgress: boolean;
+        callback: adal.IRequestCallback;
+        idTokenNonce: string;
+        renewActive: boolean;
+        singletonInstance: AuthenticationContext;
+        REQUEST_TYPE: adal.IRequestTypes;
+        CONSTANTS: Constants;
+        Library_Version: string;
+        getResourceForEndpoint(endpoint: string): string;
+        loginInProgress(): boolean;
+        clearCache(): void;
+        clearCacheForResource(resource: string): void;
+        getLoginError(): string;
+        log(level: number, message: string, error: any): void;
+        error(message: string, error: any): void;
+        warn(message: string): void;
+        info(message: string): void;
+        verbose(message: string): void;
+        isCallback(hash: string): boolean;
+        getCachedToken(resource: string): string;
+        getHostFromUri(uri: string): string;
+        decode(base64idToken: string): string;
+        newGuid(): string;
+        getItem(key: string): any;
+        saveItem(key: string, obj: any): boolean;
+        getUser(callback: adal.IRequestCallback): adal.IUser;
+        acquireToken(resource: string, callback: adal.IRequestCallback): void;
+        registerCallback(expectedState: string, resource: string, callback: adal.IRequestCallback): void;
+        handleWindowCallback(): void;
+        getCachedUser(): adal.IUser;
+        getRequestInfo(hash: string): adal.IRequestInfo;
+        saveTokenFromHash(requestInfo: adal.IRequestInfo): void;
+        login(): void;
+        logOut(): void;
+        private logstatus(msg);
+        private getHash(hash);
+        private expiresIn(expires);
+        private addClientId();
+        private supportsLocalStorage();
+        private urlContainsQueryStringParameter(name, url);
+        private supportsSessionStorage();
+        private _getItem(key);
+        private _saveItem(key, obj);
+        private getResourceFromState(state);
+        private isEmpty(str);
+        private hasResource(key);
+        /**
+         * @desc Creates or repurposes an iframe for authentication
+         * @param iframeId {string} the iframe id
+         */
+        private addAdalFrame(iframeId);
+        /**
+         * @description Loads an iframe for authentication navigation
+         * @param urlNavigate {string}  The url to navigate to
+         * @param frameName {string} the id of the iframe
+         */
+        private loadFrame(urlNavigate, frameName);
+        /**
+         * @description Redirect the Browser to Azure AD Authorization endpoint
+         * @param {string}   urlNavigate The authorization request url
+         */
+        private promptUser(urlNavigate);
+        /**
+         * @desc Retrieves a domain hint for the OAuth request Url
+         * @returns {string}
+         */
+        private getDomainHint();
+        /**
+         * @desc Acquires access token with hidden iframe
+         * @param {string}   resource  ResourceUri identifying the target resource
+         * @param {IRequestCallback} callback The Request Callback
+         */
+        private renewToken(resource, callback);
+        private renewIdToken(callback);
+        /**
+         * @desc    Retrieves the navigation url for the desired response type
+         * @param responseType {string} the desired response type
+         * @param resource  {string}    the target resource uri
+         */
+        private getNavigateUrl(responseType, resource);
+        /**
+         * @description Copies configuration settings
+         * @param obj {any} The input configuration object
+         * @returns {adal.IConfig}  The cloned configuration
+         */
+        private cloneConfig(obj);
+        /**
+         * @desc Decodes a JWT from a base64 encoded payload
+         * @param encodedIdToken The encoded string
+         * @returns {adal.IUserProfile} The decoded JWT Claims
+         */
+        private extractIdToken(encodedIdToken);
+        /**
+         * @description Creates an instance of a user for a given token
+         * @param idToken {string} the JWT containing the claims
+         */
+        private createUser(idToken);
+        constructor(cfg: adal.IConfig);
+    }
 }
 /**
  * Establish the global context contructor declared in adalts/adalts.d.ts

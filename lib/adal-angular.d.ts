@@ -1,14 +1,14 @@
 /// <reference path="adal.d.ts" />
 /// <reference path="../typings/angularjs/angular.d.ts" />
+import adalangularts = adalangular;
+declare module "adal-angular" {
+    export = adalangularts;
+}
 /**
  * TODO:Figure out less hacky way to have this thing play nice
  * when not loading in a CommonJS fashion.
  */
 declare var module: any;
-import adalangularts = adalangular;
-declare module "adal-angular" {
-    export = adalangularts;
-}
 /**
  * @description ADAL Interfaces used by angular bindings.
  */
