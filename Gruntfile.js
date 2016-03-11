@@ -88,11 +88,11 @@ module.exports = function (grunt) {
     // uglify task is producing invalid js file
 
     // jasmine node directly js api 
-    grunt.registerTask('default', ['clean', 'ts','jasmine_node']);
-    grunt.registerTask('angular', ['clean', 'ts', 'karma']);
+    grunt.registerTask('default', ['clean','tslint','ts','jasmine_node']);
+    grunt.registerTask('angular', ['clean', 'tslint', 'ts', 'karma']);
     grunt.registerTask('e2e',["clean","ts",'karma','jasmine_node']);
     grunt.registerTask('lint', ['clean',"tslint"]);
-    grunt.registerTask('doc', ['jsdoc']);
+    grunt.registerTask('doc', ['tslint','ts','jsdoc']);
     grunt.registerTask('minify', ['uglify']);
-    grunt.registerTask('dist',['clean','ts','jsdoc',"uglify"]);
+    grunt.registerTask('dist',['clean','tslint','ts','jsdoc']);
 };

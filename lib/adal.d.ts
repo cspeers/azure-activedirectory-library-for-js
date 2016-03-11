@@ -365,7 +365,7 @@ declare module adalts {
     /**
      * @description Concrete implementation of OAuth Request Parameters
      */
-    class RequestParameters implements adal.IRequestParameters {
+    class RequestParameters implements IRequestParameters {
         /**
          * @desc    {string}    The current error
          */
@@ -406,7 +406,7 @@ declare module adalts {
     * @description Concrete implementation of JWT
     * @see IToken
     */
-    class Token implements adal.IToken {
+    class Token implements IToken {
         /**
          * @desc    {string} JWT Header
          */
@@ -430,7 +430,7 @@ declare module adalts {
          * @param jwtToken  {string}    The encoded token
          * @returns {adal.IToken} The decoded token
          */
-        static decodeJwt(jwtToken: string): adal.IToken;
+        static decodeJwt(jwtToken: string): IToken;
         /**
          * @desc    Decodes a Base64 encoded JWT
          * @param base64IdToken {string} The encoded token string
@@ -445,6 +445,39 @@ declare module adalts {
         static base64DecodeStringUrlSafe(base64IdToken: string): string;
         static convertUrlSafeToRegularBase64EncodedString(str: string): string;
         constructor(...args: any[]);
+    }
+    /**
+    * @description Helper class for guids
+    */
+    class Guid {
+        /**
+         * @description returns a new GUID
+         */
+        static newGuid(): string;
+    }
+    /**
+     * @description Helper class for DateTime methods
+     */
+    class DateTime {
+        /**
+         * @desc returns the current time as seconds
+         */
+        static now(): number;
+    }
+    /**
+    * @description Class containing Browser Helper Methods
+    */
+    class BrowserHelpers {
+        /**
+         * @desc Whether the current browser supports local storage
+         * @returns {boolean}
+         */
+        static supportsLocalStorage(): boolean;
+        /**
+         * @desc Whether the current browser supports session storage
+         * @returns {boolean}
+         */
+        static supportsSessionStorage(): boolean;
     }
     /**
      * @description Enumeration for Log Severity Levels
@@ -487,7 +520,7 @@ declare module adalts {
         };
         RESOURCE_DELIMETER: string;
         LOGGING_LEVEL: typeof LoggingLevels;
-        LEVEL_STRING_MAP: adal.IStringMap;
+        LEVEL_STRING_MAP: IStringMap;
     }
     /**
      * @description Generic logging class
@@ -500,28 +533,28 @@ declare module adalts {
         /**
          * @desc Logs the specified message
          */
-        static log: adal.ILogFunction;
+        static log: ILogFunction;
     }
     /**
      * @description Concrete implementation of Azure Active Directory Authentication Context
      */
-    class AuthenticationContext implements adal.IAuthenticationContext {
+    class AuthenticationContext implements IAuthenticationContext {
         private _user;
         private _loginInProgress;
-        private _libVersion();
         private _idTokenNonce;
         private _renewStates;
         private _activeRenewals;
         instance: string;
-        config: adal.IConfig;
+        config: IConfig;
         popUp: boolean;
         frameCallInProgress: boolean;
-        callback: adal.IRequestCallback;
+        callback: IRequestCallback;
         idTokenNonce: string;
         renewActive: boolean;
         singletonInstance: AuthenticationContext;
-        REQUEST_TYPE: adal.IRequestTypes;
+        REQUEST_TYPE: IRequestTypes;
         CONSTANTS: Constants;
+        acquireToken(resource: string, callback: IRequestCallback): void;
         Library_Version: string;
         getResourceForEndpoint(endpoint: string): string;
         loginInProgress(): boolean;
@@ -538,17 +571,26 @@ declare module adalts {
         getHostFromUri(uri: string): string;
         decode(base64idToken: string): string;
         newGuid(): string;
+        /**
+         * @desc Retrieves an item from the cache
+         * @param key   {string} the storage item key
+         */
         getItem(key: string): any;
+        /**
+         * @desc Saves an item to the cache
+         * @param key   {string} the storage item key
+         * @param obj   {any} the item to be stored
+         */
         saveItem(key: string, obj: any): boolean;
-        getUser(callback: adal.IRequestCallback): adal.IUser;
-        acquireToken(resource: string, callback: adal.IRequestCallback): void;
-        registerCallback(expectedState: string, resource: string, callback: adal.IRequestCallback): void;
+        getUser(callback: IRequestCallback): IUser;
+        getCachedUser(): IUser;
+        getRequestInfo(hash: string): IRequestInfo;
+        registerCallback(expectedState: string, resource: string, callback: IRequestCallback): void;
         handleWindowCallback(): void;
-        getCachedUser(): adal.IUser;
-        getRequestInfo(hash: string): adal.IRequestInfo;
-        saveTokenFromHash(requestInfo: adal.IRequestInfo): void;
+        saveTokenFromHash(requestInfo: IRequestInfo): void;
         login(): void;
         logOut(): void;
+        private _libVersion();
         private logstatus(msg);
         private getHash(hash);
         private expiresIn(expires);
@@ -598,13 +640,13 @@ declare module adalts {
         /**
          * @description Copies configuration settings
          * @param obj {any} The input configuration object
-         * @returns {adal.IConfig}  The cloned configuration
+         * @returns {IConfig}  The cloned configuration
          */
         private cloneConfig(obj);
         /**
          * @desc Decodes a JWT from a base64 encoded payload
          * @param encodedIdToken The encoded string
-         * @returns {adal.IUserProfile} The decoded JWT Claims
+         * @returns {IUserProfile} The decoded JWT Claims
          */
         private extractIdToken(encodedIdToken);
         /**
@@ -612,7 +654,7 @@ declare module adalts {
          * @param idToken {string} the JWT containing the claims
          */
         private createUser(idToken);
-        constructor(cfg: adal.IConfig);
+        constructor(cfg: IConfig);
     }
 }
 /**

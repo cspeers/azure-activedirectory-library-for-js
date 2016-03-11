@@ -413,34 +413,34 @@ module adalts {
     /**
      * @description Concrete implementation of OAuth Request Parameters
      */
-    export class RequestParameters implements adal.IRequestParameters {
+    export class RequestParameters implements IRequestParameters {
         /**
          * @desc    {string}    The current error
          */
-        error: string;
+        public error: string;
         /**
          * @desc    {string}    The current error description
          */
-        errorDescription: string;
+        public errorDescription: string;
         /**
          * @desc    {string}    The current id token
          */
-        id_token: string;
+        public id_token: string;
         /**
          * @desc    {string}    The current access token
          */
-        access_token: string;
+        public access_token: string;
         /**
          * @desc    {string}    The current nonce state
          */
-        state: string;
+        public state: string;
 
         /**
          * @desc    Deserializes OAuth request parameters from a URL string
          * @param   query {string} The URL query string to deserialize
          * @returns {RequestParameters}
          */
-        static deserialize(query: string): adal.IRequestParameters {
+        public static deserialize(query: string): adal.IRequestParameters {
             let match: RegExpMatchArray,
                 pl = /\+/g,  // Regex for replacing addition symbol with a space
                 search = /([^&=]+)=?([^&]*)/g,
@@ -462,7 +462,7 @@ module adalts {
          * @param   resource  {string}    The desired resource
          * @returns {string}
          */
-        static serialize(responseType: string, obj: adal.IConfig, resource: string): string {
+        public static serialize(responseType: string, obj: adal.IConfig, resource: string): string {
             var str: Array<string> = [];
             if (obj !== null) {
                 str.push("?response_type=" + responseType);
@@ -496,7 +496,7 @@ module adalts {
     * @description Concrete implementation of JWT
     * @see IToken
     */
-    export class Token implements adal.IToken {
+    export class Token implements IToken {
 
         /**
          * @desc    {string} JWT Header
@@ -516,7 +516,7 @@ module adalts {
          * @param matches   The regex match set to evaluate
          * @returns {Token}
          */
-        static toJwt(matches: RegExpMatchArray): Token {
+        public static toJwt(matches: RegExpMatchArray): Token {
             return new Token(matches[1], matches[2], matches[3]);
         }
 
@@ -525,7 +525,7 @@ module adalts {
          * @param jwtToken  {string}    The encoded token
          * @returns {adal.IToken} The decoded token
          */
-        static decodeJwt(jwtToken: string): adal.IToken {
+        public static decodeJwt(jwtToken: string): IToken {
             if (jwtToken === null) {
                 return null;
             }
@@ -545,7 +545,7 @@ module adalts {
          * @param base64IdToken {string} The encoded token string
          * @returns {string}
          */
-        static decode(base64IdToken: string): string {
+        public static decode(base64IdToken: string): string {
             let codes: string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
             base64IdToken = String(base64IdToken).replace(/=+$/, "");
 
@@ -622,12 +622,12 @@ module adalts {
     /**
     * @description Helper class for guids
     */
-    class Guid {
+    export class Guid {
 
         /**
          * @description returns a new GUID
          */
-        static newGuid(): string {
+        public static newGuid(): string {
             const guidHolder: string = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx";
             const hex: string = "0123456789abcdef";
             var r: number = 0;
@@ -656,11 +656,11 @@ module adalts {
     /**
      * @description Helper class for DateTime methods
      */
-    class DateTime {
+    export class DateTime {
         /**
          * @desc returns the current time as seconds
          */
-        static now(): number {
+        public static now(): number {
             return Math.round(new Date().getTime() / 1000.0);
         };
     }
@@ -668,13 +668,13 @@ module adalts {
     /**
     * @description Class containing Browser Helper Methods
     */
-    class BrowserHelpers {
+    export class BrowserHelpers {
 
         /**
          * @desc Whether the current browser supports local storage
          * @returns {boolean}
          */
-        static supportsLocalStorage(): boolean {
+        public static supportsLocalStorage(): boolean {
             try {
                 return Boolean("localStorage" in window && window.localStorage);
             } catch (e) {
@@ -686,7 +686,7 @@ module adalts {
          * @desc Whether the current browser supports session storage
          * @returns {boolean}
          */
-        static supportsSessionStorage(): boolean {
+        public static supportsSessionStorage(): boolean {
             try {
                 return Boolean("sessionStorage" in window && window.sessionStorage);
             } catch (e) {
@@ -739,7 +739,7 @@ module adalts {
         };
         public RESOURCE_DELIMETER: string = "|";
         public LOGGING_LEVEL = LoggingLevels;
-        public LEVEL_STRING_MAP: adal.IStringMap = {
+        public LEVEL_STRING_MAP: IStringMap = {
             0: "ERROR:",
             1: "WARNING:",
             2: "INFO:",
@@ -759,39 +759,79 @@ module adalts {
         /**
          * @desc Logs the specified message
          */
-        public static log: adal.ILogFunction = (m: string) => { console.log(m); };
+        public static log: ILogFunction = (m: string) => { console.log(m); };
     }
 
     /**
      * @description Concrete implementation of Azure Active Directory Authentication Context
      */
-    export class AuthenticationContext implements adal.IAuthenticationContext {
+    export class AuthenticationContext implements IAuthenticationContext {
 
-        private _user: adal.IUser;
+        private _user: IUser;
         private _loginInProgress: boolean = false;
-
-        private _libVersion(): string { return Constants.LIBRARY_VERSION; }
-
         private _idTokenNonce: string;
         private _renewStates: Array<string> = [];
-        private _activeRenewals: adal.IRenewalList;
+        private _activeRenewals: IRenewalList;
 
         public instance: string = "https://login.microsoftonline.com/";
-        public config: adal.IConfig;
+        public config: IConfig;
         public popUp: boolean = false;
         public frameCallInProgress: boolean;
-        public callback: adal.IRequestCallback;
+        public callback: IRequestCallback;
         public idTokenNonce: string;
         public renewActive = false;
         public singletonInstance: AuthenticationContext;
-
-        public REQUEST_TYPE: adal.IRequestTypes = {
+        public REQUEST_TYPE: IRequestTypes = {
             LOGIN: "LOGIN",
             RENEW_TOKEN: "RENEW_TOKEN",
             ID_TOKEN: "ID_TOKEN",
             UNKNOWN: "UNKNOWN"
         };
-        CONSTANTS = new Constants();
+        public CONSTANTS = new Constants();
+
+
+        public acquireToken(resource: string, callback: IRequestCallback): void {
+            if (this.isEmpty(resource)) {
+                this.warn("resource is required");
+                callback("resource is required", null);
+                return;
+            }
+
+            let token: string = this.getCachedToken(resource);
+            if (token) {
+                this.info("Token is already in cache for resource:" + resource);
+                callback(null, token);
+                return;
+            }
+
+            if (this._getItem(this.CONSTANTS.STORAGE.FAILED_RENEW)) {
+                this.info("renewToken is failed for resource " + resource + ":" + this._getItem(this.CONSTANTS.STORAGE.FAILED_RENEW));
+                callback(this._getItem(this.CONSTANTS.STORAGE.FAILED_RENEW), null);
+                return;
+            }
+
+            if (!this._user) {
+                this.warn("User login is required");
+                callback("User login is required", null);
+                return;
+            }
+
+            // refresh attept with iframe
+            //Already renewing for this resource, callback when we get the token.
+            if (this._activeRenewals[resource]) {
+                //Active renewals contains the state for each renewal.
+                this.registerCallback(this._activeRenewals[resource], resource, callback);
+            } else {
+                if (resource === this.config.clientId) {
+                    // App uses idtoken to send to api endpoints
+                    // Default resource is tracked as clientid to store this token
+                    this.verbose("renewing idtoken");
+                    this.renewIdToken(callback);
+                } else {
+                    this.renewToken(resource, callback);
+                }
+            }
+        }
 
         public Library_Version: string = this._libVersion();
 
@@ -940,16 +980,25 @@ module adalts {
             return Guid.newGuid();
         }
 
+        /**
+         * @desc Retrieves an item from the cache
+         * @param key   {string} the storage item key
+         */
         public getItem(key: string): any {
             return this._getItem(key);
         }
 
+        /**
+         * @desc Saves an item to the cache
+         * @param key   {string} the storage item key
+         * @param obj   {any} the item to be stored
+         */
         public saveItem(key: string, obj: any): boolean {
             return this._saveItem(key, obj);
         }
 
-        public getUser(callback: adal.IRequestCallback): adal.IUser {
-            // IDToken is first call
+        public getUser(callback: IRequestCallback): IUser {
+            // idToken is first call
             if (typeof callback !== "function") {
                 throw new Error("callback is not a function");
             }
@@ -974,105 +1023,8 @@ module adalts {
             }
         }
 
-        public acquireToken(resource: string, callback: adal.IRequestCallback): void {
-            if (this.isEmpty(resource)) {
-                this.warn("resource is required");
-                callback("resource is required", null);
-                return;
-            }
+        public getCachedUser(): IUser {
 
-            let token: string = this.getCachedToken(resource);
-            if (token) {
-                this.info("Token is already in cache for resource:" + resource);
-                callback(null, token);
-                return;
-            }
-
-            if (this._getItem(this.CONSTANTS.STORAGE.FAILED_RENEW)) {
-                this.info("renewToken is failed for resource " + resource + ":" + this._getItem(this.CONSTANTS.STORAGE.FAILED_RENEW));
-                callback(this._getItem(this.CONSTANTS.STORAGE.FAILED_RENEW), null);
-                return;
-            }
-
-            if (!this._user) {
-                this.warn("User login is required");
-                callback("User login is required", null);
-                return;
-            }
-
-            // refresh attept with iframe
-            //Already renewing for this resource, callback when we get the token.
-            if (this._activeRenewals[resource]) {
-                //Active renewals contains the state for each renewal.
-                this.registerCallback(this._activeRenewals[resource], resource, callback);
-            } else {
-                if (resource === this.config.clientId) {
-                    // App uses idtoken to send to api endpoints
-                    // Default resource is tracked as clientid to store this token
-                    this.verbose("renewing idtoken");
-                    this.renewIdToken(callback);
-                } else {
-                    this.renewToken(resource, callback);
-                }
-            }
-        }
-
-        registerCallback(expectedState: string, resource: string, callback: adal.IRequestCallback): void {
-            this._activeRenewals[resource] = expectedState;
-            if (!(window as adal.IOAuthWindow).callBacksMappedToRenewStates[expectedState]) {
-                (window as adal.IOAuthWindow).callBacksMappedToRenewStates[expectedState] = [];
-            }
-            (window as adal.IOAuthWindow).callBacksMappedToRenewStates[expectedState].push(callback);
-            if (!(window as adal.IOAuthWindow).callBackMappedToRenewStates[expectedState]) {
-                (window as adal.IOAuthWindow).callBackMappedToRenewStates[expectedState] = (message: string, token: string) => {
-                    for (var i = 0; i < (window as adal.IOAuthWindow).callBacksMappedToRenewStates[expectedState].length; ++i) {
-                        (window as adal.IOAuthWindow).callBacksMappedToRenewStates[expectedState][i](message, token);
-                    }
-                    this._activeRenewals[resource] = null;
-                    (window as adal.IOAuthWindow).callBacksMappedToRenewStates[expectedState] = null;
-                    (window as adal.IOAuthWindow).callBackMappedToRenewStates[expectedState] = null;
-                };
-            }
-        }
-
-        handleWindowCallback(): void {
-            // This is for regular javascript usage for redirect handling
-            // need to make sure this is for callback
-            var hash = window.location.hash;
-            if (this.isCallback(hash)) {
-                var requestInfo = this.getRequestInfo(hash);
-                this.info("Returned from redirect url");
-                this.saveTokenFromHash(requestInfo);
-                var callback: adal.IRequestCallback;
-                if ((requestInfo.requestType === this.REQUEST_TYPE.RENEW_TOKEN ||
-                        requestInfo.requestType === this.REQUEST_TYPE.ID_TOKEN) &&
-                    window.parent) {
-                    // iframe call but same single page
-                    this.verbose("Window is in iframe");
-                    callback = (window.parent as adal.IOAuthWindow).callBackMappedToRenewStates[requestInfo.stateResponse];
-                    ((window as any) as adal.IOAuthIFrame).src = "";
-                } else if (window && (window as adal.IOAuthWindow).oauth2Callback) {
-                    this.verbose("Window is redirecting");
-                    callback = this.callback;
-                }
-
-                window.location.hash = "";
-                window.location = this._getItem(this.CONSTANTS.STORAGE.LOGIN_REQUEST);
-                if (callback) {
-                    if (requestInfo.requestType === this.REQUEST_TYPE.RENEW_TOKEN) {
-                        callback(this._getItem(this.CONSTANTS.STORAGE.ERROR_DESCRIPTION), requestInfo.parameters[this.CONSTANTS.ACCESS_TOKEN] || requestInfo.parameters[this.CONSTANTS.ID_TOKEN]);
-                        return;
-                    } else if (requestInfo.requestType === this.REQUEST_TYPE.ID_TOKEN) {
-                        // JS context may not have the user if callback page was different, so parse idtoken again to callback
-                        callback(this._getItem(this.CONSTANTS.STORAGE.ERROR_DESCRIPTION), this.createUser(this._getItem(this.CONSTANTS.STORAGE.IDTOKEN)));
-                        return;
-                    }
-                }
-            }
-
-        }
-
-        getCachedUser(): adal.IUser {
             if (this._user) {
                 return this._user;
             }
@@ -1082,10 +1034,11 @@ module adalts {
             return this._user;
         }
 
-        getRequestInfo(hash: string): adal.IRequestInfo {
+        public getRequestInfo(hash: string): IRequestInfo {
+
             hash = this.getHash(hash);
-            let parameters: adal.IRequestParameters = RequestParameters.deserialize(hash);
-            let requestInfo: adal.IRequestInfo = {
+            let parameters: IRequestParameters = RequestParameters.deserialize(hash);
+            let requestInfo: IRequestInfo = {
                 valid: false,
                 parameters: new RequestParameters(),
                 requestType: this.REQUEST_TYPE.UNKNOWN,
@@ -1114,22 +1067,23 @@ module adalts {
                     // async calls can fire iframe and login request at the same time if developer does not use the API as expected
                     // incoming callback needs to be looked up to find the request type
                     switch (stateResponse) {
-                    case this._getItem(this.CONSTANTS.STORAGE.STATE_LOGIN):
-                        requestInfo.requestType = this.REQUEST_TYPE.LOGIN;
-                        requestInfo.stateMatch = true;
-                        break;
-                    case this._getItem(this.CONSTANTS.STORAGE.STATE_IDTOKEN):
-                        requestInfo.requestType = this.REQUEST_TYPE.ID_TOKEN;
-                        this._saveItem(this.CONSTANTS.STORAGE.STATE_IDTOKEN, "");
-                        requestInfo.stateMatch = true;
-                        break;
-                    default:
-                        break;
+                        case this._getItem(this.CONSTANTS.STORAGE.STATE_LOGIN):
+                            requestInfo.requestType = this.REQUEST_TYPE.LOGIN;
+                            requestInfo.stateMatch = true;
+                            break;
+                        case this._getItem(this.CONSTANTS.STORAGE.STATE_IDTOKEN):
+                            requestInfo.requestType = this.REQUEST_TYPE.ID_TOKEN;
+                            this._saveItem(this.CONSTANTS.STORAGE.STATE_IDTOKEN, "");
+                            requestInfo.stateMatch = true;
+                            break;
+                        default:
+                            break;
                     }
 
                     // external api requests may have many renewtoken requests for different resource
-                    if (!requestInfo.stateMatch && window.parent && (window.parent as adal.IOAuthWindow).AuthenticationContext) {
-                        var statesInParentContext = ((window.parent as adal.IOAuthWindow).AuthenticationContext as AuthenticationContext)._renewStates;
+                    if (!requestInfo.stateMatch && window.parent && (window.parent as IOAuthWindow).AuthenticationContext) {
+                        let aContext: AuthenticationContext = ((window.parent as IOAuthWindow).AuthenticationContext as AuthenticationContext);
+                        var statesInParentContext = aContext._renewStates;
                         for (let i: number = 0; i < statesInParentContext.length; i++) {
                             if (statesInParentContext[i] === requestInfo.stateResponse) {
                                 requestInfo.requestType = this.REQUEST_TYPE.RENEW_TOKEN;
@@ -1144,7 +1098,65 @@ module adalts {
             return requestInfo;
         }
 
-        saveTokenFromHash(requestInfo: adal.IRequestInfo): void {
+        public registerCallback(expectedState: string, resource: string, callback: IRequestCallback): void {
+            this._activeRenewals[resource] = expectedState;
+            let oAuthWindow = window as IOAuthWindow;
+            if (!oAuthWindow.callBacksMappedToRenewStates[expectedState]) {
+                oAuthWindow.callBacksMappedToRenewStates[expectedState] = [];
+            }
+            oAuthWindow.callBacksMappedToRenewStates[expectedState].push(callback);
+            if (!oAuthWindow.callBackMappedToRenewStates[expectedState]) {
+                oAuthWindow.callBackMappedToRenewStates[expectedState] = (message: string, token: string) => {
+                    for (let i: number = 0; i < oAuthWindow.callBacksMappedToRenewStates[expectedState].length; ++i) {
+                        oAuthWindow.callBacksMappedToRenewStates[expectedState][i](message, token);
+                    }
+                    this._activeRenewals[resource] = null;
+                    oAuthWindow.callBacksMappedToRenewStates[expectedState] = null;
+                    oAuthWindow.callBackMappedToRenewStates[expectedState] = null;
+                };
+            }
+        }
+
+        public handleWindowCallback(): void {
+            // This is for regular javascript usage for redirect handling
+            // need to make sure this is for callback
+            let hash:string = window.location.hash;
+            if (this.isCallback(hash)) {
+                let requestInfo: IRequestInfo = this.getRequestInfo(hash);
+                this.info("Returned from redirect url");
+                this.saveTokenFromHash(requestInfo);
+                let callback: IRequestCallback;
+                if ((requestInfo.requestType === this.REQUEST_TYPE.RENEW_TOKEN ||
+                        requestInfo.requestType === this.REQUEST_TYPE.ID_TOKEN) &&
+                    window.parent) {
+                    // iframe call but same single page
+                    this.verbose("Window is in iframe");
+                    callback = (window.parent as IOAuthWindow).callBackMappedToRenewStates[requestInfo.stateResponse];
+                    ((window as any) as IOAuthIFrame).src = "";
+                } else if (window && (window as IOAuthWindow).oauth2Callback) {
+                    this.verbose("Window is redirecting");
+                    callback = this.callback;
+                }
+
+                window.location.hash = "";
+                window.location = this._getItem(this.CONSTANTS.STORAGE.LOGIN_REQUEST);
+                if (callback) {
+                    if (requestInfo.requestType === this.REQUEST_TYPE.RENEW_TOKEN) {
+                        callback(this._getItem(this.CONSTANTS.STORAGE.ERROR_DESCRIPTION),
+                            requestInfo.parameters[this.CONSTANTS.ACCESS_TOKEN] || requestInfo.parameters[this.CONSTANTS.ID_TOKEN]);
+                        return;
+                    } else if (requestInfo.requestType === this.REQUEST_TYPE.ID_TOKEN) {
+                        // JS context may not have the user if callback page was different, so parse idtoken again to callback
+                        callback(this._getItem(this.CONSTANTS.STORAGE.ERROR_DESCRIPTION),
+                            this.createUser(this._getItem(this.CONSTANTS.STORAGE.IDTOKEN)));
+                        return;
+                    }
+                }
+            }
+
+        }
+
+        public saveTokenFromHash(requestInfo: IRequestInfo): void {
             this.info("State status:" + requestInfo.stateMatch + "; Request type:" + requestInfo.requestType);
             this._saveItem(this.CONSTANTS.STORAGE.ERROR, "");
             this._saveItem(this.CONSTANTS.STORAGE.ERROR_DESCRIPTION, "");
@@ -1221,7 +1233,7 @@ module adalts {
             }
         }
 
-        login(): void {
+        public login(): void {
 
             // Token is not present and user needs to login
             let expectedState: string = Guid.newGuid();
@@ -1249,7 +1261,7 @@ module adalts {
             // callback from redirected page will receive fragment. It needs to call oauth2Callback
         }
 
-        logOut(): void {
+        public logOut(): void {
             this.clearCache();
             let tenant: string = "common";
             let logout: string = "";
@@ -1266,10 +1278,12 @@ module adalts {
                 logout = "post_logout_redirect_uri=" + encodeURIComponent(this.config.postLogoutRedirectUri);
             }
 
-            var urlNavigate = this.instance + tenant + "/oauth2/logout?" + logout;
+            let urlNavigate: string = this.instance + tenant + "/oauth2/logout?" + logout;
             this.info("Logout navigate to: " + urlNavigate);
             this.promptUser(urlNavigate);
         }
+
+        private _libVersion(): string { return Constants.LIBRARY_VERSION; }
 
         private logstatus(msg: string) {
             if (console) {
@@ -1283,7 +1297,6 @@ module adalts {
             } else if (hash.indexOf("#") > -1) {
                 hash = hash.substring(1);
             }
-
             return hash;
         }
 
@@ -1303,7 +1316,7 @@ module adalts {
 
         private urlContainsQueryStringParameter(name: string, url: string): boolean {
             // regex to detect pattern of a ? or & followed by the name parameter and an equals character
-            var regex = new RegExp("[\\?&]" + name + "=");
+            let regex: RegExp = new RegExp("[\\?&]" + name + "=");
             return regex.test(url);
         }
 
@@ -1371,7 +1384,7 @@ module adalts {
         }
 
         private hasResource(key: string): boolean {
-            var keys = this._getItem(this.CONSTANTS.STORAGE.TOKEN_KEYS) as string;
+            let keys = this._getItem(this.CONSTANTS.STORAGE.TOKEN_KEYS) as string;
             return keys && !this.isEmpty(keys) && (keys.indexOf(key + this.CONSTANTS.RESOURCE_DELIMETER) > -1);
         }
 
@@ -1386,7 +1399,7 @@ module adalts {
             }
 
             this.logstatus("adal:[addAdalFrame]Add AdalTS frame to document:" + iframeId);
-            var adalFrame = document.getElementById(iframeId) as HTMLIFrameElement;
+            let adalFrame = document.getElementById(iframeId) as HTMLIFrameElement;
             if (!adalFrame) {
                 this.logstatus("adal:[addAdalFrame]Setting up the iFrame id:" + iframeId);
                 if (document.createElement && document.documentElement && window.navigator.userAgent.indexOf("MSIE 5.0") === -1) {
@@ -1465,17 +1478,17 @@ module adalts {
          * @param {string}   resource  ResourceUri identifying the target resource
          * @param {IRequestCallback} callback The Request Callback
          */
-        private renewToken(resource: string, callback: adal.IRequestCallback): void {
+        private renewToken(resource: string, callback: IRequestCallback): void {
             // use iframe to try refresh token
             // use given resource to create new authz url
             this.logstatus("renewToken is called for resource:" + resource);
             if (!this.hasResource(resource)) {
-                var keys = this._getItem(this.CONSTANTS.STORAGE.TOKEN_KEYS) || "";
+                let keys: string = this._getItem(this.CONSTANTS.STORAGE.TOKEN_KEYS) || "";
                 this._saveItem(this.CONSTANTS.STORAGE.TOKEN_KEYS, keys + resource + this.CONSTANTS.RESOURCE_DELIMETER);
             }
 
-            var frameHandle = this.addAdalFrame("adalRenewFrame");
-            var expectedState = Guid.newGuid() + "|" + resource;
+            let frameHandle: HTMLIFrameElement = this.addAdalFrame("adalRenewFrame");
+            let expectedState: string = Guid.newGuid() + "|" + resource;
             this._idTokenNonce = Guid.newGuid();
             this.config.state = expectedState;
             // renew happens in iframe, so it keeps javascript context
@@ -1484,7 +1497,8 @@ module adalts {
             this._saveItem(this.CONSTANTS.STORAGE.FAILED_RENEW, "");
 
             this.logstatus("Renew token Expected state: " + expectedState);
-            var urlNavigate = this.getNavigateUrl("token", resource) + "&prompt=none&login_hint=" + encodeURIComponent(this._user.userName);
+            let urlNavigate: string = this.getNavigateUrl("token", resource) +
+                "&prompt=none&login_hint=" + encodeURIComponent(this._user.userName);
             urlNavigate += "&domain_hint=" + encodeURIComponent(this.getDomainHint());
             urlNavigate += "&nonce=" + encodeURIComponent(this._idTokenNonce);
             this.callback = callback;
@@ -1496,7 +1510,7 @@ module adalts {
             this.loadFrame(urlNavigate, "adalRenewFrame");
         }
 
-        private renewIdToken(callback: adal.IRequestCallback): void {
+        private renewIdToken(callback: IRequestCallback): void {
             // use iframe to try refresh token
             this.info("adal:[renewIdToken]Renewing Id Token...");
             if (!this.hasResource(this.config.clientId)) {
@@ -1515,7 +1529,8 @@ module adalts {
             this._saveItem(this.CONSTANTS.STORAGE.FAILED_RENEW, "");
 
             this.verbose("adal:[renewIdToken]Renew Idtoken Expected state:" + expectedState);
-            var urlNavigate = this.getNavigateUrl("id_token", null) + "&prompt=none&login_hint=" + encodeURIComponent(this._user.userName);
+            let urlNavigate: string = this.getNavigateUrl("id_token", null) +
+                "&prompt=none&login_hint=" + encodeURIComponent(this._user.userName);
 
             // don't add domain_hint twice if user provided it in the extraQueryParameter value
             if (!this.urlContainsQueryStringParameter("domain_hint", urlNavigate)) {
@@ -1539,7 +1554,7 @@ module adalts {
          * @param resource  {string}    the target resource uri
          */
         private getNavigateUrl(responseType: string, resource: string): string {
-            var tenant = "common";
+            let tenant: string = "common";
             if (this.config.tenant) {
                 tenant = this.config.tenant;
             }
@@ -1556,9 +1571,9 @@ module adalts {
         /**
          * @description Copies configuration settings
          * @param obj {any} The input configuration object
-         * @returns {adal.IConfig}  The cloned configuration
+         * @returns {IConfig}  The cloned configuration
          */
-        private cloneConfig(obj: any): adal.IConfig {
+        private cloneConfig(obj: any): IConfig {
             if (null === obj || "object" !== typeof obj) {
                 return obj;
             }
@@ -1567,17 +1582,17 @@ module adalts {
                 copy[attr] = obj[attr];
             });
             //TODO:something more graceful than this cast
-            return copy as adal.IConfig;
+            return copy as IConfig;
         }
 
         /**
          * @desc Decodes a JWT from a base64 encoded payload
          * @param encodedIdToken The encoded string
-         * @returns {adal.IUserProfile} The decoded JWT Claims
+         * @returns {IUserProfile} The decoded JWT Claims
          */
-        private extractIdToken(encodedIdToken: string): adal.IUserProfile {
+        private extractIdToken(encodedIdToken: string): IUserProfile {
             // id token will be decoded to get the username
-            var decodedToken = Token.decodeJwt(encodedIdToken);
+            let decodedToken: IToken = Token.decodeJwt(encodedIdToken);
             if (!decodedToken) {
                 return null;
             }
@@ -1601,9 +1616,9 @@ module adalts {
          * @description Creates an instance of a user for a given token
          * @param idToken {string} the JWT containing the claims
          */
-        private createUser(idToken: string): adal.IUser {
-            var user: adal.IUser = null;
-            var parsedJson = this.extractIdToken(idToken);
+        private createUser(idToken: string): IUser {
+            let user: IUser = null;
+            let parsedJson: IUserProfile = this.extractIdToken(idToken);
             if (parsedJson && parsedJson.hasOwnProperty("aud")) {
 
                 if (parsedJson.aud.toLowerCase() === this.config.clientId.toLowerCase()) {
@@ -1625,8 +1640,8 @@ module adalts {
             return user;
         }
 
-        constructor(cfg: adal.IConfig) {
-            var currentdate = new Date();
+        constructor(cfg: IConfig) {
+            let currentdate: Date = new Date();
             console.log("adal-ts:loading complete!");
             this.logstatus("adal:[" + currentdate.getDate() + "]Initializing Active Directory Authentication Library for JS/TS " + Constants.LIBRARY_VERSION);
             if (!this.singletonInstance) {
@@ -1647,9 +1662,9 @@ module adalts {
                     }
                     this.config.resource = this.config.loginResource || "";
                     this._activeRenewals = {};
-                    (window as adal.IOAuthWindow).callBackMappedToRenewStates = {};
-                    (window as adal.IOAuthWindow).callBacksMappedToRenewStates = { values: new Array<adal.IRequestCallback>() };
-                    (window as adal.IOAuthWindow).AuthenticationContext = this;
+                    (window as IOAuthWindow).callBackMappedToRenewStates = {};
+                    (window as IOAuthWindow).callBacksMappedToRenewStates = { values: new Array<IRequestCallback>() };
+                    (window as IOAuthWindow).AuthenticationContext = this;
                 }
             }
             console.log("adal-ts:loading complete!");

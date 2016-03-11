@@ -128,7 +128,7 @@ if (angular) {
             var token = adalContext.getCachedToken(resource);
             if (token) {
                 oAuthData.isAuthenticated = token !== null && token.length > 0;
-                var user = adalContext.getCachedUser() || { userName: "" };
+                let user: adal.IUser = adalContext.getCachedUser() || { userName: "" };
                 oAuthData.userName = user.userName;
                 oAuthData.profile = user.profile;
                 oAuthData.loginError = adalContext.getLoginError();
@@ -136,44 +136,14 @@ if (angular) {
         };
 
         return {
-            init: (configOptions: adal.IConfig, httpProvider: ng.IHttpProvider) => {
-                console.log("adal-angular:AuthenticationServiceProvider.init() - BEGIN");
-                if (configOptions) {
-
-                    // redirect and logout_redirect are set to current location by default
-
-                    var existingHash = window.location.hash;
-                    var pathDefault = window.location.href;
-                    console.log("adal-angular:Existing [window] location:" + pathDefault + " hash:" + existingHash);
-
-                    if (existingHash) {
-                        pathDefault = pathDefault.replace(existingHash, "");
-                    }
-                    configOptions.redirectUri = configOptions.redirectUri || pathDefault;
-                    configOptions.postLogoutRedirectUri = configOptions.postLogoutRedirectUri || pathDefault;
-
-                    if (httpProvider && httpProvider.interceptors) {
-                        console.log("adal-angular:pushed ProtectedResourceInterceptor");
-                        httpProvider.interceptors.push("ProtectedResourceInterceptor");
-                    }
-
-                    console.log("adal-angular:Initializing the Authentication Context");
-
-                    // create instance with given config
-                    adalContext = new $adal(configOptions);
-                } else {
-                    throw new Error("You must set configOptions, when calling init");
-                }
-                updateDataFromCache(adalContext.config.loginResource);
-                console.log("adal-angular:AuthenticationServiceProvider.init() - END");
-            },
             $get: [
-                "$rootScope", "$window", "$q", "$location", "$timeout", ($rootScope: adalangular.IAuthenticationRootScope, $window: ng.IWindowService, $q: ng.IQService,
+                "$rootScope", "$window", "$q", "$location", "$timeout",
+                ($rootScope: adalangular.IAuthenticationRootScope, $window: ng.IWindowService, $q: ng.IQService,
                     $location: ng.ILocationService, $timeout: ng.ITimeoutService): adalangular.IAuthenticationService => {
 
                     console.log("adal-angular:adalAuthenticationService.$get() -> BEGIN");
 
-                    var locationChangeHandler = () => {
+                    let locationChangeHandler: () => void = () => {
 
                         var hash = $window.location.hash;
 
@@ -265,7 +235,7 @@ if (angular) {
                         }, 1);
                     };
 
-                    var loginHandler = () => {
+                    let loginHandler: () => void = () => {
                         adalContext.info("Login event for:" + ($location as any).$$url);
                         if (adalContext.config && adalContext.config.localLoginUrl) {
                             $location.path(adalContext.config.localLoginUrl);
@@ -278,11 +248,11 @@ if (angular) {
                         }
                     };
 
-                    var isADLoginRequired = (route: any, global: any) => {
+                    let isADLoginRequired: (route: any, global: any) => void = (route: any, global: any) => {
                         return global.requireADLogin ? route.requireADLogin !== false : !!route.requireADLogin;
                     };
 
-                    var routeChangeHandler = (e: any, nextRoute: any) => {
+                    let routeChangeHandler: (e: any, nextRoute: any) => void = (e: any, nextRoute: any) => {
                         if (nextRoute && nextRoute.$$route && isADLoginRequired(nextRoute.$$route, adalContext.config)) {
                             if (!oAuthData.isAuthenticated) {
                                 adalContext.info("Route change event for:" + ($location as any).$$url);
@@ -291,23 +261,24 @@ if (angular) {
                         }
                     };
 
-                    var stateChangeHandler = (e: any, toState: any, toParams: any, fromState: any, fromParams: any) => {
-                        if (toState && isADLoginRequired(toState, adalContext.config)) {
-                            if (!oAuthData.isAuthenticated) {
-                                // $location.$$url is set as the page we are coming from
-                                // Update it so we can store the actual location we want to
-                                // redirect to upon returning
-                                ($location as any).$$url = toState.url;
+                    let stateChangeHandler: (e: any, toState: any, toParams: any, fromState: any, fromParams: any) => void =
+                        (e: any, toState: any, toParams: any, fromState: any, fromParams: any) => {
+                            if (toState && isADLoginRequired(toState, adalContext.config)) {
+                                if (!oAuthData.isAuthenticated) {
+                                    // $location.$$url is set as the page we are coming from
+                                    // Update it so we can store the actual location we want to
+                                    // redirect to upon returning
+                                    ($location as any).$$url = toState.url;
 
-                                // Parameters are not stored in the url on stateChange so
-                                // we store them
-                                adalContext.saveItem(adalContext.CONSTANTS.STORAGE.START_PAGE_PARAMS, JSON.stringify(toParams));
+                                    // Parameters are not stored in the url on stateChange so
+                                    // we store them
+                                    adalContext.saveItem(adalContext.CONSTANTS.STORAGE.START_PAGE_PARAMS, JSON.stringify(toParams));
 
-                                adalContext.info("State change event for:" + ($location as any).$$url);
-                                loginHandler();
+                                    adalContext.info("State change event for:" + ($location as any).$$url);
+                                    loginHandler();
+                                }
                             }
-                        }
-                    };
+                        };
 
                     $rootScope.$on("$routeChangeStart", routeChangeHandler);
 
@@ -329,7 +300,7 @@ if (angular) {
                         getCachedToken: (resource: string): string => adalContext.getCachedToken(resource),
                         acquireToken: (resource: string): ng.IPromise<string> => {
                             // automated token request call
-                            var deferred = $q.defer();
+                            let deferred: ng.IDeferred<any> = $q.defer();
                             adalContext.acquireToken(resource, (error, tokenOut) => {
                                 if (error) {
                                     adalContext.error("Error when acquiring token for resource: " + resource, error);
@@ -341,7 +312,7 @@ if (angular) {
                             return deferred.promise;
                         },
                         getUser: (): ng.IPromise<adal.IUser> => {
-                            var deferred = $q.defer();
+                            let deferred: ng.IDeferred<any> = $q.defer();
                             adalContext.getUser((error, user) => {
                                 if (error) {
                                     adalContext.error("Error when getting user", error);
@@ -360,7 +331,38 @@ if (angular) {
                         verbose: (message: string) => adalContext.verbose(message)
                     };
                 }
-            ]
+            ],
+            init: (configOptions: adal.IConfig, httpProvider: ng.IHttpProvider) => {
+                console.log("adal-angular:AuthenticationServiceProvider.init() - BEGIN");
+                if (configOptions) {
+
+                    // redirect and logout_redirect are set to current location by default
+
+                    let existingHash:string = window.location.hash;
+                    let pathDefault: string = window.location.href;
+                    console.log("adal-angular:Existing [window] location:" + pathDefault + " hash:" + existingHash);
+
+                    if (existingHash) {
+                        pathDefault = pathDefault.replace(existingHash, "");
+                    }
+                    configOptions.redirectUri = configOptions.redirectUri || pathDefault;
+                    configOptions.postLogoutRedirectUri = configOptions.postLogoutRedirectUri || pathDefault;
+
+                    if (httpProvider && httpProvider.interceptors) {
+                        console.log("adal-angular:pushed ProtectedResourceInterceptor");
+                        httpProvider.interceptors.push("ProtectedResourceInterceptor");
+                    }
+
+                    console.log("adal-angular:Initializing the Authentication Context");
+
+                    // create instance with given config
+                    adalContext = new $adal(configOptions);
+                } else {
+                    throw new Error("You must set configOptions, when calling init");
+                }
+                updateDataFromCache(adalContext.config.loginResource);
+                console.log("adal-angular:AuthenticationServiceProvider.init() - END");
+            }
         };
     });
     AdalModule.factory("ProtectedResourceInterceptor", [
