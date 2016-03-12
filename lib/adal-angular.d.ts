@@ -1,5 +1,3 @@
-/// <reference path="adal.d.ts" />
-/// <reference path="../typings/angularjs/angular.d.ts" />
 import adalangularts = adalangular;
 declare module "adal-angular" {
     export = adalangularts;

@@ -1,5 +1,3 @@
-/// <reference path="adal.ts" />
-/// <reference path="../typings/angularjs/angular.d.ts" />
 "use strict";
 
 import adalangularts = adalangular;

@@ -1,4 +1,4 @@
-/// <reference path="../typings/node/node.d.ts" />
+/// <reference path="../typings/main.d.ts" />
 /**
  * TODO:Figure out less hacky way to have this thing play nice
  * when not loading in a CommonJS fashion.

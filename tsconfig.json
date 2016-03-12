@@ -11,6 +11,6 @@
   },
   "compileOnSave": true,
   "exclude": [
-      "node_modules","bower_components","lib"
+      "node_modules","bower_components","lib","typings"
   ]
 }
