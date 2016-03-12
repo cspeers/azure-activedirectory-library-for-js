@@ -1,3 +1,4 @@
+/// <reference path="../typings/main.d.ts" />
 import adalangularts = adalangular;
 declare module "adal-angular" {
     export = adalangularts;
@@ -81,4 +82,13 @@ declare module adalangular {
          */
         init(configOptions: adal.IConfig, httpProvider: ng.IHttpProvider): void;
     }
+}
+declare class AuthenticationServiceProviderFactory {
+    static Create(): adalangular.IAuthenticationServiceProvider;
+}
+declare class AuthenticationInterceptorFactory {
+    static Create(authService: adalangular.IAuthenticationService, $q: ng.IQService, $rootScope: adalangular.IAuthenticationRootScope): ng.IHttpInterceptor;
+}
+declare class AdalAngularModule {
+    static init(): void;
 }

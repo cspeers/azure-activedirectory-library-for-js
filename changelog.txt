@@ -1,3 +1,23 @@
+Version 1.0.3
+==========================
+Migrate ambient definitions to typings
+
+Version 1.0.2
+==========================
+Replacement of Shim node module
+
+Version 1.0.1
+==========================
+Bower Package
+
+Version 1.0.0
+==========================
+Initial Version
+
+Version 1.0.8-FORK
+==========================
+Typesciprt Fork
+
 Version 1.0.8
 ==========================
 Fix for persisting route parameters of protected state

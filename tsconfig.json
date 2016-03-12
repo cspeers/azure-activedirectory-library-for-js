@@ -10,7 +10,5 @@
     "outDir": "lib"
   },
   "compileOnSave": true,
-  "exclude": [
-      "node_modules","bower_components","lib","typings"
-  ]
+  "files": ["src/adal.ts","src/adal-angular.ts"]
 }

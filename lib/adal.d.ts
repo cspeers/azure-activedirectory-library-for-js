@@ -101,11 +101,17 @@ declare module adalts {
          * @desc    The user email address
          */
         email: string;
+        /**
+         * @desc    The claim not valid before
+         */
         nbf: number;
         /**
          * @desc    The claim expiration
          */
         exp: number;
+        /**
+         * @desc    The claim issued at
+         */
         iat: number;
         /**
          * @desc    The claim issuer
@@ -116,7 +122,34 @@ declare module adalts {
          * @desc    The claim type
          */
         typ: string;
+        /**
+         *  @desc value used to associate a Client session with an ID Token
+         */
         nonce: string;
+        /**
+         * @desc    The claim scope
+         */
+        scp: string;
+        /**
+         * @desc    Full Name
+         */
+        name: string;
+        /**
+         * @desc    Given name(s) or first name(s)
+         */
+        given_name: string;
+        /**
+         * @desc    Surname(s) or last name(s)
+         */
+        family_name: string;
+        /**
+         * @desc time the information was last updated
+         */
+        updated_at: number;
+        locale: string;
+        zoneinfo: string;
+        profile: string;
+        picture: string;
     }
     /**
      * @description Base contract for an OAuth authenticated user
@@ -191,7 +224,7 @@ declare module adalts {
          * @desc The application id
          */
         clientId: string;
-        /**
+        /**0
          * @desc The target redirect URI
          */
         redirectUri?: string;
@@ -394,7 +427,7 @@ declare module adalts {
          * @param   query {string} The URL query string to deserialize
          * @returns {RequestParameters}
          */
-        static deserialize(query: string): adal.IRequestParameters;
+        static deserialize(query: string): IRequestParameters;
         /**
          * @desc    Serializes OAuth request parameters to a URL string
          * @param   responseType {string} The desired OAuth response type
@@ -402,7 +435,7 @@ declare module adalts {
          * @param   resource  {string}    The desired resource
          * @returns {string}
          */
-        static serialize(responseType: string, obj: adal.IConfig, resource: string): string;
+        static serialize(responseType: string, obj: IConfig, resource: string): string;
         [key: string]: any;
     }
     /**

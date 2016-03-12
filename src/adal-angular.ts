@@ -1,3 +1,5 @@
+///<reference path="../typings/main.d.ts"/>
+
 "use strict";
 
 import adalangularts = adalangular;
@@ -104,20 +106,16 @@ declare module adalangular {
     }
 }
 
-//why bother otherwise?? this is an angular binding
-if (angular) {
-    var AdalModule = angular.module("AdalAngular", []);
-    AdalModule.provider("adalAuthenticationService", (): adalangular.IAuthenticationServiceProvider => {
+class AuthenticationServiceProviderFactory {
 
-        console.log("adal-angular:initializing adalAuthenticationService...");
+    static Create(): adalangular.IAuthenticationServiceProvider {
         let adalContext: adal.IAuthenticationContext = null;
-        let oAuthData:adal.IOAuthData = {
-            userName:"",
-            isAuthenticated:false,
-            loginError:"",
-            profile:null
+        let oAuthData: adal.IOAuthData = {
+            userName: "",
+            isAuthenticated: false,
+            loginError: "",
+            profile: null
         };
-
         var updateDataFromCache = (resource: string): void => {
             console.log("adal-angular:Updating data from cache for resource:" + resource);
             // only cache lookup here to not interrupt with events
@@ -334,7 +332,7 @@ if (angular) {
 
                     // redirect and logout_redirect are set to current location by default
 
-                    let existingHash:string = window.location.hash;
+                    let existingHash: string = window.location.hash;
                     let pathDefault: string = window.location.href;
                     console.log("adal-angular:Existing [window] location:" + pathDefault + " hash:" + existingHash);
 
@@ -360,26 +358,27 @@ if (angular) {
                 console.log("adal-angular:AuthenticationServiceProvider.init() - END");
             }
         };
-    });
-    AdalModule.factory("ProtectedResourceInterceptor", [
-        "adalAuthenticationService", "$q", "$rootScope",
-        (authService: adalangular.IAuthenticationService, $q: ng.IQService, $rootScope: adalangular.IAuthenticationRootScope): ng.IHttpInterceptor => {
-            console.log("adal-angular:intializing ProtectedResourceInterceptor...");
-            return {
-                request: (config: adalangular.IAuthenticatedRequestConfig): adalangular.IAuthenticatedRequestConfig | ng.IPromise<adalangular.IAuthenticatedRequestConfig> => {
+    }
+}
 
-                    // This interceptor needs to load service, but dependeny definition causes circular reference error.
+class AuthenticationInterceptorFactory {
+    static Create(authService: adalangular.IAuthenticationService, $q: ng.IQService, $rootScope: adalangular.IAuthenticationRootScope): ng.IHttpInterceptor {
+        console.log("adal-angular:intializing ProtectedResourceInterceptor...");
+        return {
+            request:
+            (config: adalangular.IAuthenticatedRequestConfig): adalangular.IAuthenticatedRequestConfig | ng.IPromise<adalangular.IAuthenticatedRequestConfig> => {
+                    // This interceptor needs to load service, but dependency definition causes circular reference error.
                     // Loading with injector is suggested at github. https://github.com/angular/angular.js/issues/2367
 
                     config.headers = config.headers || { Authorization: null };
 
-                    var resource = authService.getResourceForEndpoint(config.url);
+                    let resource: string = authService.getResourceForEndpoint(config.url);
                     if (resource === null) {
                         return config;
                     }
 
-                    var tokenStored = authService.getCachedToken(resource);
-                    var isEndpoint = false;
+                    let tokenStored: string = authService.getCachedToken(resource);
+                    let isEndpoint: boolean = false;
 
                     if (tokenStored) {
                         authService.info("Token is avaliable for this url " + config.url);
@@ -388,9 +387,11 @@ if (angular) {
                         return config;
                     } else {
                         if (authService.config) {
-                            for (var endpointUrl in authService.config.endpoints) {
-                                if (config.url.indexOf(endpointUrl) > -1) {
-                                    isEndpoint = true;
+                            for (let endpointUrl in authService.config.endpoints) {
+                                if (authService.config.endpoints.hasOwnProperty(endpointUrl)) {
+                                    if (config.url.indexOf(endpointUrl) > -1) {
+                                        isEndpoint = true;
+                                    }
                                 }
                             }
                         }
@@ -402,7 +403,7 @@ if (angular) {
                         } else if (authService.config && isEndpoint) {
                             // external endpoints
                             // delayed request to return after iframe completes
-                            var delayedRequest = $q.defer();
+                            let delayedRequest = $q.defer();
                             authService.acquireToken(resource).then((token) => {
                                 authService.verbose("Token is avaliable");
                                 config.headers.Authorization = "Bearer " + token;
@@ -414,24 +415,47 @@ if (angular) {
                             return delayedRequest.promise;
                         }
                     }
-
                     return config;
-
                 },
-                responseError: (rejection: any): any | ng.IPromise<any> => {
-                    console.log("adal-angular:AuthenticationInterceptor.responseError");
-                    authService.info("Getting error in the response");
-                    if (rejection && rejection.status === 401) {
-                        var resource = authService.getResourceForEndpoint(rejection.config.url);
-                        authService.clearCacheForResource(resource);
-                        $rootScope.$broadcast("adal:notAuthorized", rejection, resource);
-                    }
-                    return $q.reject(rejection);
+            responseError: (rejection: any): any | ng.IPromise<any> => {
+                console.log("adal-angular:AuthenticationInterceptor.responseError");
+                authService.info("Getting error in the response");
+                if (rejection && rejection.status === 401) {
+                    let resource = authService.getResourceForEndpoint(rejection.config.url);
+                    authService.clearCacheForResource(resource);
+                    $rootScope.$broadcast("adal:notAuthorized", rejection, resource);
                 }
-            };
-        }
-    ]);
-} else {
-    console.error("Angular.JS is not included");
+                return $q.reject(rejection);
+            }
+        };
+    }
 }
+
+class AdalAngularModule {
+
+    static init(): void {
+        //why bother otherwise?? this is an angular binding
+        if (angular) {
+            var AdalModule = angular.module("AdalAngular", []);
+            AdalModule.provider("adalAuthenticationService", (): adalangular.IAuthenticationServiceProvider => {
+
+                console.log("adal-angular:initializing adalAuthenticationService...");
+                return AuthenticationServiceProviderFactory.Create();
+            });
+            AdalModule.factory("ProtectedResourceInterceptor", [
+                "adalAuthenticationService", "$q", "$rootScope",
+                (authService: adalangular.IAuthenticationService, $q: ng.IQService, $rootScope: adalangular.IAuthenticationRootScope): ng.IHttpInterceptor => {
+                    console.log("adal-angular:intializing ProtectedResourceInterceptor...");
+                    return AuthenticationInterceptorFactory.Create(authService, $q, $rootScope);
+                }
+            ]);
+        } else {
+            console.error("Angular.JS is not included");
+        }
+    }
+}
+
+AdalAngularModule.init();
+
+
 
