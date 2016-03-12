@@ -16,8 +16,7 @@ declare module "adal-angular" {
 /* tslint:disable:* */
 if (typeof module !== "undefined" && module.exports) {
     module.exports.inject = (config: adal.IConfig) => {
-
-        return new $adal(config);
+        return new $Adal(config);
     };
 }
 /* tslint:enable:* */
@@ -355,7 +354,7 @@ if (angular) {
                     console.log("adal-angular:Initializing the Authentication Context");
 
                     // create instance with given config
-                    adalContext = new $adal(configOptions);
+                    adalContext = new $Adal(configOptions);
                 } else {
                     throw new Error("You must set configOptions, when calling init");
                 }

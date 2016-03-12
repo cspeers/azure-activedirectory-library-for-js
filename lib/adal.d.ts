@@ -1,8 +1,9 @@
+/// <reference path="../typings/node/node.d.ts" />
 /**
  * TODO:Figure out less hacky way to have this thing play nice
  * when not loading in a CommonJS fashion.
  */
-declare var module: any;
+declare var module: adal.IShimModule;
 import adal = adalts;
 declare module "adal" {
     export = adal;
@@ -11,6 +12,8 @@ declare module "adal" {
  * @description Shared ADAL Interfaces
  */
 declare module adalts {
+    interface IShimModule extends NodeModule {
+    }
     /**
      * @description Base Contract for OAuth Url encoded request parameters
      */
@@ -660,4 +663,4 @@ declare module adalts {
 /**
  * Establish the global context contructor declared in adalts/adalts.d.ts
  */
-declare var $adal: adal.IContextConstructor<adal.IAuthenticationContext>;
+declare var $Adal: adal.IContextConstructor<adal.IAuthenticationContext>;

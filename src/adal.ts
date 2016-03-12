@@ -1,3 +1,6 @@
+/// <reference path="../typings/node/node.d.ts" />
+
+
 "use strict";
 
 /**
@@ -6,7 +9,7 @@
  */
 
 /* tslint:disable:* */
-declare var module: any;
+declare var module: adal.IShimModule;
 if (typeof module !== "undefined" && module.exports) {
     console.log("adal:Module inject required");
     module.exports.inject = (config: adal.IConfig) => {
@@ -27,6 +30,8 @@ declare module "adal" {
  * @description Shared ADAL Interfaces
  */
 declare module adalts {
+
+    export interface IShimModule extends NodeModule { }
 
     /**
      * @description Base Contract for OAuth Url encoded request parameters
@@ -1675,5 +1680,5 @@ module adalts {
 /**
  * Establish the global context contructor declared in adalts/adalts.d.ts
  */
-var $adal: adal.IContextConstructor<adal.IAuthenticationContext> = adalts.AuthenticationContext;
+var $Adal: adal.IContextConstructor<adal.IAuthenticationContext> = adalts.AuthenticationContext;
 
