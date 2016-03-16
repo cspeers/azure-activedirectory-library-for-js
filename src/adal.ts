@@ -847,19 +847,19 @@ module adalts {
 
             let token: string = this.getCachedToken(resource);
             if (token) {
-                this.info("adal:Token is already in cache for resource:" + resource);
+                this.info("adal:[acquireToken]Token is already in cache for resource:" + resource);
                 callback(null, token);
                 return;
             }
 
             if (this._getItem(this.CONSTANTS.STORAGE.FAILED_RENEW)) {
-                this.info("adal:renewToken is failed for resource " + resource + ":" + this._getItem(this.CONSTANTS.STORAGE.FAILED_RENEW));
+                this.info("adal:[acquireToken]renewToken is failed for resource " + resource + ":" + this._getItem(this.CONSTANTS.STORAGE.FAILED_RENEW));
                 callback(this._getItem(this.CONSTANTS.STORAGE.FAILED_RENEW), null);
                 return;
             }
 
             if (!this._user) {
-                this.warn("User login is required");
+                this.warn("adal:[acquireToken]User login is required");
                 callback("User login is required", null);
                 return;
             }
@@ -873,7 +873,7 @@ module adalts {
                 if (resource === this.config.clientId) {
                     // App uses idtoken to send to api endpoints
                     // Default resource is tracked as clientid to store this token
-                    this.verbose("renewing idtoken");
+                    this.verbose("adal:[acquireToken] resource matched client id.Renewing idtoken");
                     this.renewIdToken(callback);
                 } else {
                     this.renewToken(resource, callback);
@@ -888,7 +888,9 @@ module adalts {
                 for (let configEndpoint in this.config.endpoints) {
                     // configEndpoint is like /api/Todo requested endpoint can be /api/Todo/1
                     if (endpoint.indexOf(configEndpoint) > -1) {
-                        return this.config.endpoints[configEndpoint];
+                        let endpointMatch=this.config.endpoints[configEndpoint];
+                        this.info("adal:[getResourceForEndpoint] using configured endpoint match "  + endpointMatch);
+                        return endpointMatch;
                     }
                 }
             }
@@ -897,14 +899,19 @@ module adalts {
             // check if it's staring from http or https, needs to match with app host
             if (endpoint.indexOf("http://") > -1 || endpoint.indexOf("https://") > -1) {
                 if (this.getHostFromUri(endpoint) === this.getHostFromUri(this.config.redirectUri)) {
-                    return this.config.loginResource;
+                    let endpointMatch=this.config.loginResource;
+                    this.info("adal:[getResourceForEndpoint] using loginResource"  + endpointMatch);
+                    return endpointMatch;
                 }
             } else {
                 // in angular level, the url for $http interceptor call could be relative url,
                 // if it's relative call, we'll treat it as app backend call.
-                return this.config.loginResource;
+                let endpointMatch=this.config.loginResource;
+                this.info("adal:[getResourceForEndpoint]relative call using loginResource"  + endpointMatch);
+                return endpointMatch;
             }
 
+            this.warn("adal:getResourceForEndpoint: No endpoint match.");
             // if not the app's own backend or not a domain listed in the endpoints structure
             return null;
         }
@@ -1006,6 +1013,7 @@ module adalts {
             let offset = this.config.expireOffsetSeconds || 120;
 
             if (expired && (expired > DateTime.now() + offset)) {
+                this.verbose("adal:[getCachedToken]Found an unexpired token!");
                 return token;
             } else {
                 this._saveItem(this.CONSTANTS.STORAGE.ACCESS_TOKEN_KEY + resource, "");
@@ -1017,7 +1025,6 @@ module adalts {
         public getHostFromUri(uri: string): string {
             // remove http:// or https:// from uri
             let extractedUri: string = String(uri).replace(/^(https?:)\/\//, "");
-
             extractedUri = extractedUri.split("/")[0];
             return extractedUri;
         }
@@ -1050,7 +1057,7 @@ module adalts {
         public getUser(callback: IRequestCallback): IUser {
             // idToken is first call
             if (typeof callback !== "function") {
-                throw new Error("callback is not a function");
+                throw new Error("adal:[getUser]callback is not a function");
             }
 
             this.callback = callback;
@@ -1064,19 +1071,19 @@ module adalts {
             // frame is used to get idtoken
             let idtoken: string = this._getItem(this.CONSTANTS.STORAGE.IDTOKEN);
             if (!this.isEmpty(idtoken)) {
-                this.info("User exists in cache: ");
+                this.info("adal:[getUser]User exists in cache: ");
                 this._user = this.createUser(idtoken);
                 this.callback(null, this._user);
             } else {
-                this.warn("User information is not available");
-                this.callback("User information is not available");
+                this.warn("adal:[getUser]User information is not available");
+                this.callback("adal:[getUser]User information is not available");
             }
         }
 
         public getCachedUser(): IUser {
 
             if (this._user) {
-                this.info("adal: Cached User " + this._user.userName + "Found!:");
+                this.info("adal:[getCachedUser] Cached User " + this._user.userName + "Found!:");
                 return this._user;
             }
             let idtoken: string = this._getItem(this.CONSTANTS.STORAGE.IDTOKEN);
@@ -1106,10 +1113,10 @@ module adalts {
                     // which call
                     let stateResponse: string = "";
                     if (parameters.hasOwnProperty("state")) {
-                        this.verbose("State: " + parameters.state);
+                        this.verbose("adal:[getRequestInfo]State: " + parameters.state);
                         stateResponse = parameters.state;
                     } else {
-                        this.verbose("No state returned");
+                        this.verbose("adal:[getRequestInfo]No state returned");
                     }
 
                     requestInfo.stateResponse = stateResponse;
@@ -1173,18 +1180,18 @@ module adalts {
             let hash:string = window.location.hash;
             if (this.isCallback(hash)) {
                 let requestInfo: IRequestInfo = this.getRequestInfo(hash);
-                this.info("Returned from redirect url");
+                this.info("adal:[handleWindowCallback]Returned from redirect url");
                 this.saveTokenFromHash(requestInfo);
                 let callback: IRequestCallback;
                 if ((requestInfo.requestType === this.REQUEST_TYPE.RENEW_TOKEN ||
                         requestInfo.requestType === this.REQUEST_TYPE.ID_TOKEN) &&
                     window.parent) {
                     // iframe call but same single page
-                    this.verbose("Window is in iframe");
+                    this.verbose("adal:[handleWindowCallback]Window is in iframe");
                     callback = (window.parent as IOAuthWindow).callBackMappedToRenewStates[requestInfo.stateResponse];
                     ((window as any) as IOAuthIFrame).src = "";
                 } else if (window && (window as IOAuthWindow).oauth2Callback) {
-                    this.verbose("Window is redirecting");
+                    this.verbose("adal:[handleWindowCallback]Window is redirecting");
                     callback = this.callback;
                 }
 
@@ -1207,13 +1214,13 @@ module adalts {
         }
 
         public saveTokenFromHash(requestInfo: IRequestInfo): void {
-            this.info("adal:State status:" + requestInfo.stateMatch + "; Request type:" + requestInfo.requestType);
+            this.info("adal:[saveTokenFromHash]State status:" + requestInfo.stateMatch + "; Request type:" + requestInfo.requestType);
             this._saveItem(this.CONSTANTS.STORAGE.ERROR, "");
             this._saveItem(this.CONSTANTS.STORAGE.ERROR_DESCRIPTION, "");
 
             // Record error
             if (requestInfo.parameters.hasOwnProperty(this.CONSTANTS.ERROR_DESCRIPTION)) {
-                this.info("Error :" + requestInfo.parameters.error + "; Error description:" + requestInfo.parameters[this.CONSTANTS.ERROR_DESCRIPTION]);
+                this.info("adal:[saveTokenFromHash]Error :" + requestInfo.parameters.error + "; Error description:" + requestInfo.parameters[this.CONSTANTS.ERROR_DESCRIPTION]);
                 this._saveItem(this.CONSTANTS.STORAGE.FAILED_RENEW, requestInfo.parameters[this.CONSTANTS.ERROR_DESCRIPTION]);
                 this._saveItem(this.CONSTANTS.STORAGE.ERROR, requestInfo.parameters.error);
                 this._saveItem(this.CONSTANTS.STORAGE.ERROR_DESCRIPTION, requestInfo.parameters[this.CONSTANTS.ERROR_DESCRIPTION]);
@@ -1227,7 +1234,7 @@ module adalts {
                 // It must verify the state from redirect
                 if (requestInfo.stateMatch) {
                     // record tokens to storage if exists
-                    this.info("State is right");
+                    this.info("adal:[saveTokenFromHash]State match is found.");
                     if (requestInfo.parameters.hasOwnProperty(this.CONSTANTS.SESSION_STATE)) {
                         this._saveItem(this.CONSTANTS.STORAGE.SESSION_STATE, requestInfo.parameters[this.CONSTANTS.SESSION_STATE]);
                     }
@@ -1235,7 +1242,7 @@ module adalts {
                     let keys: any, resource: string;
 
                     if (requestInfo.parameters.hasOwnProperty(this.CONSTANTS.ACCESS_TOKEN)) {
-                        this.info("Fragment has access token");
+                        this.info("adal:[saveTokenFromHash]Fragment has access token");
                         // default resource
                         resource = this.config.loginResource;
                         if (!this.hasResource(resource)) {
@@ -1289,7 +1296,7 @@ module adalts {
             let expectedState: string = Guid.newGuid();
             this.config.state = expectedState;
             this._idTokenNonce = Guid.newGuid();
-            this.verbose("adal:Expected state: " + expectedState + " startPage:" + window.location);
+            this.verbose("adal:[login]Expected state: " + expectedState + " startPage:" + window.location);
             this._saveItem(this.CONSTANTS.STORAGE.LOGIN_REQUEST, window.location);
             this._saveItem(this.CONSTANTS.STORAGE.LOGIN_ERROR, "");
             this._saveItem(this.CONSTANTS.STORAGE.STATE_LOGIN, expectedState);
@@ -1300,6 +1307,7 @@ module adalts {
 
 
             let urlNavigate: string = this.getNavigateUrl("id_token", null) + "&nonce=" + encodeURIComponent(this._idTokenNonce);
+            this.info("adal:[login]Redirect Uri:" + urlNavigate);
             this.frameCallInProgress = false;
             this._loginInProgress = true;
             if (this.config.displayCall) {
@@ -1329,7 +1337,7 @@ module adalts {
             }
 
             let urlNavigate: string = this.instance + tenant + "/oauth2/logout?" + logout;
-            this.info("adal:Logout navigate to: " + urlNavigate);
+            this.info("adal:[logOut]Logout navigate to: " + urlNavigate);
             this.promptUser(urlNavigate);
         }
 
@@ -1379,7 +1387,7 @@ module adalts {
             if (this.config && this.config.cacheLocation && this.config.cacheLocation === "localStorage") {
 
                 if (!this.supportsLocalStorage()) {
-                    this.info("Local storage is not supported");
+                    this.info("adal:[_getItem]Local storage is not supported");
                     return null;
                 }
 
@@ -1388,7 +1396,7 @@ module adalts {
 
             // Default as session storage
             if (!this.supportsSessionStorage()) {
-                this.info("Session storage is not supported");
+                this.info("adal:[_getItem]Session storage is not supported");
                 return null;
             }
 
@@ -1614,7 +1622,7 @@ module adalts {
             }
 
             let urlNavigate: string = this.instance + tenant + "/oauth2/authorize" + RequestParameters.serialize(responseType, this.config, resource) + this.addClientId();
-            this.info("adal:Navigate url:" + urlNavigate);
+            this.info("adal:Navigate url:" + urlNavigate + "for resource:" + resource);
             return urlNavigate;
         }
 
@@ -1650,7 +1658,7 @@ module adalts {
                 let base64IdToken: string = decodedToken.JWSPayload;
                 let base64Decoded: string = Token.base64DecodeStringUrlSafe(base64IdToken);
                 if (!base64Decoded) {
-                    this.info("The returned id_token could not be base64 url safe decoded.");
+                    this.info("adal:[extractIdToken]The returned id_token could not be base64 url safe decoded.");
                     return null;
                 }
 
@@ -1695,7 +1703,7 @@ module adalts {
 
         constructor(cfg: IConfig) {
             let currentdate: Date = new Date();
-            this.logstatus("adal:[" + currentdate.getDate() + "]Initializing Active Directory Authentication Library for JS/TS " + Constants.LIBRARY_VERSION);
+            this.logstatus("adal:[" + currentdate.toLocaleString() + "]Initializing Active Directory Authentication Library for JS/TS " + Constants.LIBRARY_VERSION);
             if (!this.singletonInstance) {
                 this.singletonInstance = this;
                 if (cfg) {

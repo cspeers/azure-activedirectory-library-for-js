@@ -139,11 +139,11 @@ class AuthenticationServiceProviderFactory {
 
                     let locationChangeHandler: () => void = () => {
 
-                        var hash = $window.location.hash;
+                        let hash = $window.location.hash;
 
                         if (adalContext.isCallback(hash)) {
                             // callback can come from login or iframe request
-                            var requestInfo = adalContext.getRequestInfo(hash);
+                            let requestInfo = adalContext.getRequestInfo(hash);
                             adalContext.saveTokenFromHash(requestInfo);
 
                             if ((<any>$location).$$html5) {
@@ -241,11 +241,9 @@ class AuthenticationServiceProviderFactory {
                             adalContext.login();
                         }
                     };
-
                     let isADLoginRequired: (route: any, global: any) => void = (route: any, global: any) => {
                         return global.requireADLogin ? route.requireADLogin !== false : !!route.requireADLogin;
                     };
-
                     let routeChangeHandler: (e: any, nextRoute: any) => void = (e: any, nextRoute: any) => {
                         if (nextRoute && nextRoute.$$route && isADLoginRequired(nextRoute.$$route, adalContext.config)) {
                             if (!oAuthData.isAuthenticated) {
@@ -254,7 +252,6 @@ class AuthenticationServiceProviderFactory {
                             }
                         }
                     };
-
                     let stateChangeHandler: (e: any, toState: any, toParams: any, fromState: any, fromParams: any) => void =
                         (e: any, toState: any, toParams: any, fromState: any, fromParams: any) => {
                             if (toState && isADLoginRequired(toState, adalContext.config)) {
@@ -273,13 +270,12 @@ class AuthenticationServiceProviderFactory {
                                 }
                             }
                         };
-
                     $rootScope.$on("$routeChangeStart", routeChangeHandler);
 
                     $rootScope.$on("$stateChangeStart", stateChangeHandler);
 
                     $rootScope.$on("$locationChangeStart", locationChangeHandler);
-
+                    //Update the token cache
                     updateDataFromCache(adalContext.config.loginResource);
 
                     $rootScope.userInfo = oAuthData;
@@ -456,6 +452,3 @@ class AdalAngularModule {
 }
 
 AdalAngularModule.init();
-
-
-
