@@ -840,7 +840,7 @@ module adalts {
 
         public acquireToken(resource: string, callback: IRequestCallback): void {
             if (this.isEmpty(resource)) {
-                this.warn("resource is required");
+                this.warn("adal:[acquireToken]resource is required");
                 callback("resource is required", null);
                 return;
             }
@@ -1161,13 +1161,14 @@ module adalts {
             if (!oAuthWindow.callBacksMappedToRenewStates[expectedState]) {
                 oAuthWindow.callBacksMappedToRenewStates[expectedState] = [];
             }
+            var self = this;
             oAuthWindow.callBacksMappedToRenewStates[expectedState].push(callback);
             if (!oAuthWindow.callBackMappedToRenewStates[expectedState]) {
                 oAuthWindow.callBackMappedToRenewStates[expectedState] = (message: string, token: string) => {
                     for (let i: number = 0; i < oAuthWindow.callBacksMappedToRenewStates[expectedState].length; ++i) {
                         oAuthWindow.callBacksMappedToRenewStates[expectedState][i](message, token);
                     }
-                    this._activeRenewals[resource] = null;
+                    self._activeRenewals[resource] = null;
                     oAuthWindow.callBacksMappedToRenewStates[expectedState] = null;
                     oAuthWindow.callBackMappedToRenewStates[expectedState] = null;
                 };
@@ -1234,13 +1235,11 @@ module adalts {
                 // It must verify the state from redirect
                 if (requestInfo.stateMatch) {
                     // record tokens to storage if exists
+                    let keys: any, resource: string;
                     this.info("adal:[saveTokenFromHash]State match is found.");
                     if (requestInfo.parameters.hasOwnProperty(this.CONSTANTS.SESSION_STATE)) {
                         this._saveItem(this.CONSTANTS.STORAGE.SESSION_STATE, requestInfo.parameters[this.CONSTANTS.SESSION_STATE]);
                     }
-
-                    let keys: any, resource: string;
-
                     if (requestInfo.parameters.hasOwnProperty(this.CONSTANTS.ACCESS_TOKEN)) {
                         this.info("adal:[saveTokenFromHash]Fragment has access token");
                         // default resource
@@ -1291,12 +1290,13 @@ module adalts {
         }
 
         public login(): void {
-
             // Token is not present and user needs to login
             let expectedState: string = Guid.newGuid();
             this.config.state = expectedState;
             this._idTokenNonce = Guid.newGuid();
+
             this.verbose("adal:[login]Expected state: " + expectedState + " startPage:" + window.location);
+
             this._saveItem(this.CONSTANTS.STORAGE.LOGIN_REQUEST, window.location);
             this._saveItem(this.CONSTANTS.STORAGE.LOGIN_ERROR, "");
             this._saveItem(this.CONSTANTS.STORAGE.STATE_LOGIN, expectedState);
@@ -1312,6 +1312,7 @@ module adalts {
             this._loginInProgress = true;
             if (this.config.displayCall) {
                 // User defined way of handling the navigation
+                this.info("adal:[login]Invoking User Defined Prompt Function");
                 this.config.displayCall(urlNavigate);
             } else {
                 this.promptUser(urlNavigate);
@@ -1321,9 +1322,11 @@ module adalts {
 
         public logOut(): void {
             this.clearCache();
+            //we'll default the context to be multi-tenant
             let tenant: string = "common";
             let logout: string = "";
             this._user = undefined;
+
             if (this.config.tenant) {
                 tenant = this.config.tenant;
             }
@@ -1337,7 +1340,7 @@ module adalts {
             }
 
             let urlNavigate: string = this.instance + tenant + "/oauth2/logout?" + logout;
-            this.info("adal:[logOut]Logout navigate to: " + urlNavigate);
+            this.info("adal:[logOut]On Logout navigate to: " + urlNavigate);
             this.promptUser(urlNavigate);
         }
 
