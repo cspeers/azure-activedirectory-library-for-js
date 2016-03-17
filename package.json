@@ -15,7 +15,7 @@
     "type": "git",
     "url": ""
   },
-  "version": "1.0.5",
+  "version": "1.1",
   "description": "Windows Azure Active Directory Client Library for js (TypeScript)\\n via (Microsoft Open Technologies Inc)\nForked from: https://github.com/cspeers/azure-activedirectory-library-for-js",
   "keywords": [
     "implicit",

@@ -153,7 +153,7 @@ class AuthenticationServiceProviderFactory {
                             }
 
                             if (requestInfo.requestType !== adalContext.REQUEST_TYPE.LOGIN) {
-                                adalContext.callback = ($window.parent as any).AuthenticationContext().callback;
+                                adalContext.callback = ($window.parent as any).AuthenticationContext.callback;
                                 if (requestInfo.requestType === adalContext.REQUEST_TYPE.RENEW_TOKEN) {
                                     adalContext.callback = ($window.parent as any).callBackMappedToRenewStates[requestInfo.stateResponse];
                                 }
@@ -383,6 +383,7 @@ class AuthenticationInterceptorFactory {
                         return config;
                     } else {
                         if (authService.config) {
+                            //see if we can map this to something in the endpoint collection
                             for (let endpointUrl in authService.config.endpoints) {
                                 if (authService.config.endpoints.hasOwnProperty(endpointUrl)) {
                                     if (config.url.indexOf(endpointUrl) > -1) {
@@ -394,7 +395,7 @@ class AuthenticationInterceptorFactory {
 
                         // Cancel request if login is starting
                         if (authService.loginInProgress()) {
-                            authService.info("login already start.");
+                            authService.info("login has already started.");
                             return $q.reject();
                         } else if (authService.config && isEndpoint) {
                             // external endpoints
