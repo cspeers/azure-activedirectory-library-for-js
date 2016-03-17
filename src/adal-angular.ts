@@ -368,13 +368,35 @@ class AuthenticationInterceptorFactory {
 
                     config.headers = config.headers || { Authorization: null };
 
+                    let isEndpoint: boolean = false;
+                    let mappedEndPoint: string;
+                    if (authService.config) {
+                        //see if we can map this to something in the endpoint collection
+                        for (let endpointUrl in authService.config.endpoints) {
+                            if (authService.config.endpoints.hasOwnProperty(endpointUrl)) {
+                                if (config.url.indexOf(endpointUrl) > -1) {
+                                    isEndpoint = true;
+                                    mappedEndPoint = endpointUrl;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
                     let resource: string = authService.getResourceForEndpoint(config.url);
                     if (resource === null) {
                         return config;
                     }
+                    //we could be using the same client id for multiple endpoints.
+                    if ((resource === authService.config.clientId) && isEndpoint) {
+                        authService.info("Resource is endpoint mapped to context client id");
+                        if (mappedEndPoint) {
+                            authService.info("Using mapped endpoint " + mappedEndPoint + "as resource.");
+                            resource = mappedEndPoint;
+                        }
+                    }
 
                     let tokenStored: string = authService.getCachedToken(resource);
-                    let isEndpoint: boolean = false;
 
                     if (tokenStored) {
                         authService.info("Token is avaliable for this url " + config.url);
@@ -382,17 +404,6 @@ class AuthenticationInterceptorFactory {
                         config.headers.Authorization = "Bearer " + tokenStored;
                         return config;
                     } else {
-                        if (authService.config) {
-                            //see if we can map this to something in the endpoint collection
-                            for (let endpointUrl in authService.config.endpoints) {
-                                if (authService.config.endpoints.hasOwnProperty(endpointUrl)) {
-                                    if (config.url.indexOf(endpointUrl) > -1) {
-                                        isEndpoint = true;
-                                    }
-                                }
-                            }
-                        }
-
                         // Cancel request if login is starting
                         if (authService.loginInProgress()) {
                             authService.info("login has already started.");
