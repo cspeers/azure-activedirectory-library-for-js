@@ -95,3 +95,6 @@ samples/owin/OwinSample/Scripts/adal.js
 .tscache
 
 ts/.vscode
+typings/*
+
+*.baseDir.*
